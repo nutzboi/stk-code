@@ -5,9 +5,9 @@
 SET(CMAKE_SYSTEM_NAME Windows)
 
 # which compilers to use for C and C++
-SET(CMAKE_C_COMPILER x86_64-w64-mingw32-gcc-posix)
-SET(CMAKE_CXX_COMPILER x86_64-w64-mingw32-g++-posix)
-SET(CMAKE_RC_COMPILER x86_64-w64-mingw32-windres)
+SET(CMAKE_C_COMPILER)
+SET(CMAKE_CXX_COMPILER)
+SET(CMAKE_RC_COMPILER)
 
 # figure out folder to look in
 execute_process(COMMAND sh -c "ls /usr/lib/gcc/x86_64-w64-mingw32/ | grep posix | tr -d '\n'" OUTPUT_VARIABLE MINGW_DEPS_FOLDER)
