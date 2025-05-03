@@ -1889,6 +1889,7 @@ void clearGlobalVariables()
 //=============================================================================
 void initRest()
 {
+    GUIEngine::reserveLoadingIcons(2);
     SP::setMaxTextureSize();
     irr_driver = new IrrDriver();
 
@@ -2310,6 +2311,7 @@ int main(int argc, char *argv[])
         wiimote_manager = new WiimoteManager();
 #endif
 
+        GUIEngine::reserveLoadingIcons(4);
         int parent_pid;
         bool has_parent_process = false;
         if (CommandLine::has("--parent-process", &parent_pid))
@@ -2671,7 +2673,7 @@ int main(int argc, char *argv[])
     {
         Log::closeOutputFiles();
 #endif
-#ifndef ANDROID
+#if !defined(ANDROID) && !defined(ASAN_STK)
         fclose(stderr);
         fclose(stdout);
 #endif
