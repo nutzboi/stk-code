@@ -473,7 +473,7 @@ void RaceGUI::drawGlobalTimer()
         pos += core::vector2d<s32>(0, irr_driver->getActualScreenSize().Height - irr_driver->getSplitscreenWindow(0).getHeight());
     }
 
-    gui::ScalableFont* font = (use_digit_font ? GUIEngine::getHighresDigitFont() : GUIEngine::getFont());
+    gui::ScalableFont* font = GUIEngine::getHighresDigitFont();
     font->setScale(1.0f);
     font->setBlackBorder(true);
     irr::core::stringw trackname = Track::getCurrentTrack()->getName();
@@ -481,8 +481,9 @@ void RaceGUI::drawGlobalTimer()
                         irr_driver->getActualScreenSize().Height*1/100,
                         irr_driver->getActualScreenSize().Width,
                         irr_driver->getActualScreenSize().Height*6/100);
-    font->draw(Track::getCurrentTrack()->getName(), trackpos, time_color, false, false, NULL, true);
-    pos += core::vector2d<s32>(10, irr_driver->getActualScreenSize().Height*3/100);
+    font->draw(Track::getCurrentTrack()->getName(), trackpos, video::SColor(255, 255, 255, 255), false, false, NULL, true);
+    pos += core::vector2d<s32>(0, irr_driver->getActualScreenSize().Height*3/100);
+    font = (use_digit_font ? GUIEngine::getHighresDigitFont() : GUIEngine::getFont()); font->setScale(1.0f); font->setBlackBorder(true);
     font->draw(sw, pos, time_color, false, false, NULL,
                true /* ignore RTL */);
     font->setBlackBorder(false);

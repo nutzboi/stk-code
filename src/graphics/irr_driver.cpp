@@ -2008,9 +2008,9 @@ void IrrDriver::displayStoryModeTimer()
     int screen_width = irr_driver->getActualScreenSize().Width;
     int screen_height = irr_driver->getActualScreenSize().Height;
     int speedrun_string_width = area.Width;
-    int dist_from_right = speedrun_string_width + regular_timer_width + screen_width*4/100;
+    int dist_from_right = speedrun_string_width + regular_timer_width * 2 + screen_width*4/100;
 
-    core::rect<s32> position(screen_width - dist_from_right, screen_height*2/100,
+    core::rect<s32> position(screen_width - dist_from_right, screen_height*1/100,
                              screen_width                  , screen_height*6/100);
 
     font->setColoredBorder(irr::video::SColor(255, 0, 32, 80));
