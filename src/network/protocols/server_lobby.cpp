@@ -478,6 +478,23 @@ void ServerLobby::handleChat(Event* event)
     core::stringw message;
     event->data().decodeString16(&message, 360/*max_len*/);
 
+    // Check if the message starts with "(the name of main profile): " to prevent
+    // impersonation, see #5121.
+    std::string message_utf8 = StringUtils::wideToUtf8(message);
+    std::string prefix = StringUtils::wideToUtf8(
+        event->getPeer()->getPlayerProfiles()[0]->getName()) + ": ";
+    
+    if (!StringUtils::startsWith(message_utf8, prefix))
+    {
+        NetworkString* chat = getNetworkString();
+        chat->setSynchronous(true);
+        core::stringw warn = "Don't try to impersonate others!";
+        chat->addUInt8(LE_CHAT).encodeString16(warn);
+        event->getPeer()->sendPacket(chat, true/*reliable*/);
+        delete chat;
+        return;
+    }
+
     KartTeam target_team = KART_TEAM_NONE;
     if (event->data().size() > 0)
         target_team = (KartTeam)event->data().getUInt8();
@@ -2377,9 +2394,7 @@ void ServerLobby::computeNewRankings()
         data.push_back(entry);
     }
 
-    for (int i = 0; i < 64; ++i) {
-        m_ranking->computeNewRankings(data, RaceManager::get()->isTimeTrialMode());
-    }
+    m_ranking->computeNewRankings(data, RaceManager::get()->isTimeTrialMode());
 
     // Used to display rating change at the end of a race
     m_result_ns->addUInt8((uint8_t)player_count);
