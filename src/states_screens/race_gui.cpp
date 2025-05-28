@@ -476,13 +476,17 @@ void RaceGUI::drawGlobalTimer()
     gui::ScalableFont* font = GUIEngine::getHighresDigitFont();
     font->setScale(1.0f);
     font->setBlackBorder(true);
-    irr::core::stringw trackname = Track::getCurrentTrack()->getName();
-    core::rect<s32> trackpos(irr_driver->getActualScreenSize().Width - (10 + font->getDimension(trackname.c_str()).Width),
-                        irr_driver->getActualScreenSize().Height*1/100,
-                        irr_driver->getActualScreenSize().Width,
-                        irr_driver->getActualScreenSize().Height*6/100);
-    font->draw(Track::getCurrentTrack()->getName(), trackpos, video::SColor(255, 255, 255, 255), false, false, NULL, true);
-    pos += core::vector2d<s32>(0, irr_driver->getActualScreenSize().Height*3/100);
+    
+    // Display track name unless in story mode.
+    if(!RaceManager::get()->raceWasStartedFromOverworld()){
+        irr::core::stringw trackname = Track::getCurrentTrack()->getName();
+        core::rect<s32> trackpos(irr_driver->getActualScreenSize().Width - (10 + font->getDimension(trackname.c_str()).Width),
+                            irr_driver->getActualScreenSize().Height*1/100,
+                            irr_driver->getActualScreenSize().Width,
+                            irr_driver->getActualScreenSize().Height*6/100);
+        font->draw(Track::getCurrentTrack()->getName(), trackpos, video::SColor(255, 255, 255, 255), false, false, NULL, true);
+        pos += core::vector2d<s32>(0, irr_driver->getActualScreenSize().Height*3/100);
+    }
     font = (use_digit_font ? GUIEngine::getHighresDigitFont() : GUIEngine::getFont()); font->setScale(1.0f); font->setBlackBorder(true);
     font->draw(sw, pos, time_color, false, false, NULL,
                true /* ignore RTL */);
