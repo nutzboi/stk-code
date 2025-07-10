@@ -35,19 +35,4 @@ public:
     }
     virtual bool execute(nnwcli::CommandExecutorContext* context, void* data) OVERRIDE;
 };
-class AutoteamsVariantVoteCommand : public STKCommand
-{
-    bool m_variant_one;
-    ServerPermissionLevel m_min_veto = PERM_REFEREE;
-public:
-    AutoteamsVariantVoteCommand(const bool variantOne) : STKCommand(false)
-    {
-        m_name = variantOne ? "a" : "b";
-        m_args = {};
-        m_description = "Choose the variant after the autoteams generation.";
-        m_variant_one = variantOne;
-    }
-    virtual bool execute(nnwcli::CommandExecutorContext* context, void* data) OVERRIDE;
-};
-
 #endif // LOBBY_COMMAND_AUTOTEAMS_HPP

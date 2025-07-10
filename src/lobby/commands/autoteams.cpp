@@ -33,25 +33,6 @@
 static const char* const LOGNAME = "AutoteamsCommand";
 
 // TODO: AutoTeams, this code is so big for no reason...
-
-static
-void display_team_into(std::vector<std::string>& team, std::stringstream& team_display)
-{
-	for (size_t i = 0; i < team.size(); i++) 
-	{
-		std::string display_name = team[i];
-		if (display_name.length() > 10) 
-		{
-			display_name = display_name.substr(0, 5) + "...";
-		}
-		team_display << display_name;
-		if (i < team.size() - 1) 
-		{
-			team_display << ", ";
-		}
-	}
-}
-
 bool AutoteamsCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const data)
 {
     STK_CTX(stk_ctx, ctx);
@@ -132,49 +113,9 @@ bool AutoteamsCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* 
         Log::info(LOGNAME, msg.c_str());
     }
 	lobby->m_team_option_a = lobby->createBalancedTeams(player_copy);
-	lobby->m_team_option_b = lobby->createAlternativeTeams(player_copy);
 	lobby->m_min_player_idx = min;
 	lobby->m_player_vec = player_vec;
-	std::stringstream team_display;
-	team_display << "Proposed Team Options:\n\n";
-	team_display << "Team Option A:\n";
-	team_display << "Red Team: ";
-    display_team_into(lobby->m_team_option_a.first, team_display);
-	team_display << "\nBlue Team: ";
-    display_team_into(lobby->m_team_option_a.second, team_display);
-	team_display << "\n\nTeam Option B:\n";
-	team_display << "Red Team: ";
-    display_team_into(lobby->m_team_option_b.first, team_display);
-	team_display << "\nBlue Team: ";
-    display_team_into(lobby->m_team_option_b.second, team_display);
-	team_display << "\n\nVote with /a for Team Option A or /b for Team Option B.";
-        lobby->startTeamSelectionVote();
-	std::string team_display_str = team_display.str();
-	lobby->sendStringToAllPeers(team_display_str);
-    return true;
-}
-
-bool AutoteamsVariantVoteCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const data)
-{
-    STK_CTX(stk_ctx, ctx);
-
-    auto parser = ctx->get_parser();
-    parser->parse_finish();
-
-    ServerLobby* const lobby = stk_ctx->get_lobby();
-
-    if (stk_ctx->getVeto() >= m_min_veto)
-    {
-        // forcefully apply
-        lobby->applyTeamSelection(m_variant_one);
-        return true;
-    }
-
-    STKPeer* const peer = stk_ctx->get_peer();
-
-    if (peer)
-    {
-        lobby->handleTeamSelectionVote(peer, m_variant_one);
-    }
+	lobby->applyTeamSelection(true);
+	lobby->sendStringToAllPeers("Teams have been automatically balanced!");
     return true;
 }
