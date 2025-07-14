@@ -610,11 +610,6 @@ void SoccerWorld::onCheckGoalTriggered(bool first_goal)
     auto sl = LobbyProtocol::get<ServerLobby>();
     float ball_speed = m_ball_body->getLinearVelocity().length() * 3.6f / 2.0f;
     int shotSpeed = (int)ball_speed;
-    irr::core::stringw speed_message = StringUtils::insertValues(L"Shot Speed: %d km/h!", (int)ball_speed);
-    if (!ServerConfig::m_soccer_roulette)
-    {
-	    sl->broadcastMessageInGame(speed_message);
-    }
     if (getTicksSinceStart() < m_ticks_back_to_own_goal)
         return;
 
@@ -730,6 +725,13 @@ void SoccerWorld::onCheckGoalTriggered(bool first_goal)
 		    }
 	    }
 #ifdef ENABLE_SQLITE3
+// If you don't have the table yet, you can create it with this command:
+// CREATE TABLE IF NOT EXISTS soccer_shots (
+// id INTEGER PRIMARY KEY AUTOINCREMENT,
+// player_name TEXT NOT NULL,
+// track_name TEXT NOT NULL,
+// speed INTEGER NOT NULL,
+// timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
 	    if (ServerConfig::m_sql_management)
 	    {
 		    auto lobby = LobbyProtocol::get<ServerLobby>();
