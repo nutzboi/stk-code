@@ -101,7 +101,7 @@
 #include "lobby/commands/setteam.hpp"
 #include "lobby/commands/settrack.hpp"
 #include "lobby/commands/start.hpp"
-
+#include "lobby/commands/authenticate.hpp"
 #include "lobby/stk_command_context.hpp"
 #include "network/moderation_toolkit/server_permission_level.hpp"
 #include "network/protocols/lobby_protocol.hpp"
@@ -334,11 +334,10 @@ void ServerLobbyCommands::registerCommands()
     m_executor.register_command(std::make_shared<AutoteamsCommand>());
     m_executor.add_alias("mix", "autoteams");
     m_executor.add_alias("am", "autoteams");
-    m_executor.register_command(std::make_shared<AutoteamsVariantVoteCommand>(true)); // a
-    m_executor.register_command(std::make_shared<AutoteamsVariantVoteCommand>(false)); // b
     m_executor.register_command(std::make_shared<RPSCommand>());
     m_executor.register_command(std::make_shared<JumblewordCommand>());
     m_executor.add_alias("jw", "jumbleword");
+    m_executor.register_command(std::make_shared<AuthenticateCommand>());
 }
 
 void ServerLobbyCommands::handleServerCommand(ServerLobby* const lobby, std::shared_ptr<STKPeer>& peer, std::string& line)
