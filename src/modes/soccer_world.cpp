@@ -55,7 +55,8 @@
 #include <string>
 #include "utils/string_utils.hpp"
 #include "network/live_soccer.hpp"
-
+#include "network/database/sqlite_database.hpp"
+#include "network/protocols/lobby_protocol.hpp"
 //=============================================================================
 class BallGoalData
 {
@@ -608,6 +609,7 @@ void SoccerWorld::onCheckGoalTriggered(bool first_goal)
 
     auto sl = LobbyProtocol::get<ServerLobby>();
     float ball_speed = m_ball_body->getLinearVelocity().length() * 3.6f / 2.0f;
+    int shotSpeed = (int)ball_speed;
     irr::core::stringw speed_message = StringUtils::insertValues(L"Shot Speed: %d km/h!", (int)ball_speed);
     if (!ServerConfig::m_soccer_roulette)
     {
@@ -713,7 +715,6 @@ void SoccerWorld::onCheckGoalTriggered(bool first_goal)
         GoalHistory::addGoalData(player_name_log, ball_speed, team);
 
 
-        // DernisNW comment: why is there an if statement then?
         if (sd.m_correct_goal)
 	{
             if (m_soccer_log)
@@ -727,7 +728,29 @@ void SoccerWorld::onCheckGoalTriggered(bool first_goal)
 								getScore(KART_TEAM_BLUE),
 								m_time);
 		    }
-	   }
+	    }
+#ifdef ENABLE_SQLITE3
+	    if (ServerConfig::m_sql_management)
+	    {
+		    auto lobby = LobbyProtocol::get<ServerLobby>();
+		    if (lobby)
+		    {
+			    SQLiteDatabase* db = dynamic_cast<SQLiteDatabase*>(lobby->getDatabase());
+			    if (db)
+			    {
+				    std::string track_name = Track::getCurrentTrack()->getIdent();
+				    std::shared_ptr<BinderCollection> coll = std::make_shared<BinderCollection>();
+				    std::string query = StringUtils::insertValues(
+					"INSERT INTO soccer_shots (player_name, track_name, speed) VALUES (%s,%s, %d);",
+					Binder(coll, player_name_log, "player_name"),
+					Binder(coll, track_name, "track_name"),
+					shotSpeed
+					);
+				    db->easySQLQuery(query, nullptr, coll->getBindFunction());
+			    }
+		    }
+	     }
+#endif
 	}
 	else
 	{
@@ -743,6 +766,26 @@ void SoccerWorld::onCheckGoalTriggered(bool first_goal)
 								m_time);
 		    }
 	    }
+#ifdef ENABLE_SQLITE3
+	    if (ServerConfig::m_sql_management)
+	    {
+		    auto lobby = LobbyProtocol::get<ServerLobby>();
+		    if (lobby)
+		    {
+			    SQLiteDatabase* db = dynamic_cast<SQLiteDatabase*>(lobby->getDatabase());
+			    if (db)
+			    {
+				    std::shared_ptr<BinderCollection> coll = std::make_shared<BinderCollection>();
+				    std::string query = StringUtils::insertValues(
+						    "INSERT INTO soccer_shots (player_name, speed) VALUES (%s, %d);",
+						    Binder(coll, player_name_log, "player_name"),
+						    shotSpeed
+						    );
+				    db->easySQLQuery(query, nullptr, coll->getBindFunction());
+			    }
+		    }
+	    }
+#endif
 	}
 
         if (NetworkConfig::get()->isNetworking() &&
