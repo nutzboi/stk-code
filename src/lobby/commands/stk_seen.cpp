@@ -68,7 +68,7 @@ bool StkSeenCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* co
     // Note that if the context does not survive up to this point,
     // this will result in an undefined behavior, since
     // the command can receive a temporary pointer
-    std::thread([&]() {
+    std::thread([ctx, playername]() {
         auto request = std::make_shared<STKSeenRequest>(playername);
         Online::RequestManager::get()->addRequest(request);
 
