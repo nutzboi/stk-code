@@ -136,7 +136,6 @@ bool DatetimeCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* c
    const std::unordered_map<std::string, double> TZ_OFFSETS = {
       // America (DST and Std.)
       {"EST", -5}, {"EDT", -4},
-      {"CST", -6}, {"CDT", -5},
       {"MST", -7}, {"MDT", -6},
       {"PST", -8}, {"PDT", -7},
       {"AKST", -9}, {"AKDT", -8},
@@ -160,11 +159,11 @@ bool DatetimeCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* c
       {"KST", 9},
       {"SGT", 8},
       {"ICT", 7},
-      {"MST", 5.5},
-      {"PST", 8},
+      {"MYT", 5.5},
+      {"PHST", 8},
       {"LKT", 5.5},
       
-      // countries
+      // countries (average)
       {"BR", -3},
       {"IN", 5.5},
       {"AR", -3},
@@ -208,42 +207,70 @@ bool DatetimeCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* c
    auto it = TZ_OFFSETS.find(tz);
    if (it != TZ_OFFSETS.end())
    {
-   // get time from server
-   time_t now = time(nullptr);
-       tm *gmtm = gmtime(&now);
-       // apply manually
-       int hours_offset = static_cast<int>(it->second);
-       int minutes_offset = static_cast<int>((it->second - hours_offset) * 60);
+       // get time from server
+       time_t current_utc_time = time(nullptr); 
+       // offset handling
+       double total_offset_hours = it->second;
+       int total_offset_seconds = static_cast<int>(total_offset_hours * 3600);
+       // adjust timezones
+       time_t target_time_t = current_utc_time + total_offset_seconds;
+       // formatting
+       tm *target_tm = gmtime(&target_time_t);
 
-       gmtm->tm_hour += hours_offset;
-       gmtm->tm_min += minutes_offset;
-       time_t adjusted = mktime(gmtm);
-       gmtm = gmtime(&adjusted);
-       char buffer[256];
-       strftime(buffer, sizeof(buffer), "%H:%M:%S | %a, %d-%m-%Y", gmtm);
-
-       ctx->nprintf("[TIME] %s (UTC%+d:%02d) %s", 550, tz.c_str(), hours_offset, abs(minutes_offset), buffer);
-       // send msg
-       ctx->flush();
-       return true;
+       if (target_tm)
+       {    
+           char buffer[256];
+           strftime(buffer, sizeof(buffer), "%H:%M:%S | %a, %d-%m-%Y", target_tm);
+           int hours_offset_display = static_cast<int>(total_offset_hours);
+           int minutes_offset_display = static_cast<int>(std::round(std::abs(total_offset_hours - hours_offset_display) * 60));
+           ctx->nprintf("[TIME] %s (UTC%+d:%02d) %s", 550, tz.c_str(), hours_offset_display, minutes_offset_display, buffer);
+           // send msg 
+           ctx->flush();
+           return true;
+       }
+       else
+       {
+           ctx->write("Error converting time.");
+           ctx->flush();
+           return false;
+       }
    }
    else
    {
-       std::string valid_tz;
+           
+       ctx->write("Invalid timezone or country code. \nValid codes:\n\n");
 
-       ctx->write("Invalid timezone or country code. \n"
-           "Valid codes: ");
-       bool nfirst = false;
-       for (const auto& pair : TZ_OFFSETS) {
-           if (nfirst)
-               ctx->write(", ");
-           ctx->write(pair.first);
-           nfirst = true;
-       }
+       const std::vector<std::string> america = {"EST", "EDT", "CST", "CDT", "MST", "MDT", "PST", "PDT", "AKST", "AKDT", "HST", "HDT"};
+       const std::vector<std::string> europe = {"GMT", "BST", "CET", "CEST", "EET", "EEST", "WET", "WEST", "MSK"};
+       const std::vector<std::string> asia = {"AFT", "IST", "PKT", "IRST", "IRDT", "CST", "CDT", "JST", "KST", "SGT", "ICT", "MYT", "PHST", "LKT"};
+       const std::vector<std::string> country = {"BR", "IN", "AR", "CH", "FR", "IT", "RU", "ES", "PL", "MX", "NL", "CA", "DE", "US", "JP", "GB", "AU", "ZA", "KR", "EG", "NG", "TR", "SE", "FI", "BE", "PT", "DK"};
+
+       auto write_group = [&](const std::string& title, const std::vector<std::string>& list) {
+           ctx->write(title + ":\n");
+           int count = 0;
+           for (size_t i = 0; i < list.size(); ++i) {
+               ctx->write(list[i]);
+               if (i != list.size() -1) ctx->write(", ");
+               count++;
+               if (count == 11) {
+                   ctx->write("\n");
+                   count=0;
+               }
+           }
+           ctx->write("\n\n");
+       };
+
+       write_group("America", america);
+       write_group("Europe", europe);
+       write_group("Asia", asia);
+       write_group("Countries", country);
+
        ctx->flush();
        return false;
    }
 }
+
+
 bool GoalHistoryCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const data)
 {
     STK_CTX(stk_ctx, ctx);
