@@ -580,6 +580,16 @@ public:
     void resetKartSelections();
     std::string getTimeStamp();    
     std::string execPythonScript();    
+
+    // Live join tracking for reconnect functionality
+    std::map<std::string, uint64_t> m_players_in_game; // player_name -> join_time
+    std::mutex m_players_in_game_mutex;
+    
+    bool isPlayerAllowedToLiveJoin(const std::string& player_name);
+    void addPlayerToGameTracking(const std::string& player_name);
+    void removePlayerFromGameTracking(const std::string& player_name);
+    void clearGameTracking();
+    bool wasPlayerInGame(const std::string& player_name);
     // Add more macro conditions when needed. SQLite3 is the only implementation for now.
 };   // class ServerLobby
 

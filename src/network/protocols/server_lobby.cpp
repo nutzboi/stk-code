@@ -337,7 +337,7 @@ void ServerLobby::updateAddons()
         all_k.resize(65535 - (unsigned)oks.size());
     for (const std::string& k : oks)
         all_k.push_back(k);
-    if (ServerConfig::m_live_players)
+    if (ServerConfig::m_live_join_mode != ServerConfig::LIVE_JOIN_NONE)
         m_available_kts.first = m_official_kts.first;
     else
         m_available_kts.first = { all_k.begin(), all_k.end() };
@@ -458,11 +458,11 @@ void ServerLobby::setup()
     auto all_k = kart_properties_manager->getAllAvailableKarts();
     if (all_k.size() >= 65536)
         all_k.resize(65535);
-    if (ServerConfig::m_live_players)
+    if (ServerConfig::m_live_join_mode != ServerConfig::LIVE_JOIN_NONE)
         m_available_kts.first = m_official_kts.first;
     else
         m_available_kts.first = { all_k.begin(), all_k.end() };
-    NetworkConfig::get()->setTuxHitboxAddon(ServerConfig::m_live_players);
+    NetworkConfig::get()->setTuxHitboxAddon(ServerConfig::m_real_addon_karts_hitbox);
     updateTracksForMode();
 
     m_server_has_loaded_world.store(false);
@@ -1555,9 +1555,10 @@ NetworkString* ServerLobby::getLoadWorldMessage(
  */
 bool ServerLobby::canLiveJoinNow() const
 {
-    bool live_join = ServerConfig::m_live_players && worldIsActive();
-    if (!live_join)
+    // Check if live join is enabled and world is active
+    if (ServerConfig::m_live_join_mode == ServerConfig::LIVE_JOIN_NONE || !worldIsActive())
         return false;
+    
     if (RaceManager::get()->modeHasLaps())
     {
         // No spectate when fastest kart is nearly finish, because if there
@@ -1582,8 +1583,62 @@ bool ServerLobby::canLiveJoinNow() const
         if (progress > 0.9f)
             return false;
     }
-    return live_join;
+    return true;
 }   // canLiveJoinNow
+
+//-----------------------------------------------------------------------------
+/** Check if a player is allowed to live join based on current mode and player history
+ */
+bool ServerLobby::isPlayerAllowedToLiveJoin(const std::string& player_name)
+{
+    switch (ServerConfig::m_live_join_mode)
+    {
+        case ServerConfig::LIVE_JOIN_NONE:
+            return false;
+        case ServerConfig::LIVE_JOIN_ALL:
+            return true;
+        case ServerConfig::LIVE_JOIN_RECONNECT:
+            return wasPlayerInGame(player_name);
+        default:
+            return false;
+    }
+}   // isPlayerAllowedToLiveJoin
+
+//-----------------------------------------------------------------------------
+/** Add a player to the game tracking for reconnect functionality
+ */
+void ServerLobby::addPlayerToGameTracking(const std::string& player_name)
+{
+    std::lock_guard<std::mutex> lock(m_players_in_game_mutex);
+    m_players_in_game[player_name] = StkTime::getMonoTimeMs();
+}   // addPlayerToGameTracking
+
+//-----------------------------------------------------------------------------
+/** Remove a player from the game tracking
+ */
+void ServerLobby::removePlayerFromGameTracking(const std::string& player_name)
+{
+    std::lock_guard<std::mutex> lock(m_players_in_game_mutex);
+    m_players_in_game.erase(player_name);
+}   // removePlayerFromGameTracking
+
+//-----------------------------------------------------------------------------
+/** Clear all game tracking data (called when game restarts)
+ */
+void ServerLobby::clearGameTracking()
+{
+    std::lock_guard<std::mutex> lock(m_players_in_game_mutex);
+    m_players_in_game.clear();
+}   // clearGameTracking
+
+//-----------------------------------------------------------------------------
+/** Check if a player was in the current game
+ */
+bool ServerLobby::wasPlayerInGame(const std::string& player_name)
+{
+    std::lock_guard<std::mutex> lock(m_players_in_game_mutex);
+    return m_players_in_game.find(player_name) != m_players_in_game.end();
+}   // wasPlayerInGame
 
 //-----------------------------------------------------------------------------
 /** Returns true if world is active for clients to live join, spectate or
@@ -1634,12 +1689,32 @@ void ServerLobby::liveJoinRequest(Event* event)
         rejectLiveJoin(peer, BLR_NO_GAME_FOR_LIVE_JOIN);
         return;
     }
+    
     bool spectator = data.getUInt8() == 1;
     if (RaceManager::get()->modeHasLaps() && !spectator)
     {
         // No live join for linear race
         rejectLiveJoin(peer, BLR_NO_GAME_FOR_LIVE_JOIN);
         return;
+    }
+
+    // Check if player is allowed to live join based on current mode
+    if (!spectator)
+    {
+        std::string player_name = StringUtils::wideToUtf8(peer->getPlayerProfiles()[0]->getName());
+        if (!isPlayerAllowedToLiveJoin(player_name))
+        {
+            rejectLiveJoin(peer, BLR_NO_PLACE_FOR_LIVE_JOIN);
+            if (ServerConfig::m_live_join_mode == ServerConfig::LIVE_JOIN_RECONNECT)
+            {
+                sendStringToPeer(L"You can only reconnect if you were already in this game.", peer);
+            }
+            else
+            {
+                sendStringToPeer(L"Live join is not allowed.", peer);
+            }
+            return;
+        }
     }
 
     if (spectator && (peer->hasRestriction(PRF_NOSPEC) ||
@@ -2068,7 +2143,7 @@ void ServerLobby::update(int ticks)
 
         resetVotingTime();
         m_game_setup->stopGrandPrix();
-        m_rs_state.store(RS_WAITING);
+        m_rs_state.store(RS_ASYNC_RESET);
         return;
     }
 
@@ -3157,6 +3232,9 @@ void ServerLobby::clientDisconnected(Event* event)
         std::string name = StringUtils::wideToUtf8(p->getName());
         msg->encodeString(name);
         Log::info("ServerLobby", "%s disconnected", name.c_str());
+        
+        // Remove player from tracking
+        removePlayerFromGameTracking(name);
     }
 
     std::string msg2;
@@ -4603,7 +4681,7 @@ void ServerLobby::configPeersStartTime()
         max_ping = std::max(peer->getAveragePing(), max_ping);
     }
     if ((ServerConfig::m_high_ping_workaround && peer_exceeded_max_ping) ||
-        (ServerConfig::m_live_players && RaceManager::get()->supportsLiveJoining()))
+        (ServerConfig::m_live_join_mode != ServerConfig::LIVE_JOIN_NONE && RaceManager::get()->supportsLiveJoining()))
     {
         Log::info("ServerLobby", "Max ping to ServerConfig::m_max_ping for "
             "live joining or high ping workaround.");
@@ -4687,6 +4765,23 @@ void ServerLobby::configPeersStartTime()
             int sleep_time = (int)(start_time - cur_time);
             StkTime::sleep(sleep_time);
             m_state.store(RACING);
+            
+            // Add all current players (excluding spectators) to live join tracking when game starts
+            auto all_profiles = STKHost::get()->getAllPlayerProfiles();
+            for (auto& profile : all_profiles)
+            {
+                auto peer = profile->getPeer();
+                if (!peer || !peer->isValidated())
+                    continue;
+                    
+                // Only add non-spectators to tracking for reconnect functionality
+                if (!peer->isSpectator())
+                {
+                    std::string player_name = StringUtils::wideToUtf8(profile->getName());
+                    addPlayerToGameTracking(player_name);
+                }
+            }
+            
 	    const std::string game_start_message = ServerConfig::m_game_start_message;
 
 	    // Have Fun
@@ -4748,6 +4843,9 @@ void ServerLobby::addWaitingPlayersToGame()
 //-----------------------------------------------------------------------------
 void ServerLobby::resetServer()
 {
+    // Clear live join tracking when server resets
+    clearGameTracking();
+    
     addWaitingPlayersToGame();
     resetPeersReady();
     updatePlayerList(true/*update_when_reset_server*/);
@@ -5170,8 +5268,8 @@ void ServerLobby::handlePlayerDisconnection() const
         }
     }
 
-    // If live players is enabled, don't end the game if unfair team
-    if (!ServerConfig::m_live_players &&
+    // If live join is enabled, don't end the game if unfair team
+    if (ServerConfig::m_live_join_mode == ServerConfig::LIVE_JOIN_NONE &&
         total != 1 && World::getWorld()->hasTeam() &&
         (red_count == 0 || blue_count == 0))
         World::getWorld()->setUnfairTeam(true);
@@ -5188,7 +5286,7 @@ void ServerLobby::addLiveJoinPlaceholder(
 {
     assert(push_front_blue <= 7);
     assert(push_front_red <= 7);
-    if (!ServerConfig::m_live_players || !RaceManager::get()->supportsLiveJoining())
+    if (ServerConfig::m_live_join_mode == ServerConfig::LIVE_JOIN_NONE || !RaceManager::get()->supportsLiveJoining())
         return;
     if (RaceManager::get()->getMinorMode() == RaceManager::MINOR_MODE_FREE_FOR_ALL)
     {

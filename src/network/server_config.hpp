@@ -471,20 +471,32 @@ namespace ServerConfig
         "was created using the in-game GUI. The changed difficulty and game "
         "mode will not be saved in this config file."));
 
-    SERVER_CFG_PREFIX BoolServerConfigParam m_live_players
-        SERVER_CFG_DEFAULT(BoolServerConfigParam(true, "live-spectate",
-        "If true, players can live join or spectate the in-progress game. "
-        "Currently live joining is only available if the current game mode "
-        "used in server is FFA, CTF or soccer, also official-karts-threshold "
-        "will be made 1.0. If false addon karts will use their original "
-        "hitbox other than tux, all players having it restriction applies."));
-
     SERVER_CFG_PREFIX BoolServerConfigParam m_real_addon_karts
         SERVER_CFG_DEFAULT(BoolServerConfigParam(true, "real-addon-karts",
         "If true, server will send its addon karts real physics (kart size, "
         "length, type, etc) to client. If false or client chooses an addon "
         "kart which server is missing, tux's kart physics and kart type of "
         "the original addon is sent."));
+
+    SERVER_CFG_PREFIX BoolServerConfigParam m_real_addon_karts_hitbox
+        SERVER_CFG_DEFAULT(BoolServerConfigParam(true, "real-addon-karts-hitbox",
+        "If true, server will send its addon karts real hitbox (kart size, "
+        "length, type, etc) to client. If false or client chooses an addon "
+        "kart which server is missing, tux's kart hitbox and kart type of "
+        "the original addon is sent."));
+
+    // Live join mode enum
+    enum LiveJoinMode {
+        LIVE_JOIN_NONE = 0,        // No live join possible
+        LIVE_JOIN_RECONNECT = 1,   // Only reconnect for players who were already in game
+        LIVE_JOIN_ALL = 2          // Everyone can join
+    };
+
+    SERVER_CFG_PREFIX IntServerConfigParam m_live_join_mode
+        SERVER_CFG_DEFAULT(IntServerConfigParam(2, "live-join-mode",
+        "Live join mode: 0=none, 1=reconnect only, 2=all players can join. "
+        "Currently live joining is only available if the current game mode "
+        "used in server is FFA, CTF or soccer."));
 
     SERVER_CFG_PREFIX FloatServerConfigParam m_flag_return_timeout
         SERVER_CFG_DEFAULT(FloatServerConfigParam(20.0f, "flag-return-timeout",

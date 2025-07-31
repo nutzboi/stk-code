@@ -215,7 +215,7 @@ void GameSetup::addServerInfo(NetworkString* ns)
 #endif
     ns->encodeString16(m_message_of_today);
     ns->addUInt8((uint8_t)ServerConfig::m_server_configurable);
-    ns->addUInt8(ServerConfig::m_live_players? 1 : 0);
+    ns->addUInt8(ServerConfig::m_live_join_mode != ServerConfig::LIVE_JOIN_NONE ? 1 : 0);
 }   // addServerInfo
 //-----------------------------------------------------------------------------
 void GameSetup::addModifiedServerInfo(
@@ -254,7 +254,7 @@ void GameSetup::addModifiedServerInfo(
     if (!configurable_override)
         configurable = ServerConfig::m_server_configurable;
     if (!live_players_override)
-        live_players = ServerConfig::m_live_players;
+        live_players = ServerConfig::m_live_join_mode != ServerConfig::LIVE_JOIN_NONE;
 
     ns->addUInt8((uint8_t)difficulty)
         .addUInt8((uint8_t)server_max_players)

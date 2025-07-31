@@ -62,7 +62,7 @@ bool SpectateCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* c
     STKPeer* const peer = stk_c->get_peer();
     ServerLobby* const lobby = stk_c->get_lobby();
 
-    if (lobby->getGameSetup()->isGrandPrix() || !ServerConfig::m_live_players)
+    if (lobby->getGameSetup()->isGrandPrix() || ServerConfig::m_live_join_mode == ServerConfig::LIVE_JOIN_NONE)
     {
         ctx->write("Server doesn't support spectate");
         ctx->flush();
