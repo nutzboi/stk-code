@@ -2911,9 +2911,10 @@ skip_default_vote_randomizing:
                 peer->disconnect();
         }
         m_pending_connection.clear();
-        std::unique_lock<std::mutex> ul(m_keys_mutex);
-        m_keys.clear();
-        ul.unlock();
+        {
+            std::lock_guard<std::mutex> lock(m_keys_mutex);
+            m_keys.clear();
+        }
     }
     // Will be changed after the first vote received
     m_timeout.store(std::numeric_limits<int64_t>::max());
