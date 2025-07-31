@@ -1,5 +1,68 @@
 # Building from source
 
+## TierS Server Fork - Quick Installation
+
+For the TierS server fork, the installation process is different but still requires all SuperTuxKart dependencies:
+
+### Dependencies
+
+#### Ubuntu/Debian
+```bash
+sudo apt-get install build-essential cmake libbluetooth-dev libsdl2-dev \
+libcurl4-openssl-dev libenet-dev libfreetype6-dev libharfbuzz-dev \
+libjpeg-dev libogg-dev libopenal-dev libpng-dev \
+libssl-dev libvorbis-dev libmbedtls-dev pkg-config zlib1g-dev \
+nlohmann-json3-dev
+```
+
+#### Arch Linux
+```bash
+sudo pacman -S openal libogg libvorbis freetype2 harfbuzz curl \
+bluez-libs openssl libpng zlib libjpeg-turbo sdl2 gcc cmake \
+pkgconf make git subversion nlohmann-json
+```
+
+#### Fedora
+```bash
+sudo dnf install @development-tools angelscript-devel \
+bluez-libs-devel cmake desktop-file-utils SDL2-devel \
+freealut-devel freetype-devel \
+gcc-c++ git-core libcurl-devel libjpeg-turbo-devel \
+libpng-devel libsquish-devel libtool libvorbis-devel \
+openal-soft-devel openssl-devel libcurl-devel harfbuzz-devel \
+libogg-devel openssl-devel pkgconf \
+wiiuse-devel zlib-devel nlohmann-json-devel
+```
+
+### Quick Build Instructions
+```bash
+# Clone the repository
+git clone https://github.com/BcfWor/stk-code.git
+cd stk-code
+
+# Create build directory
+mkdir build && cd build
+
+# Configure CMake
+cmake -DNO_SHADERC=on
+
+# Build
+make -j4
+
+# Run
+./supertuxkart
+```
+
+### Server Configuration
+```bash
+# Start server with custom config (We assume that you have already linked your account.)
+./supertuxkart --server-config=server_config.xml
+```
+
+---
+
+## Original SuperTuxKart Installation
+
 In order to build SuperTuxKart from source, you'll need both the code and the assets (See <https://supertuxkart.net/Source_control> for more information):
 
 ```bash
