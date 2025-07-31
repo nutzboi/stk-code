@@ -76,9 +76,13 @@ enum GEVulkanPipelineType : unsigned
 {
     GVPT_DEPTH = 1,
     GVPT_SOLID,
+    GVPT_DEFERRED_LIGHTING,
+    GVPT_DEFERRED_CONVERT_COLOR,
     GVPT_GHOST_DEPTH,
     GVPT_TRANSPARENT,
-    GVPT_SKYBOX
+    GVPT_SKYBOX,
+    GVPT_DISPLACE_MASK,
+    GVPT_DISPLACE_COLOR,
 };
 
 struct GEMaterial;
@@ -90,6 +94,7 @@ struct PipelineSettings
     char m_drawing_priority;
     VkPipelineLayout m_custom_pl;
     VkCompareOp m_depth_op;
+    VkPrimitiveTopology m_topology;
     VertexDescription m_vertex_description;
     GEVulkanPipelineType m_pipeline_type;
 
@@ -171,6 +176,8 @@ private:
 
     VkPipelineLayout m_pipeline_layout, m_skybox_layout;
 
+    std::vector<VkPipelineLayout> m_deferred_layouts;
+
     std::unordered_map<std::string, PipelineData> m_graphics_pipelines;
 
     std::unordered_map<GEVulkanDynamicSPMBuffer*, std::pair<int, size_t> > m_dyspmb_materials;
@@ -244,6 +251,13 @@ private:
     size_t getLightDataOffset() const;
     // ------------------------------------------------------------------------
     std::vector<uint32_t> getDefaultDynamicOffsets() const;
+    // ------------------------------------------------------------------------
+    VkRenderPass getRenderPassForPipelineCreation(GEVulkanDriver* vk,
+                                                  GEVulkanPipelineType type);
+    // ------------------------------------------------------------------------
+    uint32_t getSubpassForPipelineCreation(GEVulkanDriver* vk,
+                                           GEVulkanPipelineType type);
+
 public:
     // ------------------------------------------------------------------------
     GEVulkanDrawCall();
@@ -276,6 +290,13 @@ public:
     // ------------------------------------------------------------------------
     bool renderSkyBox(GEVulkanDriver* vk, VkCommandBuffer cmd);
     // ------------------------------------------------------------------------
+    void renderDeferredLighting(GEVulkanDriver* vk, VkCommandBuffer cmd);
+    // ------------------------------------------------------------------------
+    void renderDeferredConvertColor(GEVulkanDriver* vk, VkCommandBuffer cmd);
+    // ------------------------------------------------------------------------
+    void renderDisplaceColor(GEVulkanDriver* vk, VkCommandBuffer cmd,
+                             VkBool32 has_displace);
+    // ------------------------------------------------------------------------
     unsigned getPolyCount() const
     {
         unsigned result = 0;
@@ -300,6 +321,14 @@ public:
     void addSkyBox(irr::scene::ISceneNode* node);
     // ------------------------------------------------------------------------
     void addLightNode(irr::scene::ILightSceneNode* node);
+    // ------------------------------------------------------------------------
+    bool hasShaderForRendering(const std::string& shader)
+    {
+        const std::string& dbk = getDynamicBufferKey(shader);
+        if (m_dynamic_spm_buffers.find(dbk) != m_dynamic_spm_buffers.end())
+            return true;
+        return m_materials_data.find(shader) != m_materials_data.end();
+    }
 };   // GEVulkanDrawCall
 
 }

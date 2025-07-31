@@ -105,7 +105,7 @@ void CustomVideoSettingsDialog::beforeAddingWidgets()
     shadows->addLabel(_("High"));       // 3
     shadows->addLabel(_("Very High"));  // 4
     shadows->setValue(UserConfigParams::m_shadows_resolution == 2048 ? 
-                        (UserConfigParams::m_pcss_threshold == 2048 ? 4 : 3) :
+                      (UserConfigParams::m_pcss ? 4 : 3) :
                       UserConfigParams::m_shadows_resolution == 1024 ? 2 :
                       UserConfigParams::m_shadows_resolution ==  512 ? 1 : 0);
 
@@ -165,8 +165,8 @@ GUIEngine::EventPropagation CustomVideoSettingsDialog::processEvent(const std::s
                     getWidget<SpinnerWidget>("shadows")->getValue() == 1 ?  512 :
                     getWidget<SpinnerWidget>("shadows")->getValue() == 2 ? 1024 :
                     getWidget<SpinnerWidget>("shadows")->getValue() >= 3 ? 2048 : 0;
-                UserConfigParams::m_pcss_threshold = 
-                    getWidget<SpinnerWidget>("shadows")->getValue() == 3 ? 4096 : 2048;
+                UserConfigParams::m_pcss = 
+                    getWidget<SpinnerWidget>("shadows")->getValue() == 3 ? false : true;
             }
             else
             {
@@ -199,6 +199,8 @@ GUIEngine::EventPropagation CustomVideoSettingsDialog::processEvent(const std::s
             UserConfigParams::m_light_scatter =
                 advanced_pipeline && getWidget<CheckBoxWidget>("lightscattering")->getState();
 
+            bool force_reload_texture = getWidget<CheckBoxWidget>("texture_compression")->getState() !=
+                UserConfigParams::m_texture_compression;
             UserConfigParams::m_texture_compression =
                 getWidget<CheckBoxWidget>("texture_compression")->getState();
             GE::getGEConfig()->m_texture_compression = UserConfigParams::m_texture_compression;
@@ -224,7 +226,9 @@ GUIEngine::EventPropagation CustomVideoSettingsDialog::processEvent(const std::s
             OptionsScreenVideo::getInstance()->updateBlurSlider();
             if ((pbr_changed || ibl_changed) && GE::getDriver()->getDriverType() == video::EDT_VULKAN)
                 GE::getVKDriver()->updateDriver(false/*scale_changed*/, pbr_changed, ibl_changed);
-            OptionsScreenVideo::setImageQuality(quality);
+            // sameRestart will have the same effect
+            if (!(CVS->isGLSL() && pbr_changed))
+                OptionsScreenVideo::setImageQuality(quality, force_reload_texture);
             return GUIEngine::EVENT_BLOCK;
         }
         else if (selection == "cancel")
