@@ -37,7 +37,7 @@
 
 #include <algorithm>
 
-RewindManager* RewindManager::m_rewind_manager[PT_COUNT];
+RewindManager* RewindManager::m_rewind_manager[PT_COUNT] = {};
 std::atomic_bool RewindManager::m_enable_rewind_manager(false);
 
 /** Creates the singleton. */
