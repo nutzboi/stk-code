@@ -235,6 +235,7 @@ ServerLobby::ServerLobby() : LobbyProtocol()
     m_last_wanrefresh_requester.reset();
     m_last_wanrefresh_is_peer.store(false);
     m_random_karts_enabled = false;
+    m_last_generated_track = "";
     RaceManager::get()->setInfiniteMode(ServerConfig::m_infinite_game, false);
 
 #ifdef ENABLE_SQLITE3
@@ -2752,6 +2753,7 @@ void ServerLobby::startSelection(const Event *event)
         m_default_vote->m_num_laps = m_set_laps;
         m_default_vote->m_reverse = m_set_specvalue;
         m_fixed_laps = m_set_laps;
+        m_last_generated_track = m_set_field;
         track_voting = false;
         // ensure that the m_available_kts.second has the said set field.
         m_available_kts.second.insert(m_set_field);
@@ -2764,9 +2766,20 @@ void ServerLobby::startSelection(const Event *event)
         return;
     }
 
-    it = m_available_kts.second.begin();
-    std::advance(it, rg.get((int)m_available_kts.second.size()));
+    std::set<std::string> available_tracks = m_available_kts.second;
+
+    if (!m_last_generated_track.empty() && available_tracks.size() > 1)
+    {
+        available_tracks.erase(m_last_generated_track);
+        Log::verbose("ServerLobby", "Excluding '%s' from random selection", 
+                  m_last_generated_track.c_str());
+    }
+    
+    it = available_tracks.begin();
+    std::advance(it, rg.get((int)available_tracks.size()));
     m_default_vote->m_track_name = *it;
+    
+    m_last_generated_track = *it;
     switch (RaceManager::get()->getMinorMode())
     {
         case RaceManager::MINOR_MODE_NORMAL_RACE:
@@ -6647,6 +6660,7 @@ bool ServerLobby::setForcedTrack(std::string track_id,
                 m_set_laps = 0;
                 m_fixed_laps = -1;
                 m_set_specvalue = false;
+                m_last_generated_track = "";
                 std::string msg = is_soccer ? "All soccer fields can be played again" : "All tracks can be played again";
                 sendStringToAllPeers(msg);
                 Log::info("ServerLobby", "setfield all");
@@ -6664,6 +6678,7 @@ bool ServerLobby::setForcedTrack(std::string track_id,
                 m_set_laps = laps;
                 m_fixed_laps = laps;
                 m_set_specvalue = specvalue;
+                m_last_generated_track = track_id;
                 std::string msg = is_soccer ? "Next played soccer field will be " + track_id + "." :
                     "Next played track will be " + track_id + ".";
                 if (!ServerConfig::m_soccer_roulette)
