@@ -2143,6 +2143,7 @@ void ServerLobby::update(int ticks)
 
         resetVotingTime();
         m_game_setup->stopGrandPrix();
+        exitGameState();
         m_rs_state.store(RS_ASYNC_RESET);
         return;
     }
