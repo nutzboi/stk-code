@@ -236,6 +236,7 @@ ServerLobby::ServerLobby() : LobbyProtocol()
     m_last_wanrefresh_is_peer.store(false);
     m_random_karts_enabled = false;
     m_last_generated_track = "";
+    m_last_generated_karts.clear();
     RaceManager::get()->setInfiniteMode(ServerConfig::m_infinite_game, false);
 
 #ifdef ENABLE_SQLITE3
@@ -6727,10 +6728,27 @@ void ServerLobby::assignRandomKarts()
             for (unsigned i = 0; i < player.size(); i++)
             {
                 auto& player_profile = player[i];
-                std::set<std::string>::iterator it = m_available_kts.first.begin();
-                std::advance(it, random_gen.get((int)m_available_kts.first.size()));
+                std::string player_name = StringUtils::wideToUtf8(player_profile->getName());
+                
+                std::set<std::string> available_karts = m_available_kts.first;
+                if (!m_last_generated_karts.empty() && available_karts.size() > 1)
+                {
+                    auto it = m_last_generated_karts.find(player_name);
+                    if (it != m_last_generated_karts.end())
+                    {
+                        available_karts.erase(it->second);
+                        Log::verbose("ServerLobby", "Excluding kart '%s' for player '%s'", 
+                                   it->second.c_str(), player_name.c_str());
+                    }
+                }
+                
+                std::set<std::string>::iterator it = available_karts.begin();
+                std::advance(it, random_gen.get((int)available_karts.size()));
                 std::string selected_kart = *it;
                 player_profile->forceKart(selected_kart);
+                m_last_generated_karts[player_name] = selected_kart;
+                Log::verbose("ServerLobby", "Selected kart '%s' for player '%s'", 
+                           selected_kart.c_str(), player_name.c_str());
             }
         }
     }
@@ -6758,6 +6776,7 @@ void ServerLobby::resetKartSelections()
                         }
                 }
         }
+        m_last_generated_karts.clear();
 }
 // ========================================================================
 // Executes the Python script for track records and returns its output

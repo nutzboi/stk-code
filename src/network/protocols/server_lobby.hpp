@@ -291,6 +291,7 @@ private:
     /* for race it's reverse on/off, for battle/soccer it's random items */
     bool        m_set_specvalue;
     std::string m_last_generated_track;
+    std::map<std::string, std::string> m_last_generated_karts;
 
     //std::map<std::string, std::vector<std::string>> m_command_voters;
     std::set<STKPeer*> m_team_speakers;
