@@ -32,13 +32,34 @@ bool AddTimeCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* co
 
     auto parser = ctx->get_parser();
 
-    unsigned short amount_sec = 0;
-    
-    parser->parse_unsigned_shortint(amount_sec);
+    std::string first_arg;
+    parser->parse_string(first_arg);
+
+    if (first_arg == "status")
+    {
+        parser->parse_finish();
+        
+        ServerLobby* const lobby = stk_c->get_lobby();
+        int64_t current_timeout = lobby->getTimeout();
+        
+        if (current_timeout == std::numeric_limits<int64_t>::max())
+        {
+            *ctx << "Current timeout: Infinite";
+        }
+        else
+        {
+            float remaining_seconds = (current_timeout - (int64_t)StkTime::getMonoTimeMs()) / 1000.0f;
+            std::string message = "Current timeout: " + std::to_string((int)remaining_seconds) + " seconds remaining";
+            *ctx << message.c_str();
+        }
+        ctx->flush();
+        return true;
+    }
+
+    unsigned short amount_sec = std::stoi(first_arg);
 
     parser->parse_finish();
 
-    // argument verification permission-wise
     if (amount_sec < 1 || (amount_sec > 3600 &&
                 stk_c->getPermissionLevel() < m_perm_limitless))
     {

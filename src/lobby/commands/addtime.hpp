@@ -33,8 +33,8 @@ public:
     AddTimeCommand() : STKCommand(true) // can vote for this command
     {
         m_name = "addtime";
-        m_args = {{nnwcli::CT_USHORTINT, "seconds", "seconds, between 1 and 3600"}};
-        m_description = "Temporarily increase the starting timeout in the lobby.";
+        m_args = {{nnwcli::CT_STRING, "seconds_or_status", "seconds (1-3600) or 'status' to show current timeout"}};
+        m_description = "Temporarily increase the starting timeout in the lobby. Use 'status' to show current timeout.";
     }
     ~AddTimeCommand() {}
 
