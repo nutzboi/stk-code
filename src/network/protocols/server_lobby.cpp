@@ -1731,6 +1731,10 @@ void ServerLobby::liveJoinRequest(Event* event)
         const PeerEligibility old_eligibility = peer->getEligibility();
         const PeerEligibility new_eligibility = peer->testEligibility();
         LobbyPlayerQueue::get()->onPeerEligibilityChange(event->getPeerSP(), old_eligibility);
+
+        if (new_eligibility != old_eligibility)
+            updatePlayerList();
+
         // test eligibility for not spectating
         switch (new_eligibility)
         {
@@ -2530,6 +2534,10 @@ void ServerLobby::startSelection(const Event *event)
         const PeerEligibility old_eligibility = peer->getEligibility();
         const PeerEligibility new_eligibility = peer->testEligibility();
         LobbyPlayerQueue::get()->onPeerEligibilityChange(peer, old_eligibility);
+
+        if (new_eligibility != old_eligibility)
+            updatePlayerList();
+
         switch (new_eligibility)
         {
             case PELG_ACCESS_DENIED:
@@ -2668,7 +2676,7 @@ void ServerLobby::startSelection(const Event *event)
         {
             peer->setWaitingForGame(true);
             if (peer->getPermissionLevel() >= PERM_SPECTATOR &&
-                    peer->notRestrictedBy(PRF_NOSPEC))
+                    peer->notRestrictedBy(PRF_NOSPEC) && peer->getAlwaysSpectate() != ASM_COMMAND)
                 peer->setAlwaysSpectate(ASM_FULL);
             always_spectate_peers.insert(peer.get());
             continue;
@@ -2746,6 +2754,7 @@ void ServerLobby::startSelection(const Event *event)
     RandomGenerator rg;
     std::set<std::string>::iterator it;
     bool track_voting = ServerConfig::m_track_voting;
+    std::set<std::string> available_tracks = m_available_kts.second;
 
     if (!m_set_field.empty())
     {
@@ -2758,86 +2767,84 @@ void ServerLobby::startSelection(const Event *event)
         track_voting = false;
         // ensure that the m_available_kts.second has the said set field.
         m_available_kts.second.insert(m_set_field);
-        goto skip_default_vote_randomizing;
     }
-
-    if (m_available_kts.second.empty())
+    else
     {
-        Log::error("ServerLobby", "No tracks for playing!");
-        return;
+        if (m_available_kts.second.empty())
+        {
+            Log::error("ServerLobby", "No tracks for playing!");
+            return;
+        }
+
+        if (!m_last_generated_track.empty() && available_tracks.size() > 1)
+        {
+            available_tracks.erase(m_last_generated_track);
+            Log::verbose("ServerLobby", "Excluding '%s' from random selection", 
+                      m_last_generated_track.c_str());
+        }
+        
+        it = available_tracks.begin();
+        std::advance(it, rg.get((int)available_tracks.size()));
+        m_default_vote->m_track_name = *it;
+        
+        m_last_generated_track = *it;
+        switch (RaceManager::get()->getMinorMode())
+        {
+            case RaceManager::MINOR_MODE_NORMAL_RACE:
+            case RaceManager::MINOR_MODE_TIME_TRIAL:
+            case RaceManager::MINOR_MODE_FOLLOW_LEADER:
+            {
+                Track* t = track_manager->getTrack(*it);
+                assert(t);
+                m_default_vote->m_num_laps = t->getDefaultNumberOfLaps();
+                if (ServerConfig::m_auto_game_time_ratio > 0.0f)
+                {
+                    m_default_vote->m_num_laps =
+                        (uint8_t)(fmaxf(1.0f, (float)t->getDefaultNumberOfLaps() *
+                        ServerConfig::m_auto_game_time_ratio));
+                }
+                else if (m_fixed_laps != -1)
+                    m_default_vote->m_num_laps = m_fixed_laps;
+                m_default_vote->m_reverse = rg.get(2) == 0;
+                break;
+            }
+            case RaceManager::MINOR_MODE_FREE_FOR_ALL:
+            {
+                m_default_vote->m_num_laps = 0;
+                m_default_vote->m_reverse = rg.get(2) == 0;
+                break;
+            }
+            case RaceManager::MINOR_MODE_CAPTURE_THE_FLAG:
+            {
+                m_default_vote->m_num_laps = 0;
+                m_default_vote->m_reverse = 0;
+                break;
+            }
+            case RaceManager::MINOR_MODE_SOCCER:
+            {
+                if (m_game_setup->isSoccerGoalTarget())
+                {
+                    m_default_vote->m_num_laps =
+                        (uint8_t)(UserConfigParams::m_num_goals);
+                    if (m_default_vote->m_num_laps > 10)
+                        m_default_vote->m_num_laps = (uint8_t)5;
+                }
+                else
+                {
+                    m_default_vote->m_num_laps =
+                        (uint8_t)(UserConfigParams::m_soccer_time_limit);
+                    if (m_default_vote->m_num_laps > 15)
+                        m_default_vote->m_num_laps = (uint8_t)7;
+                }
+                m_default_vote->m_reverse = rg.get(2) == 0;
+                break;
+            }
+            default:
+                assert(false);
+                break;
+        }
     }
 
-    std::set<std::string> available_tracks = m_available_kts.second;
-
-    if (!m_last_generated_track.empty() && available_tracks.size() > 1)
-    {
-        available_tracks.erase(m_last_generated_track);
-        Log::verbose("ServerLobby", "Excluding '%s' from random selection", 
-                  m_last_generated_track.c_str());
-    }
-    
-    it = available_tracks.begin();
-    std::advance(it, rg.get((int)available_tracks.size()));
-    m_default_vote->m_track_name = *it;
-    
-    m_last_generated_track = *it;
-    switch (RaceManager::get()->getMinorMode())
-    {
-        case RaceManager::MINOR_MODE_NORMAL_RACE:
-        case RaceManager::MINOR_MODE_TIME_TRIAL:
-        case RaceManager::MINOR_MODE_FOLLOW_LEADER:
-        {
-            Track* t = track_manager->getTrack(*it);
-            assert(t);
-            m_default_vote->m_num_laps = t->getDefaultNumberOfLaps();
-            if (ServerConfig::m_auto_game_time_ratio > 0.0f)
-            {
-                m_default_vote->m_num_laps =
-                    (uint8_t)(fmaxf(1.0f, (float)t->getDefaultNumberOfLaps() *
-                    ServerConfig::m_auto_game_time_ratio));
-            }
-            else if (m_fixed_laps != -1)
-                m_default_vote->m_num_laps = m_fixed_laps;
-            m_default_vote->m_reverse = rg.get(2) == 0;
-            break;
-        }
-        case RaceManager::MINOR_MODE_FREE_FOR_ALL:
-        {
-            m_default_vote->m_num_laps = 0;
-            m_default_vote->m_reverse = rg.get(2) == 0;
-            break;
-        }
-        case RaceManager::MINOR_MODE_CAPTURE_THE_FLAG:
-        {
-            m_default_vote->m_num_laps = 0;
-            m_default_vote->m_reverse = 0;
-            break;
-        }
-        case RaceManager::MINOR_MODE_SOCCER:
-        {
-            if (m_game_setup->isSoccerGoalTarget())
-            {
-                m_default_vote->m_num_laps =
-                    (uint8_t)(UserConfigParams::m_num_goals);
-                if (m_default_vote->m_num_laps > 10)
-                    m_default_vote->m_num_laps = (uint8_t)5;
-            }
-            else
-            {
-                m_default_vote->m_num_laps =
-                    (uint8_t)(UserConfigParams::m_soccer_time_limit);
-                if (m_default_vote->m_num_laps > 15)
-                    m_default_vote->m_num_laps = (uint8_t)7;
-            }
-            m_default_vote->m_reverse = rg.get(2) == 0;
-            break;
-        }
-        default:
-            assert(false);
-            break;
-    }
-
-skip_default_vote_randomizing:
     if (!allowJoinedPlayersWaiting())
     {
         ProtocolManager::lock()->findAndTerminate(PROTOCOL_CONNECTION);
@@ -3507,9 +3514,11 @@ bool ServerLobby::handleAssets(const NetworkString& ns,
         updateTracksForMode();
     }
     const PeerEligibility old_el = peer->getEligibility();
-    peer->testEligibility();
+    const PeerEligibility new_el = peer->testEligibility();
     // eligibility hooks
     LobbyPlayerQueue::get()->onPeerEligibilityChange(peer, old_el);
+    if (new_el != old_el)
+        updatePlayerList();
     return true;
 }   // handleAssets
 
@@ -3869,6 +3878,7 @@ void ServerLobby::handleUnencryptedConnection(std::shared_ptr<STKPeer> peer,
         .addUInt8(m_db->hasPlayerReportsTable() ? 1 : 0);
 
     peer->setSpectator(false);
+    peer->testEligibility();
 
     // The 127.* or ::1/128 will be in charged for controlling AI
     if (m_ai_profiles.empty() && peer->getAddress().isLoopback())
@@ -4010,7 +4020,8 @@ void ServerLobby::updatePlayerList(bool update_when_reset_server)
         .addUInt8((uint8_t)all_profiles.size());
     for (auto profile : all_profiles)
     {
-        const bool is_spectator_by_limit = LobbyPlayerQueue::get()->isSpectatorByLimit(profile->getPeer().get());
+        auto peer = profile->getPeer();
+        const bool is_spectator_by_limit = LobbyPlayerQueue::get()->isSpectatorByLimit(peer.get());
         auto profile_name = profile->getName();
         auto user_name = StringUtils::wideToUtf8(profile->getName());
 
@@ -4025,6 +4036,9 @@ void ServerLobby::updatePlayerList(bool update_when_reset_server)
         // Add an hourglass emoji for players waiting because of the player limit
         if (is_spectator_by_limit) 
             profile_name = StringUtils::utf32ToWide({ 0x231B }) + profile_name;
+        else if (peer->getEligibility() != PELG_YES && peer->getEligibility() != PELG_SPECTATOR)
+            // Otherwise add X emoji
+            profile_name = StringUtils::utf32ToWide({ 0x274C }) + profile_name;
 
         // Show the Player Elo in case the server have enabled it
 	std::pair<unsigned int, int> elorank;
@@ -6689,6 +6703,19 @@ bool ServerLobby::setForcedTrack(std::string track_id,
                     std::string msg2 = "setfield " + track_id;
                     Log::info("ServerLobby", msg2.c_str());
                 }
+
+                // Update eligibilities of all the peers and make sure to reflect the update in the player list
+                bool upl = false;
+                for (auto& peer : STKHost::get()->getPeers())
+                {
+                    const PeerEligibility old_el = peer->getEligibility();
+                    const PeerEligibility new_el = peer->testEligibility();
+
+                    upl |= old_el != new_el;
+                }
+                if (upl)
+                    updatePlayerList();
+
             }
             return true;
         }

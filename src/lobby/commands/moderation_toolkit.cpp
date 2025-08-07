@@ -244,8 +244,11 @@ bool restrict_command(
                 target->getRestrictions(), _k);
 
         const PeerEligibility old_el = target->getEligibility();
-        target->testEligibility();
+        const PeerEligibility new_el = target->testEligibility();
         LobbyPlayerQueue::get()->onPeerEligibilityChange(dispatch_data->m_peer_wkptr.lock(), old_el);
+
+        if (new_el != old_el)
+            stk_ctx->get_lobby()->updatePlayerList();
 
         ctx->nprintf(
                 "Set %s to %s for player %s.",
@@ -378,6 +381,8 @@ bool SetKartCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* co
     STK_CTX(stk_ctx, ctx);
     if (!data) return false;
 
+    ServerLobbyCommands::DispatchData* const dispatch_data =
+        reinterpret_cast<ServerLobbyCommands::DispatchData*>(data);
     auto parser = ctx->get_parser();
     ServerLobby* const lobby = stk_ctx->get_lobby();
     AbstractDatabase* const db = lobby->getDatabase();
@@ -476,6 +481,12 @@ bool SetKartCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* co
             ctx->flush();
         }
     }
+    const PeerEligibility old_el = t_peer->getEligibility();
+    const PeerEligibility new_el = t_peer->testEligibility();
+    LobbyPlayerQueue::get()->onPeerEligibilityChange(dispatch_data->m_peer_wkptr.lock(), old_el);
+    if (new_el != old_el)
+        lobby->updatePlayerList();
+
     Log::info("ServerLobby", "setkart %s %s", kartname.c_str(), playername.c_str());
     return true;
 }

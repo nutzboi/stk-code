@@ -23,12 +23,16 @@
 #include "lobby/stk_command_context.hpp"
 #include "network/protocols/server_lobby.hpp"
 #include "network/server_config.hpp"
+#include "network/stk_peer.hpp"
 #include <parser/argline_parser.hpp>
 #include <string>
 
 bool SetTrackCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const data)
 {
     STK_CTX(stk_ctx, ctx);
+
+    ServerLobbyCommands::DispatchData* const dispatch_data =
+        reinterpret_cast<ServerLobbyCommands::DispatchData*>(data);
 
     const bool canSpecifyExtra = stk_ctx->getPermissionLevel() >= m_required_perm;
 
@@ -53,11 +57,16 @@ bool SetTrackCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* c
     ServerLobby* const lobby = stk_ctx->get_lobby();
     STKPeer* const peer = stk_ctx->get_peer();
 
+    const PeerEligibility old_el = peer->getEligibility();
+
     if (ServerConfig::m_command_track_mode)
     {
         CMD_REQUIRE_PERM(stk_ctx, PERM_PLAYER);
+
         if (LobbyPlayerQueue::get()->isSpectatorByLimit(peer) ||
-                !peer->isEligibleForGame())
+                (old_el != PELG_YES &&
+                 old_el != PELG_PRESET_KART_REQUIRED &&
+                 old_el != PELG_PRESET_TRACK_REQUIRED))
         {
             ctx->write("You need to be able to play in order to use that command.");
             ctx->flush();
@@ -68,10 +77,14 @@ bool SetTrackCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* c
     {
         CMD_REQUIRE_PERM(stk_ctx, m_required_perm);
     }
+
     bool isField = (ctx->get_alias() == "setfield");
 
     // Check that peer and server have the track
     bool found = lobby->setForcedTrack(track_id, laps, specvalue, isField, true);
+
+    // Eligibilities are updated automatically in the setForcedTrack
+
     if (!found)
     {
         if (isField)

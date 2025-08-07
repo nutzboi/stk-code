@@ -66,6 +66,9 @@ bool StartCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* cons
         const PeerEligibility new_el = peer->testEligibility();
         LobbyPlayerQueue::get()->onPeerEligibilityChange(peer_shptr, old_el);
 
+        if (new_el != old_el)
+            lobby->updatePlayerList();
+
         const bool is_singleslot = queue_size == 1;
 
         if (is_singleslot) switch (new_el)
