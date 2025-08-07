@@ -22,44 +22,7 @@ out vec4 Spec;
 #stk_include "utils/SpecularIBL.frag"
 
 #if !defined(GL_ES)
-vec3 CalcCoordFromPosition(in vec3 pos)
-{
-    vec4 projectedCoord      = u_projection_matrix * vec4(pos, 1.0);
-    projectedCoord.xyz      /= projectedCoord.w;
-    projectedCoord.xyz       = projectedCoord.xyz * 0.5 + 0.5;
-    return projectedCoord.xyz;
-}
-
-// Fade out edges of screen buffer tex
-// 1 means full render tex, 0 means full IBL tex
-float GetEdgeFade(vec2 coords)
-{
-    float gradL = smoothstep(0.0, 0.4, coords.x);
-    float gradR = 1.0 - smoothstep(0.6, 1.0, coords.x);
-    float gradT = smoothstep(0.0, 0.4, coords.y);
-    float gradB = 1.0 - smoothstep(0.6, 1.0, coords.y);
-    return min(min(gradL, gradR), min(gradT, gradB));
-}
-
-vec2 RayCast(vec3 dir, vec3 hitCoord)
-{
-    dir *= 0.5;
-    hitCoord += dir;
-
-    vec3 projectedCoord = CalcCoordFromPosition(hitCoord);
-    float factor = 1.0;
-
-    for (int i = 0; i < 32; i++)
-    {
-        float direction = texture(stex, projectedCoord);
-        factor *= direction;
-        dir = dir * (0.5 + 0.5 * factor);
-        hitCoord += dir * (2. * direction - 1.);
-        projectedCoord = CalcCoordFromPosition(hitCoord);
-    }
-
-    return projectedCoord.xy;
-}
+#stk_include "utils/screen_space_reflection.frag"
 
 vec3 gtaoMultiBounce(float visibility, vec3 albedo)
 {
@@ -116,7 +79,10 @@ void main(void)
     if (specval < 0.5 || cosine > 0.2) {
         outColor = fallback;
     } else {
-        vec2 coords = RayCast(reflected, xpos.xyz);
+        vec2 viewport_scale = vec2(1.0);
+        vec2 viewport_offset = vec2(0.0);
+        vec2 coords = RayCast(reflected, xpos.xyz, u_projection_matrix,
+            viewport_scale, viewport_offset, stex);
 
         if (coords.x < 0. || coords.x > 1. || coords.y < 0. || coords.y > 1.) {
             outColor = fallback;
@@ -125,7 +91,8 @@ void main(void)
             float mirror = texture(ntex, coords).z;
             
             outColor = textureLod(albedo, coords, 0.f).rgb;
-            outColor = mix(fallback, outColor, GetEdgeFade(coords));
+            outColor = mix(fallback, outColor, GetEdgeFade(coords,
+                viewport_scale, viewport_offset));
             outColor = mix(fallback, outColor, 1. - max(cosine * 5., 0.));
             outColor = mix(fallback, outColor, 4. - max(mirror * 4., 3.));
             // TODO temporary measure the lack of mipmapping for RTT albedo

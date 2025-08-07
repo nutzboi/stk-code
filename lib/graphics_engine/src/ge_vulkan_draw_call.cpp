@@ -1196,6 +1196,7 @@ void GEVulkanDrawCall::createPipeline(GEVulkanDriver* vk,
         float m_specular_levels_minus_one;
         VkBool32 m_deferred;
         VkBool32 m_skybox;
+        VkBool32 m_ssr;
     };
     Constants constants = {};
     constants.m_ibl = getGEConfig()->m_pbr && getGEConfig()->m_ibl &&
@@ -1205,7 +1206,9 @@ void GEVulkanDrawCall::createPipeline(GEVulkanDriver* vk,
     constants.m_specular_levels_minus_one = std::floor(std::log2(ts));
     constants.m_deferred = !m_deferred_layouts.empty();
     constants.m_skybox = m_skybox_renderer != NULL;
-    std::array<VkSpecializationMapEntry, 4> specialization_entries = {};
+    constants.m_ssr = getGEConfig()->m_screen_space_reflection_type !=
+        GSSRT_DISABLED;
+    std::array<VkSpecializationMapEntry, 5> specialization_entries = {};
     specialization_entries[0].constantID = 0;
     specialization_entries[0].offset = offsetof(Constants, m_ibl);
     specialization_entries[0].size = sizeof(VkBool32);
@@ -1219,6 +1222,9 @@ void GEVulkanDrawCall::createPipeline(GEVulkanDriver* vk,
     specialization_entries[3].constantID = 3;
     specialization_entries[3].offset = offsetof(Constants, m_skybox);
     specialization_entries[3].size = sizeof(VkBool32);
+    specialization_entries[4].constantID = 4;
+    specialization_entries[4].offset = offsetof(Constants, m_ssr);
+    specialization_entries[4].size = sizeof(VkBool32);
     VkSpecializationInfo specialization_info = {};
     specialization_info.mapEntryCount = specialization_entries.size();
     specialization_info.pMapEntries = specialization_entries.data();
@@ -1495,6 +1501,15 @@ void GEVulkanDrawCall::createVulkanData()
     {
         all_layouts.push_back(
             vk->getSkyBoxRenderer()->getEnvDescriptorSetLayout());
+        if (vk->getRTTTexture() && vk->getRTTTexture()->isDeferredFBO())
+        {
+            auto* dfbo = static_cast<GEVulkanDeferredFBO*>(vk->getRTTTexture());
+            if (dfbo->getAttachment<GVDFT_DISPLACE_COLOR>())
+            {
+                all_layouts.push_back(
+                    dfbo->getDescriptorSetLayout(GVDFP_DISPLACE_COLOR));
+            }
+        }
     }
 
     VkPipelineLayoutCreateInfo pipeline_layout_info = {};
@@ -1521,7 +1536,7 @@ void GEVulkanDrawCall::createVulkanData()
     }
 
     all_layouts.resize(2);
-    all_layouts[0] = vk->getSkyBoxRenderer()->getDescriptorSetLayout();
+    all_layouts[0] = vk->getSkyBoxRenderer()->getEnvDescriptorSetLayout();
     pipeline_layout_info.setLayoutCount = all_layouts.size();
     pipeline_layout_info.pSetLayouts = all_layouts.data();
     result = vkCreatePipelineLayout(vk->getDevice(), &pipeline_layout_info,
@@ -1736,11 +1751,33 @@ void GEVulkanDrawCall::renderPipeline(GEVulkanDriver* vk, VkCommandBuffer cmd,
 
     int cur_mid = -1;
     std::vector<uint32_t> dynamic_offsets = getDefaultDynamicOffsets();
-    if (getGEConfig()->m_pbr && pt == GVPT_SOLID)
+    if (getGEConfig()->m_pbr)
     {
-        vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
-            m_pipeline_layout, 2, 1,
-            vk->getSkyBoxRenderer()->getEnvDescriptorSet(), 0, NULL);
+        switch (pt)
+        {
+        case GVPT_SOLID:
+            vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                m_pipeline_layout, 2, 1,
+                vk->getSkyBoxRenderer()->getEnvDescriptorSet(), 0, NULL);
+            break;
+        case GVPT_DISPLACE_MASK:
+        case GVPT_DISPLACE_COLOR:
+        {
+            auto* dfbo = static_cast<GEVulkanDeferredFBO*>(vk->getRTTTexture());
+            if (dfbo && dfbo->getAttachment<GVDFT_DISPLACE_COLOR>())
+            {
+                vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                    m_pipeline_layout, 2, 1,
+                    vk->getSkyBoxRenderer()->getEnvDescriptorSet(), 0, NULL);
+                vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                    m_pipeline_layout, 3, 1,
+                    dfbo->getDescriptorSet(GVDFP_DISPLACE_COLOR), 0, NULL);
+            }
+            break;
+        }
+        default:
+            break;
+        }
     }
     if (bind_mesh_textures)
     {
@@ -2054,12 +2091,13 @@ void GEVulkanDrawCall::addSkyBox(scene::ISceneNode* node)
 // ----------------------------------------------------------------------------
 bool GEVulkanDrawCall::renderSkyBox(GEVulkanDriver* vk, VkCommandBuffer cmd)
 {
-    if (!m_skybox_renderer || !m_skybox_renderer->getDescriptorSet())
+    if (!m_skybox_renderer)
         return false;
     vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
         *m_graphics_pipelines["skybox"].m_pipelines[GVPT_SKYBOX].get());
     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
-        m_skybox_layout, 0, 1, m_skybox_renderer->getDescriptorSet(), 0, NULL);
+        m_skybox_layout, 0, 1, m_skybox_renderer->getEnvDescriptorSet(), 0,
+        NULL);
     int current_buffer_idx = vk->getCurrentBufferIdx();
     std::vector<uint32_t> dynamic_offsets = getDefaultDynamicOffsets();
     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -2105,12 +2143,19 @@ void GEVulkanDrawCall::renderDeferredLighting(GEVulkanDriver* vk,
             .m_pipelines;
         vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
             *pl[GVPT_DEFERRED_LIGHTING]);
+        struct PushConstants
+        {
+            btQuaternion m_rotation;
+            int m_fullscreen_light;
+        };
+        PushConstants pc;
+        pc.m_rotation = m_billboard_rotation;
+        pc.m_fullscreen_light = fullscreen_light;
         vkCmdPushConstants(cmd, m_deferred_layouts[GVDFP_HDR],
-            VK_SHADER_STAGE_ALL_GRAPHICS, 0, sizeof(btQuaternion),
-            &m_billboard_rotation);
+            VK_SHADER_STAGE_ALL_GRAPHICS, 0, sizeof(PushConstants),
+            &pc);
         vkCmdDraw(cmd, 4,
-            m_light_handler->getLightCount() - fullscreen_light,
-            0, fullscreen_light);
+            m_light_handler->getLightCount() - fullscreen_light, 0, 0);
     }
 }   // renderDeferredLighting
 
