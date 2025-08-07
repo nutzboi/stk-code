@@ -35,21 +35,28 @@ bool ShowCommandsCommand::execute(nnwcli::CommandExecutorContext* const ctx, voi
     parser->parse_finish(); // Do not allow more arguments
 
     auto it = executor->get_command_iter();
+    std::vector<Command*> commands;
+    for (auto iter = it.first; iter != it.second; ++iter)
+    {
+        commands.push_back(iter->get());
+    }
+    // Sort commands alphabetically by name
+    std::sort(commands.begin(), commands.end(), [](Command* a, Command* b)
+    {
+        return a->get_name() < b->get_name();
+    });
 
-    for (;;)
+    for (size_t i = 0; i < commands.size(); ++i)
     {
         ctx->write("/");
-        ctx->write(it.first->get()->get_name());
+        ctx->write(commands[i]->get_name());
 
         // alias scan
         auto alias_it = executor->get_alias_iter();
         write_aliases(stk_ctx->get_response_buffer(),
-                alias_it.first, alias_it.second, it.first->get());
+                      alias_it.first, alias_it.second, commands[i]);
 
-        it.first++;
-        if (it.first == it.second)
-            break;
-        else
+        if (i + 1 < commands.size())
             ctx->write(" ");
     }
     ctx->flush();
