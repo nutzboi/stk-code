@@ -762,8 +762,6 @@ void ServerLobbyCommands::applyVoteIfPresent(ServerLobby* lobby)
                 vote->first.m_voted_argline);
         // Erase the command
         vote = m_command_votes.erase(vote);
-        // reset voting
-        m_command_votes.clear();
         break;
     }
 }
