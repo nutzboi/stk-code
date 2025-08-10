@@ -822,10 +822,25 @@ void ServerLobby::kickHost(Event* event)
     if (!checkDataSize(event, 4)) return;
     NetworkString& data = event->data();
     uint32_t host_id = data.getUInt32();
-    std::shared_ptr<STKPeer> peer = STKHost::get()->findPeerByHostId(host_id);
+    std::shared_ptr<STKPeer> t_peer = STKHost::get()->findPeerByHostId(host_id);
+
+    STKPeer* host_peer = event->getPeer();
+
+    if (!t_peer)
+        return;
+
     // Ignore kicking ai peer if ai handling is on
-    if (peer && (!ServerConfig::m_ai_handling || !peer->isAIPeer()))
-        peer->kick();
+    if (ServerConfig::m_ai_handling && t_peer->isAIPeer())
+        return;
+
+    // Prevent kicking the veto staff member
+    if (host_peer->getVeto() < t_peer->getVeto())
+    {
+        sendStringToPeer(std::string("Unable kick this player."), host_peer);
+        return;
+    }
+
+    t_peer->kick();
 }   // kickHost
 
 //-----------------------------------------------------------------------------
