@@ -3919,6 +3919,17 @@ void ServerLobby::handleUnencryptedConnection(std::shared_ptr<STKPeer> peer,
         }
     }
 
+    if (peer->hasPlayerProfiles())
+        Log::verbose("ServerLobby", "playerjoin %s %d",
+                StringUtils::wideToUtf8(
+                    peer->getPlayerProfiles()[0]->getName()).c_str(),
+                peer->getPlayerProfiles()[0]->getOnlineId());
+    ServerLobbyCommands::get()->onPeerJoin(this, peer);
+    LobbyPlayerQueue::get()->onPeerJoin(peer);
+#ifdef ENABLE_SQLITE3
+    m_db->onPlayerJoinQueries(peer, online_id, player_count, country_code);
+#endif
+
     if (game_started)
     {
         peer->setWaitingForGame(true);
@@ -3952,16 +3963,6 @@ void ServerLobby::handleUnencryptedConnection(std::shared_ptr<STKPeer> peer,
         }
     }
 
-    if (peer->hasPlayerProfiles())
-        Log::verbose("ServerLobby", "playerjoin %s %d",
-                StringUtils::wideToUtf8(
-                    peer->getPlayerProfiles()[0]->getName()).c_str(),
-                peer->getPlayerProfiles()[0]->getOnlineId());
-    ServerLobbyCommands::get()->onPeerJoin(this, peer);
-    LobbyPlayerQueue::get()->onPeerJoin(peer);
-#ifdef ENABLE_SQLITE3
-    m_db->onPlayerJoinQueries(peer, online_id, player_count, country_code);
-#endif
 }   // handleUnencryptedConnection
 
 //-----------------------------------------------------------------------------
