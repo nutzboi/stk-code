@@ -211,12 +211,12 @@ PeerEligibility STKPeer::testEligibility()
     std::shared_ptr<ServerLobby> const lobby =
         LobbyProtocol::get<ServerLobby>();
     // if a spectator then not eligible
-    if (alwaysSpectate() != ASM_NONE)
+    if (getAlwaysSpectate() == ASM_COMMAND)
     {
         m_last_eligibility.store(PELG_SPECTATOR);
         return PELG_SPECTATOR;
     }
-    if (!isValidated())
+    if (!isValidated() || (getAlwaysSpectate() == ASM_FULL))
     {
         m_last_eligibility.store(PELG_OTHER);
         return PELG_OTHER;
