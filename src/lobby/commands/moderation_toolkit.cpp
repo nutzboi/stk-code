@@ -41,6 +41,7 @@
 #include "utils/string_utils.hpp"
 #include "utils/log.hpp"
 #include <parser/argline_parser.hpp>
+#include <set>
 #include <string>
 #include <unistd.h>
 
@@ -218,7 +219,12 @@ bool restrict_command(
 
     std::shared_ptr<STKPeer> target = STKHost::get()->findPeerByName(
             playername_w, true, true);
-    int target_permlvl = db->loadPermissionLevelForUsername(playername_w);
+    int target_permlvl;
+    if (target)
+        target_permlvl = target->getPermissionLevel();
+    else
+        target_permlvl = db->loadPermissionLevelForUsername(playername_w);
+
     auto target_rv_k = db->loadRestrictionsForUsername(playername_w);
 
 	std::string _k = std::get<1>(target_rv_k);
