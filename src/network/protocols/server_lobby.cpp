@@ -4259,7 +4259,7 @@ void ServerLobby::handlePlayerVote(Event* event)
                 (uint8_t)(fmaxf(1.0f, (float)t->getDefaultNumberOfLaps() *
                 ServerConfig::m_auto_game_time_ratio));
         }
-        else if (m_game_setup->isSoccerGoalTarget())
+        else if (m_game_setup->hasExtraSeverInfo() && m_game_setup->isSoccerGoalTarget())
         {
             if (ServerConfig::m_auto_game_time_ratio > 0.0f)
             {
