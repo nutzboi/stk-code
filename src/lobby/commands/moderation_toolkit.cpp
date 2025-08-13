@@ -259,6 +259,37 @@ bool restrict_command(
         ctx->flush();
         return true;
     }
+    else
+    {
+        std::uint32_t rv = std::get<0>(target_rv_k);
+        // apply offline restriction
+        if (!state && restriction_name == "all")
+        {
+            rv = PRF_OK;
+            ctx->nprintf("Cleared all restrictions for player %s.", 512,
+                    playername.c_str());
+            db->writeRestrictionsForUsername(playername_w, rv);
+            ctx->flush();
+            return true;
+        }
+
+        if (state)
+            rv |= restriction;
+        else
+            rv &= ~restriction;
+
+        db->writeRestrictionsForUsername(playername_w, rv);
+
+        ctx->nprintf(
+                "Set %s to %s for offline player %s.",
+                512,
+                getRestrictionName(restriction),
+                state ? "on" : "off",
+                playername.c_str());
+        ctx->flush();
+        return true;
+
+    }
 
     return false;
 }
