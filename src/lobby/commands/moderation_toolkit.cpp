@@ -216,7 +216,7 @@ bool restrict_command(
 {
     irr::core::stringw playername_w = StringUtils::utf8ToWide(playername);
 
-    auto target = STKHost::get()->findPeerByName(
+    std::shared_ptr<STKPeer> target = STKHost::get()->findPeerByName(
             playername_w, true, true);
     int target_permlvl = db->loadPermissionLevelForUsername(playername_w);
     auto target_rv_k = db->loadRestrictionsForUsername(playername_w);
@@ -245,7 +245,7 @@ bool restrict_command(
 
         const PeerEligibility old_el = target->getEligibility();
         const PeerEligibility new_el = target->testEligibility();
-        LobbyPlayerQueue::get()->onPeerEligibilityChange(dispatch_data->m_peer_wkptr.lock(), old_el);
+        LobbyPlayerQueue::get()->onPeerEligibilityChange(target, old_el);
 
         if (new_el != old_el)
             stk_ctx->get_lobby()->updatePlayerList();
@@ -460,10 +460,10 @@ bool SetKartCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* co
         kart = nullptr;
 
     std::shared_ptr<NetworkPlayerProfile> t_player = nullptr;
-    STKPeer* t_peer = nullptr;
+    std::shared_ptr<STKPeer> t_peer = nullptr;
     if (canSpecifyExtra && !playername.empty())
         t_peer = STKHost::get()->findPeerByName(
-                StringUtils::utf8ToWide(playername), true, true, &t_player).get();
+                StringUtils::utf8ToWide(playername), true, true, &t_player);
     else if (!stk_ctx->get_peer())
     {
         ctx->write("Console always need to specify the player name.");
@@ -472,7 +472,7 @@ bool SetKartCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* co
     }
     else
     {
-        t_peer = stk_ctx->get_peer();
+        t_peer = dispatch_data->m_peer_wkptr.lock();
         t_player = t_peer->getPlayerProfiles()[0];
     }
     if (!t_player || !t_peer || !t_peer->hasPlayerProfiles())
@@ -490,7 +490,7 @@ bool SetKartCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* co
         t_player->unforceKart();
         if (permanent)
             db->writeRestrictionsForOID(t_player->getOnlineId(), "");
-        if (t_peer != peer)
+        if (t_peer.get() != peer)
         {
             ctx->nprintf("No longer forcing a kart for %s.", 512,
                     playername.c_str());
@@ -504,7 +504,7 @@ bool SetKartCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* co
         t_player->forceKart(kartname);
         if (permanent)
             db->writeRestrictionsForOID(t_player->getOnlineId(), kartname);
-        if (t_peer != peer)
+        if (t_peer.get() != peer)
         {
             ctx->nprintf(
                     "Made %s use kart %s.", 512,
@@ -514,7 +514,7 @@ bool SetKartCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* co
     }
     const PeerEligibility old_el = t_peer->getEligibility();
     const PeerEligibility new_el = t_peer->testEligibility();
-    LobbyPlayerQueue::get()->onPeerEligibilityChange(dispatch_data->m_peer_wkptr.lock(), old_el);
+    LobbyPlayerQueue::get()->onPeerEligibilityChange(t_peer, old_el);
     if (new_el != old_el)
         lobby->updatePlayerList();
 
