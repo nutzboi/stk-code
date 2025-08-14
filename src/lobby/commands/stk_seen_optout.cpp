@@ -115,7 +115,7 @@ bool StkSeenOptOutCommand::execute(nnwcli::CommandExecutorContext* const ctx, vo
 
     if (!m_success)
     {
-	ctx->nprintf("Failed to opt in/out of STK seen: %s", 512, reason);
+	ctx->nprintf("Failed to opt in/out of STK seen: %s", 512, reason.c_str());
 	ctx->flush();
 	return false;
     }

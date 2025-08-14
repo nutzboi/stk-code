@@ -3851,14 +3851,7 @@ void ServerLobby::handleUnencryptedConnection(std::shared_ptr<STKPeer> peer,
 	    }
     }
 
-    if (!checkAllStandardContentInstalled(peer.get()))
-    {
-	    std::string player_name;
-	    if (!peer->getPlayerProfiles().empty())
-		    player_name = StringUtils::wideToUtf8(peer->getPlayerProfiles()[0]->getName());
-	    Log::info("ServerLobby", "Player %s doesn't have all standard content installed.",
-			    player_name.c_str());
-    }
+
     if (ServerConfig::m_soccer_roulette)
     {
 	    std::shared_ptr<NetworkPlayerProfile> profile = peer->getPlayerProfiles()[0];
@@ -3893,7 +3886,6 @@ void ServerLobby::handleUnencryptedConnection(std::shared_ptr<STKPeer> peer,
         .addUInt8(m_db->hasPlayerReportsTable() ? 1 : 0);
 
     peer->setSpectator(false);
-    peer->testEligibility();
 
     // The 127.* or ::1/128 will be in charged for controlling AI
     if (m_ai_profiles.empty() && peer->getAddress().isLoopback())
@@ -6911,7 +6903,10 @@ bool ServerLobby::checkAllStandardContentInstalled(STKPeer* peer) const
         std::string msg = "You are missing standard tracks";   
         msg += "\n\nMissing tracks:\n";
         for (const auto& track : missing_tracks)
+        {
             msg += "- " + track + "\n";
+            msg += "  Install with: /installaddon " + track + "\n";
+        }
         sendStringToPeer(msg, peer);
         return false;
     }   
