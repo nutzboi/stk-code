@@ -6275,6 +6275,7 @@ void ServerLobby::sendCurrentModifiers(STKPeer* const peer) const
     // add stuff here
     addKartRestrictionMessage(msg);
     addPowerupSMMessage(msg);
+    addRandomKartsMessage(msg);
 
     if (!msg.empty())
     {
@@ -6295,6 +6296,7 @@ void ServerLobby::sendCurrentModifiers(std::shared_ptr<STKPeer>& peer) const
     // add stuff here
     addKartRestrictionMessage(msg);
     addPowerupSMMessage(msg);
+    addRandomKartsMessage(msg);
 
     if (!msg.empty())
     {
@@ -6340,6 +6342,14 @@ void ServerLobby::addPowerupSMMessage(std::string& msg) const
         default:
             break;
     }
+}
+
+void ServerLobby::addRandomKartsMessage(std::string& msg) const
+{
+    if (!m_random_karts_enabled)
+        return;
+
+    msg += "RANDOM KARTS is ACTIVE! Karts will be randomly assigned to players.\n";
 }
 int ServerLobby::loadPermissionLevelForOID(const uint32_t online_id)
 {
