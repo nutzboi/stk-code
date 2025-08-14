@@ -331,6 +331,12 @@ namespace ServerConfig
 	    "excluded-tracks",
 	    "Tracks that will never be selected if track-voting = false."));
 
+	SERVER_CFG_PREFIX StringServerConfigParam m_allowed_missing_tracks
+	    SERVER_CFG_DEFAULT(StringServerConfigParam(
+	    "hole_drop oasis",
+	    "allowed-missing-tracks",
+	    "Space-separated list of standard track identifiers that clients are allowed to miss without being blocked from joining."));
+
     SERVER_CFG_PREFIX BoolServerConfigParam m_command_track_mode
         SERVER_CFG_DEFAULT(BoolServerConfigParam(false, "command-track-mode",
         "In order to play the next game, the player(s) need to use /settrack "

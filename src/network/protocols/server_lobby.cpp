@@ -6883,8 +6883,17 @@ bool ServerLobby::checkAllStandardContentInstalled(STKPeer* peer) const
 {
     const auto& client_assets = peer->getClientAssets();
     std::vector<std::string> missing_tracks;
-    // TODO: separate ServerConfig entry
-    const std::set<std::string> allowed_missing_tracks = {"hole_drop", "oasis"};
+    // Read allowed missing tracks from server configuration
+    std::set<std::string> allowed_missing_tracks;
+    {
+        const std::string cfg = ServerConfig::m_allowed_missing_tracks;
+        const std::vector<std::string> entries = StringUtils::split(cfg, ' ');
+        for (const std::string& e : entries)
+        {
+            if (!e.empty())
+                allowed_missing_tracks.insert(e);
+        }
+    }
     const std::vector<std::string>& all_track_ids = track_manager->getAllTrackIdentifiers();   
     for (const std::string& track_id : all_track_ids)
     {
