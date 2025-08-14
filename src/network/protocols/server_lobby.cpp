@@ -1495,8 +1495,6 @@ void ServerLobby::asynchronousUpdate()
                     {
                         const auto tracks = peer->getClientAssets().second;
                         return !peer->isWaitingForGame() &&
-                            peer->getPermissionLevel() >= PERM_SPECTATOR &&
-                            peer->notRestrictedBy(PRF_NOSPEC) &&
                             tracks.find(winner_vote.m_track_name) != tracks.cend();
                     }, load_world_message);
             // updatePlayerList so the in lobby players (if any) can see always

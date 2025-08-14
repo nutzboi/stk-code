@@ -1637,6 +1637,12 @@ std::vector<std::shared_ptr<NetworkPlayerProfile> >
     for (auto& p : m_peers)
     {
         auto& stk_peer = p.second;
+	// Handle nogame+nospec peers
+	if (stk_peer->hasRestriction(PRF_NOSPEC) && stk_peer->hasRestriction(PRF_NOGAME))
+	{
+	    stk_peer->setWaitingForGame(true);
+	    continue;
+	}
         // Handle always spectate for peer
         if (has_always_on_spectators && stk_peer->alwaysSpectate())
         {
