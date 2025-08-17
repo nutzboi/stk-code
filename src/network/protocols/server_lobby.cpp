@@ -235,6 +235,7 @@ ServerLobby::ServerLobby() : LobbyProtocol()
     m_last_wanrefresh_requester.reset();
     m_last_wanrefresh_is_peer.store(false);
     m_random_karts_enabled = false;
+    m_autokick_enabled = (ServerConfig::m_kick_idle_player_seconds > 0);
     m_last_generated_track = "";
     m_last_generated_karts.clear();
     RaceManager::get()->setInfiniteMode(ServerConfig::m_infinite_game, false);
@@ -2088,7 +2089,8 @@ void ServerLobby::update(int ticks)
             }
             if (!peer->isAIPeer() &&
                 sec > 0 && peer->idleForSeconds() > sec &&
-                !peer->isDisconnected() && NetworkConfig::get()->isWAN())
+                !peer->isDisconnected() && NetworkConfig::get()->isWAN() &&
+                m_autokick_enabled)
             {
                 if (w && w->getKart(i)->hasFinishedRace())
                     continue;
@@ -2162,6 +2164,10 @@ void ServerLobby::update(int ticks)
 
         resetVotingTime();
         m_game_setup->stopGrandPrix();
+        
+        // Reset autokick to default config when all players leave
+        m_autokick_enabled = (ServerConfig::m_kick_idle_player_seconds > 0);
+        
         exitGameState();
         m_rs_state.store(RS_ASYNC_RESET);
         return;
@@ -2183,6 +2189,10 @@ void ServerLobby::update(int ticks)
         delete back_lobby;
         resetVotingTime();
         m_game_setup->stopGrandPrix();
+        
+        // Reset autokick to default config when all players leave
+        m_autokick_enabled = (ServerConfig::m_kick_idle_player_seconds > 0);
+        
         m_rs_state.store(RS_ASYNC_RESET);
     }
 
@@ -2584,6 +2594,8 @@ void ServerLobby::startSelection(const Event *event)
             }
             case PELG_SPECTATOR:
             {
+		if (m_server_owner.lock() == event.getPeerSP())
+		    break;
                 const std::string msg = "You are the spectator.";
                 sendStringToPeer(msg, peer);
                 return;
@@ -6219,6 +6231,29 @@ void ServerLobby::setRandomKartsEnabled(const bool state, const bool announce)
         if (announce)
         {
             msg += "deactivated.";
+            sendStringToAllPeers(msg);
+        }
+    }
+}
+
+void ServerLobby::setAutokickEnabled(const bool state, const bool announce)
+{
+    m_autokick_enabled = state;
+    std::string msg = "Autokick has been ";
+
+    if (state)
+    {
+        if (announce)
+        {
+            msg += "enabled.";
+            sendStringToAllPeers(msg);
+        }
+    }
+    else
+    {
+        if (announce)
+        {
+            msg += "disabled.";
             sendStringToAllPeers(msg);
         }
     }

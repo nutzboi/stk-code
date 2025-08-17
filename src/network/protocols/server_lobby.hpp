@@ -150,6 +150,7 @@ private:
     bool m_team_selection_vote_active;
     uint64_t m_team_selection_vote_timer;
     bool m_random_karts_enabled;
+    bool m_autokick_enabled;
     std::string m_replay_dir;
     bool m_replay_requested = false;    
 #ifdef ENABLE_SQLITE3
@@ -497,6 +498,7 @@ public:
     void addKartRestrictionMessage(std::string& msg) const;
     void addPowerupSMMessage(std::string& msg) const;
     void addRandomKartsMessage(std::string& msg) const;
+    void addAutokickMessage(std::string& msg) const;
     const std::string getRandomAddon(RaceManager::MinorRaceModeType m=RaceManager::MINOR_MODE_NONE) const;
     bool isPoleEnabled() const { return m_pole_enabled; }
     core::stringw formatTeammateList(
@@ -514,6 +516,9 @@ public:
 
     bool getRandomKartsEnabled() const { return m_random_karts_enabled; };
     void setRandomKartsEnabled(bool state, bool announce = true);
+    
+    bool getAutokickEnabled() const { return m_autokick_enabled; };
+    void setAutokickEnabled(bool state, bool announce = true);
 
     // When the database is made into a singleton, deprecate this method.
     AbstractDatabase* getDatabase() { return m_db; };

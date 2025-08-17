@@ -90,6 +90,7 @@
 #include "lobby/commands/rps.hpp"
 #include "lobby/commands/jumbleword.hpp"
 #include "lobby/commands/randomkarts.hpp"
+#include "lobby/commands/autokick.hpp"
 #include "lobby/commands/endgame.hpp"
 #include "lobby/commands/goalhistory.hpp"
 // special features
@@ -262,6 +263,8 @@ void ServerLobbyCommands::registerCommands()
     m_executor.register_command(std::make_shared<ReplayCommand>());
     m_executor.register_command(std::make_shared<RandomkartsCommand>());
     m_executor.add_alias("rks", "randomkarts");
+    m_executor.register_command(std::make_shared<AutokickCommand>());
+    m_executor.add_alias("ak", "autokick");
     m_executor.register_command(std::make_shared<ResetBallCommand>());
     m_executor.add_alias("resetpuck", "resetball");
     m_executor.add_alias("rb", "resetball");
