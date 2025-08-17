@@ -2561,58 +2561,61 @@ void ServerLobby::startSelection(const Event *event)
         if (new_eligibility != old_eligibility)
             updatePlayerList();
 
-        switch (new_eligibility)
+        // Do checks only if this player is not server owner
+        if (m_server_owner.lock() != peer)
         {
-            case PELG_ACCESS_DENIED:
-                sendStringToPeer(L"You are not allowed to play the game.", peer);
-                return;
-            // check if player has standard assets
-            case PELG_NO_STANDARD_CONTENT:
-                sendStringToPeer(L"You cannot ready up because you are missing required standard tracks.", peer);
-                return;
-            // when the field is forced, check if the player has the field
-            case PELG_NO_FORCED_TRACK:
+            switch (new_eligibility)
             {
-                std::string msg = "You need to install ";
-                msg += m_set_field;
-                msg += " in order to play. Click the link below to install it:\n/installaddon";
-                msg += m_set_field;
-                sendStringToPeer(msg, peer);
-                return;
+                case PELG_ACCESS_DENIED:
+                    sendStringToPeer(L"You are not allowed to play the game.", peer);
+                    return;
+                // check if player has standard assets
+                case PELG_NO_STANDARD_CONTENT:
+                    sendStringToPeer(L"You cannot ready up because you are missing required standard tracks.", peer);
+                    return;
+                // when the field is forced, check if the player has the field
+                case PELG_NO_FORCED_TRACK:
+                {
+                    std::string msg = "You need to install ";
+                    msg += m_set_field;
+                    msg += " in order to play. Click the link below to install it:\n/installaddon";
+                    msg += m_set_field;
+                    sendStringToPeer(msg, peer);
+                    return;
+                }
+                case PELG_PRESET_KART_REQUIRED:
+                {
+                    const std::string msg = "Use /setkart (kart_name) to play the game.";
+                    sendStringToPeer(msg, peer);
+                    return;
+                }
+                case PELG_PRESET_TRACK_REQUIRED:
+                {
+                    const std::string msg = "Use /settrack (track_name) - (reverse? on/off) to play the game.";
+                    sendStringToPeer(msg, peer);
+                    return;
+                }
+                case PELG_SPECTATOR:
+                {
+                    const std::string msg = "You are a spectator.";
+                    sendStringToPeer(msg, peer);
+                    return;
+                }
+                case PELG_OTHER:
+                {
+                    const std::string msg = "You cannot play the game.";
+                    sendStringToPeer(msg, peer);
+                    return;
+                }
+                case PELG_YES:
+                    break;
             }
-            case PELG_PRESET_KART_REQUIRED:
-            {
-                const std::string msg = "Use /setkart (kart_name) to play the game.";
-                sendStringToPeer(msg, peer);
-                return;
-            }
-            case PELG_PRESET_TRACK_REQUIRED:
-            {
-                const std::string msg = "Use /settrack (track_name) - (reverse? on/off) to play the game.";
-                sendStringToPeer(msg, peer);
-                return;
-            }
-            case PELG_SPECTATOR:
-            {
-		if (m_server_owner.lock() == event.getPeerSP())
-		    break;
-                const std::string msg = "You are the spectator.";
-                sendStringToPeer(msg, peer);
-                return;
-            }
-            case PELG_OTHER:
-            {
-                const std::string msg = "You cannot play the game.";
-                sendStringToPeer(msg, peer);
-                return;
-            }
-            case PELG_YES:
-                break;
         }
+
         const bool is_sbl = LobbyPlayerQueue::get()->isSpectatorByLimit(peer.get());
         // this should give the privilege to immediately start the game
         const bool not_singleslot = LobbyPlayerQueue::get()->getMaxPlayersInGame() != 1;
-	
+
         if (is_sbl)
         {
             const std::string msg = "You need to wait for the free spot for playing the game.";
