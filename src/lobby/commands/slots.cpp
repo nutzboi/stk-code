@@ -46,7 +46,7 @@ bool SlotsCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* cons
         const unsigned int current =
             LobbyPlayerQueue::get()->getMaxPlayersInGame();
         ctx->nprintf("Current slots: %u", 18, 
-                current > 10 ? 10 : current);
+                current);
         ctx->flush();
         return true;
     }
