@@ -35,7 +35,7 @@
 #include "utils/log.hpp"
 #include "utils/string_utils.hpp"
 #include "utils/time.hpp"
-
+#include "modes/soccer_roulette.hpp"
 
 #include <memory>
 #include <string.h>
@@ -261,6 +261,21 @@ PeerEligibility STKPeer::testEligibility()
     {
         m_last_eligibility.store(PELG_PRESET_TRACK_REQUIRED);
         return PELG_PRESET_TRACK_REQUIRED;
+    }
+    if (ServerConfig::m_soccer_roulette && hasPlayerProfiles())
+    {
+	    auto profiles = getPlayerProfiles();
+	    for (auto& profile : profiles)
+	    {
+		    std::string player_name = StringUtils::wideToUtf8(profile->getName());
+		    std::string team = SoccerRoulette::get()->getTeamForPlayer(player_name);
+		    if (team.empty())
+		    {
+			    // player not found in .xml
+			    m_last_eligibility.store(PELG_OTHER);
+			    return PELG_OTHER;
+		    }
+	    }
     }
     // In other cases, everything is okay.
     m_last_eligibility.store(PELG_YES);

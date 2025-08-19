@@ -2776,7 +2776,7 @@ void ServerLobby::startSelection(const Event *event)
     }
 
     // These tracks will never be selected when track voting is disabled
-    if (!ServerConfig::m_track_voting)
+    if (!ServerConfig::m_track_voting && !ServerConfig::m_soccer_roulette)
     {
 	    std::vector<std::string> excluded = StringUtils::split(ServerConfig::m_excluded_tracks, ' ');
 	    for (const std::string& track : excluded)

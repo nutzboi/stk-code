@@ -23,6 +23,8 @@
 #include "lobby/stk_command_context.hpp"
 #include "modes/soccer_roulette.hpp"
 #include "network/protocols/server_lobby.hpp"
+#include "lobby/player_queue.hpp"
+#include "network/stk_host.hpp"
 #include <parser/argline_parser.hpp>
 #include <string>
 
@@ -110,6 +112,15 @@ bool SoccerRouletteCommand::execute(nnwcli::CommandExecutorContext* const ctx, v
         if (success)
         {
             msg = "Soccer Roulette started with field: " + next_field;
+            // Recalculate eligibility so players not in teams.xml get a cross immediately
+            auto peers = STKHost::get()->getPeers();
+            for (auto& peer : peers)
+            {
+                if (!peer->isValidated() || peer->isAIPeer())
+                    continue;
+                peer->testEligibility();
+            }
+            lobby->updatePlayerList();
         }
         else
         {
