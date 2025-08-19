@@ -118,7 +118,9 @@ bool SoccerRouletteCommand::execute(nnwcli::CommandExecutorContext* const ctx, v
             {
                 if (!peer->isValidated() || peer->isAIPeer())
                     continue;
+                const PeerEligibility old_el = peer->getEligibility();
                 peer->testEligibility();
+                LobbyPlayerQueue::get()->onPeerEligibilityChange(peer, old_el);
             }
             lobby->updatePlayerList();
         }

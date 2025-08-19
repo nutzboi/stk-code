@@ -25,6 +25,7 @@
 #include <unistd.h>
 #include "karts/controller/controller.hpp"
 #include "network/protocols/server_lobby.hpp"
+#include "lobby/player_queue.hpp"
 
 SoccerRoulette* SoccerRoulette::m_soccer_roulette = NULL;
 
@@ -638,6 +639,11 @@ void SoccerRoulette::reassignTeams(STKCommandContext* const commander)
                           player_name.c_str(), team_str.c_str());
             }
         }
+
+        // Re-test eligibility and update queue after potential team changes
+        const PeerEligibility old_el = peer->getEligibility();
+        peer->testEligibility();
+        LobbyPlayerQueue::get()->onPeerEligibilityChange(peer, old_el);
     }
     sl->updatePlayerList();
     std::string confirm_msg = "Reassigned teams";
@@ -659,4 +665,3 @@ void SoccerRoulette::setRouletteTimeout(STKCommandContext* const commander)
     sl->sendStringToAllPeers(confirm_msg);
     Log::info("SoccerRoulette", "Game start timeout set to 5 minutes");
 }
-
