@@ -230,7 +230,7 @@ void LobbyPlayerQueue::updateCachedSpectators()
     m_cache_spectators_by_limit.clear();
 
     unsigned int profile_counter = 0;
-    auto it = m_peer_queue.cbegin();
+    auto it = m_peer_queue.begin();
     // iterating from the head of the queue, the players that are on the front
     // have their profile size summed up.
     for (; profile_counter < m_max_players_in_game && it != m_peer_queue.cend();
@@ -245,11 +245,11 @@ void LobbyPlayerQueue::updateCachedSpectators()
             break;
         profile_counter += player_count;
     }
-    if (it == m_peer_queue.cend())
+    if (it == m_peer_queue.end())
         // No players in the queue are exceeding the limit
         return;
 
-    for (; it != m_peer_queue.cend(); it++)
+    for (; it != m_peer_queue.end(); it++)
     {
         // the rest of the queue are the players that are under limit
         m_cache_spectators_by_limit.insert(it->lock().get());
