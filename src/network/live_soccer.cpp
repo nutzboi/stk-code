@@ -150,7 +150,6 @@ void LiveSoccer::sendResetEvent()
             json << "\"players\":[ ]";
             json << "}";
             send_json(json.str());
-            Log::info("LiveSoccer", "Compatibility zero-update sent");
         }
 
         m_is_active = false;
