@@ -63,7 +63,7 @@ bool AutoteamsCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* 
     std::vector <std::pair<std::string, int>> player_vec;
     for (auto peer : peers)
     {
-        if (!peer->alwaysSpectate())
+        if (peer->isEligibleForGame())
         {
             for (auto player : peer->getPlayerProfiles())
             {

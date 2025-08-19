@@ -6610,6 +6610,8 @@ void ServerLobby::soccerRankedMakeTeams(std::pair<std::vector<std::string>, std:
 
     for (auto peer2 : peers2)
     {
+        if (!peer2->isEligibleForGame())
+            continue;
         for (auto player : peer2->getPlayerProfiles())
         {
             std::string username = std::string(StringUtils::wideToUtf8(player->getName()));
