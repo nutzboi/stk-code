@@ -19,7 +19,7 @@ private:
     std::thread m_export_thread;
     int m_last_red_score;
     int m_last_blue_score;
-    bool m_is_active;
+    std::atomic<bool> m_is_active;
     void liveExportThread();
     void exportLiveData();
     static LiveSoccer* m_instance;
@@ -33,10 +33,10 @@ public:
     void startExport(const std::string& server_ip = "127.0.0.1", int server_port = 9877, int update_interval_ms = 2000);
     void stopExport();
     void resetGame();
+    void sendResetEvent();
     void updateGoal(const std::string& scorer_name, int team, int red_score, int blue_score, float game_time);
     void updateGameState(int red_score, int blue_score, float game_time);
-    bool isActive() const { return m_is_active; }
+    bool isActive() const { return m_is_active.load(); }
 };
 
 #endif
-

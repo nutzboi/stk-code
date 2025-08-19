@@ -304,6 +304,8 @@ private:
     bool m_show_elo = false;
     bool m_show_rank = false;
 
+    bool m_sent_empty_lobby_reset = false;
+
     // connection management
     void clientDisconnected(Event* event);
     void connectionRequested(Event* event);

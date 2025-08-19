@@ -105,6 +105,7 @@
 #include <algorithm>
 #include <fstream>
 #include <random>
+#include "network/live_soccer.hpp"
 int ServerLobby::m_fixed_laps = -1;
 // ========================================================================
 class SubmitRankingRequest : public Online::XMLRequest
@@ -231,6 +232,7 @@ ServerLobby::ServerLobby() : LobbyProtocol()
     m_allow_powerupper = ServerConfig::m_allow_powerupper;
     m_show_elo = ServerConfig::m_show_elo;
     m_show_rank = ServerConfig::m_show_rank;
+    m_sent_empty_lobby_reset = false;
     m_last_wanrefresh_res = nullptr;
     m_last_wanrefresh_requester.reset();
     m_last_wanrefresh_is_peer.store(false);
@@ -2162,6 +2164,11 @@ void ServerLobby::update(int ticks)
             delete back_to_lobby;
         }
 
+        if (ServerConfig::m_soccer_log)
+        {
+            LiveSoccer::getInstance()->sendResetEvent();
+        }
+
         resetVotingTime();
         m_game_setup->stopGrandPrix();
         
@@ -4027,7 +4034,22 @@ void ServerLobby::updatePlayerList(bool update_when_reset_server)
     else
         m_current_ai_count.store(0);
 
+    const int prev_lobby_players = m_lobby_players.load();
     m_lobby_players.store((int)all_profiles.size());
+
+    if (m_state.load() == WAITING_FOR_START_GAME && ServerConfig::m_soccer_log)
+    {
+        const int cur = (int)all_profiles.size();
+        if (cur == 0 && !m_sent_empty_lobby_reset)
+        {
+            LiveSoccer::getInstance()->sendResetEvent();
+            m_sent_empty_lobby_reset = true;
+        }
+        else if (cur > 0 && m_sent_empty_lobby_reset)
+        {
+            m_sent_empty_lobby_reset = false;
+        }
+    }
 
     // No need to update player list (for started grand prix currently)
     if (!allowJoinedPlayersWaiting() &&
@@ -6612,6 +6634,7 @@ void ServerLobby::soccerRankedMakeTeams(std::pair<std::vector<std::string>, std:
     {
         if (!peer2->isEligibleForGame())
             continue;
+
         for (auto player : peer2->getPlayerProfiles())
         {
             std::string username = std::string(StringUtils::wideToUtf8(player->getName()));

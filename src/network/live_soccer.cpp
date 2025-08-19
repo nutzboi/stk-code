@@ -109,6 +109,59 @@ void LiveSoccer::resetGame()
 }
 
 // ------------------------------------------------------------------------------
+void LiveSoccer::sendResetEvent()
+{
+    if (!m_is_active || m_socket < 0)
+        return;
+
+    try
+    {
+        struct sockaddr_in server_addr;
+        memset(&server_addr, 0, sizeof(server_addr));
+        server_addr.sin_family = AF_INET;
+        server_addr.sin_port = htons(m_server_port);
+        inet_pton(AF_INET, m_server_ip.c_str(), &server_addr.sin_addr);
+
+        auto send_json = [&](const std::string& payload)
+        {
+            sendto(m_socket, payload.c_str(), payload.length(), 0,
+                   (struct sockaddr*)&server_addr, sizeof(server_addr));
+        };
+
+        {
+            std::stringstream json;
+            json << "{";
+            json << "\"timestamp\":" << StkTime::getTimeSinceEpoch() << ",";
+            json << "\"type\":\"reset\",";
+            json << "\"score\":{\"red\":0,\"blue\":0},";
+            json << "\"time\":0,";
+            json << "\"players\":[ ]";
+            json << "}";
+            send_json(json.str());
+            Log::info("LiveSoccer", "Reset event sent (no peers left)");
+        }
+        {
+            std::stringstream json;
+            json << "{";
+            json << "\"timestamp\":" << StkTime::getTimeSinceEpoch() << ",";
+            json << "\"type\":\"update\",";
+            json << "\"score\":{\"red\":0,\"blue\":0},";
+            json << "\"time\":0,";
+            json << "\"players\":[ ]";
+            json << "}";
+            send_json(json.str());
+            Log::info("LiveSoccer", "Compatibility zero-update sent");
+        }
+
+        m_is_active = false;
+        stopExport();
+    }
+    catch (const std::exception& e)
+    {
+        Log::error("LiveSoccer", "Error sending reset event: %s", e.what());
+    }
+}
+// ------------------------------------------------------------------------------
 void LiveSoccer::updateGoal(const std::string& scorer_name, int team, int red_score, int blue_score, float game_time)
 {
     if (!m_is_active || m_socket < 0)
