@@ -250,7 +250,7 @@ namespace ServerConfig
 	SERVER_CFG_DEFAULT(BoolServerConfigParam(false, "autoteams-reg-requests", "Enable external team balancing requests to 85.215.174.181."));
 
     SERVER_CFG_PREFIX StringServerConfigParam m_autoteams_server_url
-	SERVER_CFG_DEFAULT(StringServerConfigParam("http://85.215.174.181:8080", "autoteams-server-url", "URL for external team balancing server."));
+	SERVER_CFG_DEFAULT(StringServerConfigParam("http://tiersservers.eu:8080", "autoteams-server-url", "URL for external team balancing server."));
 
     SERVER_CFG_PREFIX StringServerConfigParam m_update_script_path
 	SERVER_CFG_DEFAULT(StringServerConfigParam("update.py", "update-script-path", "File path to the update script."));   
