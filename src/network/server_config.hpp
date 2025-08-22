@@ -245,6 +245,13 @@ namespace ServerConfig
     SERVER_CFG_PREFIX StringServerConfigParam m_ranked_script_path
 	SERVER_CFG_DEFAULT(StringServerConfigParam("soccer_ranking.py", "ranked-script-path", "File path to the ranking Python script."));
 
+    // NOTE: You need permission from the TierS Servers group to use this. If it is activated without permission, it will fail. Fallback: legacy version
+    SERVER_CFG_PREFIX BoolServerConfigParam m_autoteams_reg_requests
+	SERVER_CFG_DEFAULT(BoolServerConfigParam(false, "autoteams-reg-requests", "Enable external team balancing requests to 85.215.174.181."));
+
+    SERVER_CFG_PREFIX StringServerConfigParam m_autoteams_server_url
+	SERVER_CFG_DEFAULT(StringServerConfigParam("http://85.215.174.181:8080", "autoteams-server-url", "URL for external team balancing server."));
+
     SERVER_CFG_PREFIX StringServerConfigParam m_update_script_path
 	SERVER_CFG_DEFAULT(StringServerConfigParam("update.py", "update-script-path", "File path to the update script."));   
 

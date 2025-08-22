@@ -56,7 +56,21 @@ bool AddTimeCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* co
         return true;
     }
 
-    unsigned short amount_sec = std::stoi(first_arg);
+    unsigned short amount_sec = 0;
+    try
+    {
+	    int parsed = std::stoi(first_arg);
+	    if (parsed < 0)
+		    throw std::out_of_range("negative");
+	    amount_sec = static_cast<unsigned short>(parsed);
+    }
+    catch (const std::exception& e)
+    {
+	    CMD_VOTABLE(data, false);
+	    *ctx << "Invalid value. Use a number between 1 and 3600 or 'status'.";
+	    ctx->flush();
+	    return false;
+    }
 
     parser->parse_finish();
 

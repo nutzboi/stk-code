@@ -32,6 +32,7 @@ public:
         m_name = "autoteams";
         m_args = {};
         m_description = "Automatically assigns teams, finding least difference in ELO sums.";
+	m_optargs = {{nnwcli::CT_STRING, "exp", "Specify exp to use experimental autoteams algorithm."}};
     }
     virtual bool execute(nnwcli::CommandExecutorContext* context, void* data) OVERRIDE;
 };

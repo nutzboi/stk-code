@@ -500,7 +500,7 @@ void ServerLobbyCommands::VoteEntry::bakeArgline()
             case nnwcli::CT_STRING_CUSTOM:
             {
                 std::string arg;
-                *m_voted_args >> arg;
+                m_voted_args->parse_string(arg, !opt);
                 const bool has_whitespace = arg.find(' ') != arg.npos;
                 const bool has_double_quote = arg.find('"') != arg.npos;
                 const bool has_single_quote = arg.find('\'') != arg.npos;
@@ -519,7 +519,8 @@ void ServerLobbyCommands::VoteEntry::bakeArgline()
             case nnwcli::CT_BOOL:
             {
                 bool arg;
-                *m_voted_args >> arg;
+                if (!m_voted_args->parse_bool(arg, !opt))
+		    break;
                 if (nfirst)
                     res << whitespace;
                 if (arg)
@@ -533,7 +534,8 @@ void ServerLobbyCommands::VoteEntry::bakeArgline()
             case nnwcli::CT_FLOAT:
             {
                 float arg;
-                *m_voted_args >> arg;
+                if (!m_voted_args->parse_float(arg, !opt))
+		    break;
                 if (nfirst)
                     res << whitespace;
                 res << arg;
@@ -542,7 +544,8 @@ void ServerLobbyCommands::VoteEntry::bakeArgline()
             case nnwcli::CT_DOUBLE:
             {
                 double arg;
-                *m_voted_args >> arg;
+                if (!m_voted_args->parse_double(arg, !opt))
+		    break;
                 if (nfirst)
                     res << whitespace;
                 res << arg;
@@ -551,7 +554,8 @@ void ServerLobbyCommands::VoteEntry::bakeArgline()
             case nnwcli::CT_INTEGER:
             {
                 int arg;
-                *m_voted_args >> arg;
+                if (!m_voted_args->parse_integer(arg, !opt))
+		    break;
                 if (nfirst)
                     res << whitespace;
                 res << arg;
@@ -560,7 +564,8 @@ void ServerLobbyCommands::VoteEntry::bakeArgline()
             case nnwcli::CT_BIGINT:
             {
                 long arg;
-                *m_voted_args >> arg;
+                if (!m_voted_args->parse_bigint(arg, !opt))
+		    break;
                 if (nfirst)
                     res << whitespace;
                 res << arg;
@@ -569,7 +574,8 @@ void ServerLobbyCommands::VoteEntry::bakeArgline()
             case nnwcli::CT_SHORTINT:
             {
                 short arg;
-                *m_voted_args >> arg;
+                if (!m_voted_args->parse_shortint(arg, !opt))
+		    break;
                 if (nfirst)
                     res << whitespace;
                 res << arg;
@@ -578,7 +584,9 @@ void ServerLobbyCommands::VoteEntry::bakeArgline()
             case nnwcli::CT_TINYINT:
             {
                 char arg;
-                *m_voted_args >> arg;
+                if (!m_voted_args->parse_tinyint(arg, !opt))
+		    break;
+                if (nfirst)
                 if (nfirst)
                     res << whitespace;
                 res << arg;
@@ -587,7 +595,8 @@ void ServerLobbyCommands::VoteEntry::bakeArgline()
             case nnwcli::CT_UINTEGER:
             {
                 unsigned int arg;
-                *m_voted_args >> arg;
+                if (!m_voted_args->parse_unsigned_integer(arg, !opt))
+		    break;
                 if (nfirst)
                     res << whitespace;
                 res << arg;
@@ -596,7 +605,8 @@ void ServerLobbyCommands::VoteEntry::bakeArgline()
             case nnwcli::CT_UBIGINT:
             {
                 unsigned long arg;
-                *m_voted_args >> arg;
+                if (!m_voted_args->parse_unsigned_bigint(arg, !opt))
+		    break;
                 if (nfirst)
                     res << whitespace;
                 res << arg;
@@ -605,7 +615,8 @@ void ServerLobbyCommands::VoteEntry::bakeArgline()
             case nnwcli::CT_USHORTINT:
             {
                 unsigned short arg;
-                *m_voted_args >> arg;
+                if (!m_voted_args->parse_unsigned_shortint(arg, !opt))
+		    break;
                 if (nfirst)
                     res << whitespace;
                 res << arg;
@@ -614,7 +625,8 @@ void ServerLobbyCommands::VoteEntry::bakeArgline()
             case nnwcli::CT_UTINYINT:
             {
                 unsigned char arg;
-                *m_voted_args >> arg;
+                if (!m_voted_args->parse_unsigned_tinyint(arg, !opt))
+		    break;
                 if (nfirst)
                     res << whitespace;
                 res << arg;
