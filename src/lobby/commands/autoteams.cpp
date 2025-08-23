@@ -64,7 +64,7 @@ static bool run_external_balancer(const std::vector<std::string>& players,
         return false;
     }
 
-    Log::info(LOGNAME, (std::string("run_external_balancer: players=[") + join_names(players) + "]").c_str());
+
     // Create HTTP request to ServerConfig::m_autoteams_reg_requests
     std::string url = std::string(ServerConfig::m_autoteams_server_url.c_str()) + "/team_balancer";
     Online::HTTPRequest request(0); // Priority 0
@@ -84,7 +84,6 @@ static bool run_external_balancer(const std::vector<std::string>& players,
     }
 
     std::string response = request.getData();
-    Log::info(LOGNAME, (std::string("External balancer response: ") + response).c_str());
 
     // Parse the response (expected format: "Blue Team: player1, player2\nRed Team: player3, player4")
     auto parse_line = [](const std::string& prefix, const std::string& line,
@@ -126,11 +125,10 @@ static bool run_external_balancer(const std::vector<std::string>& players,
         Log::warn(LOGNAME, "run_external_balancer: failed to parse Blue/Red Team lines from response");
         return false;
     }
-    Log::info(LOGNAME, (std::string("run_external_balancer: parsed Blue=[") + join_names(blue) + "] Red=[" + join_names(red) + "]").c_str());
     return true;
 }
 
-// TODO: Reduce code length
+
 bool AutoteamsCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const data)
 {
     STK_CTX(stk_ctx, ctx);
@@ -191,8 +189,6 @@ bool AutoteamsCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* 
                 if (!found)
                     player_vec.push_back(std::pair<std::string, int>(username, default_elo));
                 eligible_names.push_back(username);
-                msg = "Player " + username + " eligible for autoteams.";
-                Log::info(LOGNAME, msg.c_str());
             }
         }
 	}
@@ -231,29 +227,21 @@ bool AutoteamsCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* 
         // Check if external requests are enabled
         if (ServerConfig::m_autoteams_reg_requests)
         {
-            Log::info(LOGNAME, "Trying external team balancer first (default mode)");
             lobby->sendStringToAllPeers("Generating teams.. please wait");
             std::vector<std::string> blue, red;
             bool ok = run_external_balancer(eligible_names, blue, red);
             if (ok && !blue.empty() && !red.empty())
             {
-                Log::info(LOGNAME, (std::string("External balancer success. Blue=") + join_names(blue) + ", Red=" + join_names(red)).c_str());
-                lobby->m_team_option_a = std::make_pair(blue, red);
-                lobby->m_player_vec = player_vec;
-                lobby->m_min_player_idx = -1; // ensure no legacy random assignment
-                lobby->applyTeamSelection(true);
-                lobby->sendStringToAllPeers("Teams have been automatically balanced! (external)");
-                return true;
+                lobby->m_current_teams = std::make_pair(blue, red);
+            lobby->m_player_vec = player_vec;
+            lobby->m_min_player_idx = -1; // ensure no legacy random assignment
+            lobby->applyTeamSelection(true);
+            lobby->sendStringToAllPeers("Teams have been automatically balanced! (external)");
+            return true;
             }
-            Log::info(LOGNAME, "External balancer failed, falling back to legacy autoteams");
-        }
-        else
-        {
-            Log::info(LOGNAME, "External autoteams disabled in config, using legacy autoteams");
         }
     }
-    Log::info(LOGNAME, "Using legacy autoteams (legacy mode)");
-    lobby->m_team_option_a = lobby->createBalancedTeams(player_copy);
+    lobby->m_current_teams = lobby->createBalancedTeams(player_copy);
     lobby->m_min_player_idx = min;
     lobby->m_player_vec = player_vec;
     lobby->applyTeamSelection(true);

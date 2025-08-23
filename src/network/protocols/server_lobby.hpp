@@ -138,17 +138,9 @@ private:
     std::vector<RPSChallenge> m_rps_challenges;
     std::pair<
         std::vector<std::string>,
-        std::vector<std::string>> m_team_option_a;
-    std::pair<
-        std::vector<std::string>,
-        std::vector<std::string>> m_team_option_b;
+        std::vector<std::string>> m_current_teams;
     int m_min_player_idx;
     std::vector<std::pair<std::string, int>> m_player_vec;
-    int m_team_selection_votes_a;
-    int m_team_selection_votes_b;
-    std::set<uint32_t> m_team_selection_voted_peers;
-    bool m_team_selection_vote_active;
-    uint64_t m_team_selection_vote_timer;
     bool m_random_karts_enabled;
     bool m_autokick_enabled;
     std::string m_replay_dir;
@@ -567,13 +559,7 @@ public:
     std::pair<unsigned int, int> getPlayerRanking(std::string username) const;
     std::string get_elo_change_string();
     void soccerRankedMakeTeams(std::pair<std::vector<std::string>, std::vector<std::string>> teams, int min, std::vector <std::pair<std::string, int>> player_vec);
-    // TODO: move to soccer_autoteams
-    void startTeamSelectionVote();
-    void handleTeamSelectionVote(STKPeer* peer, bool select_option_a);
-    void applyTeamSelection(bool select_option_a);
-    void checkTeamSelectionVoteTimeout();
-    std::pair<std::vector<std::string>, std::vector<std::string>> createAlternativeTeams(
-        const std::vector<std::pair<std::string, int>>& players); 
+    void applyTeamSelection(bool select_option_a); 
     bool isReplayRequested() const                                      { return m_replay_requested; }
     void setReplayRequested(const bool value)                           { m_replay_requested = value; }
     // Soccer Roulette
