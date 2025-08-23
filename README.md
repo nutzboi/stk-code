@@ -32,6 +32,7 @@ Creating a robust, scalable version of SuperTuxKart that is optimally suited for
 - **Kart Restriction Modes** - Heavy, medium, light kart restrictions
 - **Item Chaos Mode** - Random item distribution
 - **Pole Position System** - Team voting for starting positions
+- **External Team Balancer** - Advanced team balancing via external server integration (requires permission from TierS Servers group)
 
 ## Installation
 
