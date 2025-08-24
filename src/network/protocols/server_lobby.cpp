@@ -2290,29 +2290,43 @@ void ServerLobby::update(int ticks)
 		// Execute a python script
 		if (ServerConfig::m_race_log)
 		{
-
 			std::thread python_thread([&]()
 					{
-						std::string command = std::string("python3 ") + ServerConfig::m_update_script_path.c_str();
-						FILE* pipe = popen(command.c_str(), "r");
-						if (!pipe)
-						{	
-							Log::info("ServerLobby", "Failed to start python script");
-							return;
-						}
-						char buffer[4096];
-						while (fgets(buffer, sizeof(buffer), pipe) != nullptr)
+						try
 						{
-							size_t len = strlen(buffer);
-							if (len > 0 && buffer[len-1] == '\n')
-							{
-								buffer[len-1] = '\0';
+							std::string command = std::string("python3 ") + ServerConfig::m_update_script_path.c_str();
+							FILE* pipe = popen(command.c_str(), "r");
+							if (!pipe)
+							{	
+								Log::info("ServerLobby", "Failed to start python script");
+								return;
 							}
-							Log::info("ServerLobby", "Update script: %s", buffer);
+							char buffer[4096];
+							while (fgets(buffer, sizeof(buffer), pipe) != nullptr)
+							{
+								size_t len = strlen(buffer);
+								if (len > 0 && buffer[len-1] == '\n')
+								{
+									buffer[len-1] = '\0';
+								}
+								Log::info("ServerLobby", "Update script: %s", buffer);
+							}
+							int status = pclose(pipe);
+							if (status != 0)
+							{
+								Log::warn("ServerLobby", "Update script exited with status %d", status);
+							}
 						}
-						pclose(pipe);
+						catch (const std::exception& e)
+						{
+							Log::error("ServerLobby", "Exception in update script thread: %s", e.what());
+						}
+						catch (...)
+						{
+							Log::error("ServerLobby", "Unknown exception in update script thread");
+						}
 					});
-					python_thread.detach();
+			python_thread.detach();
 		}
 	}
 	break;
