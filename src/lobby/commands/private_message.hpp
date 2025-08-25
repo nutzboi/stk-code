@@ -29,7 +29,7 @@ public:
     {
         m_name = "msg";
         m_args = {{nnwcli::CT_STRING, "recipient", "Recipient of the message, online player name or '@console'."},
-                  {nnwcli::CT_DOUBLE, "msg", "The message"},
+                  {nnwcli::CT_FULL, "msg", "The message"},
                   };
         m_description = "Send a private message to an online player or the console.";
     }
