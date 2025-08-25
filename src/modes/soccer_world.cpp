@@ -412,9 +412,9 @@ void SoccerWorld::onGo()
     m_ball->setEnabled(true);
     m_ball->reset();
     WorldWithRank::onGo();
-    if (ServerConfig::m_soccer_log)
+    if (ServerConfig::m_soccer_log && !ServerConfig::m_soccer_roulette)
     {
-	    LiveSoccer::getInstance()->startExport();
+	LiveSoccer::getInstance()->startExport();
         LiveSoccer::getInstance()->resetGame();
     }
 }   // onGo
@@ -430,7 +430,7 @@ void SoccerWorld::terminateRace()
         m_karts[i]->finishedRace(0.0f, true/*from_server*/);
     }   // i<kart_amount
     tellCountIfDiffers();
-    if (ServerConfig::m_soccer_log)
+    if (ServerConfig::m_soccer_log && !ServerConfig::m_soccer_roulette)
     {
 	    LiveSoccer::getInstance()->stopExport();
     }
@@ -712,7 +712,7 @@ void SoccerWorld::onCheckGoalTriggered(bool first_goal)
 
         if (sd.m_correct_goal)
 	{
-            if (m_soccer_log)
+            if (m_soccer_log && !ServerConfig::m_soccer_roulette)
 	    {
 		    GlobalLog::writeLog( "goal "+ player_name_log + " "+team_name+"\n", GlobalLogTypes::POS_LOG);
 		    if (LiveSoccer::getInstance()->isActive())
@@ -756,7 +756,7 @@ void SoccerWorld::onCheckGoalTriggered(bool first_goal)
 	}
 	else
 	{
-            if (m_soccer_log)
+            if (m_soccer_log && !ServerConfig::m_soccer_roulette)
 	    {
 		    GlobalLog::writeLog( "own_goal "+ player_name_log + " "+team_name+"\n", GlobalLogTypes::POS_LOG);
 		    if (LiveSoccer::getInstance()->isActive())

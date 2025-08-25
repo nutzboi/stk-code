@@ -139,6 +139,13 @@ bool AutoteamsCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* 
     parser->parse_finish();
     ServerLobby* const lobby = stk_ctx->get_lobby();
 
+    if (ServerConfig::m_soccer_roulette)
+    {
+        ctx->write("Autoteams command is not available when soccer roulette is enabled.");
+        ctx->flush();
+        return false;
+    }
+
     if (RaceManager::get()->getMinorMode() != RaceManager::MINOR_MODE_SOCCER)
     {
         ctx->write("This command is only for soccer mode.");

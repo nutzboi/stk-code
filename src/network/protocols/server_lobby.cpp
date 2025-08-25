@@ -2163,7 +2163,7 @@ void ServerLobby::update(int ticks)
             delete back_to_lobby;
         }
 
-        if (ServerConfig::m_soccer_log)
+        if (ServerConfig::m_soccer_log && !ServerConfig::m_soccer_roulette)
         {
             LiveSoccer::getInstance()->sendResetEvent();
         }
@@ -4050,7 +4050,7 @@ void ServerLobby::updatePlayerList(bool update_when_reset_server)
     const int prev_lobby_players = m_lobby_players.load();
     m_lobby_players.store((int)all_profiles.size());
 
-    if (m_state.load() == WAITING_FOR_START_GAME && ServerConfig::m_soccer_log)
+    if (m_state.load() == WAITING_FOR_START_GAME && ServerConfig::m_soccer_log && !ServerConfig::m_soccer_roulette)
     {
         const int cur = (int)all_profiles.size();
         if (cur == 0 && !m_sent_empty_lobby_reset)

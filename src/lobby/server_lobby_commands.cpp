@@ -363,9 +363,9 @@ void ServerLobbyCommands::handleServerCommand(ServerLobby* const lobby, std::sha
 
     // TODO: change lobby to a separate singleton of a pole
     // and add a temporary callback to the numeric commands.
-    if (lobby->isPoleEnabled() && line.size() == 1 && !argv0_ss.fail())
+    if (lobby->isPoleEnabled() && line.size() < 4 && !argv0_ss.fail())
     {
-        // command is a number, /1 /2 /3 ... and pole is enabled
+        // command is a number, /1 /2 /3 /999 ... and pole is enabled
         lobby->submitPoleVote(peer, argv0_number);
         return;
     }
