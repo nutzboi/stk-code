@@ -4861,7 +4861,7 @@ void ServerLobby::configPeersStartTime()
                     continue;
                     
                 // Only add non-spectators to tracking for reconnect functionality
-                if (!peer->isSpectator())
+                if (!peer->isSpectator() && !peer->isWaitingForGame())
                 {
                     std::string player_name = StringUtils::wideToUtf8(profile->getName());
                     addPlayerToGameTracking(player_name);
@@ -4928,10 +4928,7 @@ void ServerLobby::addWaitingPlayersToGame()
 
 //-----------------------------------------------------------------------------
 void ServerLobby::resetServer()
-{
-    // Clear live join tracking when server resets
-    clearGameTracking();
-    
+{   
     addWaitingPlayersToGame();
     resetPeersReady();
     updatePlayerList(true/*update_when_reset_server*/);
@@ -4964,6 +4961,8 @@ void ServerLobby::resetServer()
     {
 	    setPoleEnabled(true);
     }
+    // Clear live join tracking when server resets
+    clearGameTracking();
 }   // resetServer
 
 //-----------------------------------------------------------------------------
