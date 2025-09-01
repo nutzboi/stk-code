@@ -1633,6 +1633,7 @@ void ServerLobby::addPlayerToGameTracking(const std::string& player_name)
 
 //-----------------------------------------------------------------------------
 /** Remove a player from the game tracking
+ * This feature is currently not in use.
  */
 void ServerLobby::removePlayerFromGameTracking(const std::string& player_name)
 {
@@ -3303,9 +3304,6 @@ void ServerLobby::clientDisconnected(Event* event)
         std::string name = StringUtils::wideToUtf8(p->getName());
         msg->encodeString(name);
         Log::info("ServerLobby", "%s disconnected", name.c_str());
-        
-        // Remove player from tracking
-        removePlayerFromGameTracking(name);
     }
 
     std::string msg2;
