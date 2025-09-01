@@ -139,6 +139,14 @@ bool AutoteamsCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* 
     parser->parse_finish();
     ServerLobby* const lobby = stk_ctx->get_lobby();
 
+    // Validate argument before allowing vote
+    if (!mode.empty() && mode != "legacy")
+    {
+        ctx->write("Invalid argument. Valid options are: legacy or no argument.");
+        ctx->flush();
+        return false;
+    }
+
     if (ServerConfig::m_soccer_roulette)
     {
         ctx->write("Autoteams command is not available when soccer roulette is enabled.");

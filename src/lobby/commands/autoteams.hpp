@@ -31,8 +31,8 @@ public:
     {
         m_name = "autoteams";
         m_args = {};
-        m_description = "Automatically assigns teams, finding least difference in ELO sums.";
-	m_optargs = {{nnwcli::CT_STRING, "exp", "Specify exp to use experimental autoteams algorithm."}};
+        m_description = "Automatically assigns teams, finding least difference in ELO sums. Valid arguments: legacy (use local algorithm) or no argument (use external balancer if available).";
+	m_optargs = {{nnwcli::CT_STRING, "mode", "Specify mode: 'legacy' for local algorithm, or no argument for external balancer."}};
     }
     virtual bool execute(nnwcli::CommandExecutorContext* context, void* data) OVERRIDE;
 };
