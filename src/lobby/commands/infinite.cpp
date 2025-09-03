@@ -33,7 +33,7 @@ bool InfiniteCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* c
     *parser >> state;
 
     parser->parse_finish(); // Do not allow more arguments
-    CMD_REQUIRE_PERM(stk_ctx, m_required_perm);
+    CMD_REQUIRE_CROWN_OR_PERM(stk_ctx, m_required_perm);
 
     RaceManager::get()->setInfiniteMode(state);
 
