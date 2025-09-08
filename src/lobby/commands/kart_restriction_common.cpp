@@ -40,7 +40,7 @@ bool kartRestrictionCommandOf(nnwcli::CommandExecutorContext* const ctx,
 
     irr::core::stringw response;
     if (state == (lobby->getKartRestrictionMode() ==
-                KartRestrictionMode::HEAVY))
+                krm))
     {
         ctx->write(krm_displayname);
         ctx->write(" is already active or inactive.");
@@ -65,7 +65,7 @@ bool kartRestrictionCommandOf(nnwcli::CommandExecutorContext* const ctx,
     {
         CMD_REQUIRE_PERM(stk_ctx, PERM_ADMINISTRATOR);
     }
-    lobby->setKartRestrictionMode(state ? HEAVY : NONE);
+    lobby->setKartRestrictionMode(state ? krm : NONE);
 
     // BROADCAST
     std::stringstream bc;

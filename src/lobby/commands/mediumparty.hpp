@@ -29,7 +29,7 @@ class MediumPartyCommand : public STKCommand
 public:
     MediumPartyCommand() : STKCommand(true/*votable*/)
     {
-        m_name = "heavyparty";
+        m_name = "mediumparty";
         m_args = {{nnwcli::CT_BOOL, "state", "State: on or off"}};
         m_description = "Enable or disable medium party mode."
             "When enabled, only medium karts can be selected.";

@@ -29,7 +29,7 @@ class LightPartyCommand : public STKCommand
 public:
     LightPartyCommand() : STKCommand(true/*votable*/)
     {
-        m_name = "heavyparty";
+        m_name = "lightparty";
         m_args = {{nnwcli::CT_BOOL, "state", "State: on or off"}};
         m_description = "Enable or disable light party mode."
             "When enabled, only light karts can be selected.";
