@@ -26,6 +26,8 @@
 
 bool AddTimeCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const data)
 {
+    static const char* const LOGNAME = "AddTimeCommand";
+    
     STKCommandContext* const stk_c = dynamic_cast<STKCommandContext*>(ctx);
     if (!stk_c)
         return false;
@@ -87,6 +89,15 @@ bool AddTimeCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* co
     CMD_VOTABLE(data, true)
     // when the player is below the specified veto level, emits the vote
     CMD_SELFVOTE_PERMLOWER_CROWN(stk_c, data, m_min_veto, parser)
+
+    ServerLobbyCommands::DispatchData* dd =
+        reinterpret_cast<ServerLobbyCommands::DispatchData*>(data);
+
+    if (stk_c->getVeto() >= m_min_veto)
+    {
+        Log::info(LOGNAME, "%s adds %d to the timeout",
+                stk_c->getProfileName().c_str(), amount_sec);
+    }
 
     // when otherwise the command is run with higher privileges
     ServerLobby* const lobby = stk_c->get_lobby();

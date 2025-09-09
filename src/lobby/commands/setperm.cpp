@@ -36,6 +36,8 @@ bool setPermCommand(
         const std::string& playername,
         const ServerPermissionLevel min_perm)
 {
+    static const char* const LOGNAME = "SetPermCommands";
+
     STK_CTX(stk_ctx, ctx);
     CMD_REQUIRE_PERM(stk_ctx, min_perm);
 
@@ -82,6 +84,9 @@ bool setPermCommand(
     }
     else
         db->writePermissionLevelForOID(oid, lvl);
+
+    Log::info(LOGNAME, "%s sets permission level of %s to %d",
+            stk_ctx->getProfileName().c_str(), playername.c_str(), lvl);
     return true;
 }
 

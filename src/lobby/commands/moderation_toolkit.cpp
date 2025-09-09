@@ -47,6 +47,8 @@
 
 bool VetoCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const data)
 {
+    static const char* const LOGNAME = "VetoCommand";
+
     STK_CTX(stk_ctx, ctx);
 
     auto parser = ctx->get_parser();
@@ -80,9 +82,11 @@ bool VetoCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const
     {
         peer->setVeto(peer->getPermissionLevel());
         ctx->write("Forcing votable commands is now enabled.");
+        Log::info("VetoCommand", "%s enabled veto with level %d", stk_ctx->getProfileName().c_str(), peer->getPermissionLevel());
     }
     else
     {
+        Log::info("VetoCommand", "%s disabled veto with level %d", stk_ctx->getProfileName().c_str(), peer->getVeto());
         peer->setVeto(0);
         ctx->write("Votable commands are no longer forced.");
     }
@@ -93,6 +97,8 @@ bool VetoCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const
 
 bool BanCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const data)
 {
+    static const char* const LOGNAME = "BanCommand";
+
     STK_CTX(stk_ctx, ctx);
 
     auto parser = ctx->get_parser();
@@ -114,7 +120,7 @@ bool BanCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const 
     int32_t trg_permlvl = db->loadPermissionLevelForUsername(
         StringUtils::utf8ToWide(playername));
     int32_t sender_permlvl = stk_ctx->getPermissionLevel();
-    Log::verbose("BanCommand", "sender_permlvl = %d, trg_permlvl = %d",
+    Log::verbose(LOGNAME, "sender_permlvl = %d, trg_permlvl = %d",
             sender_permlvl, trg_permlvl);
 
     if (trg_permlvl >= sender_permlvl)
@@ -127,6 +133,8 @@ bool BanCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const 
     int res;
     if ((res = lobby->banPlayer(playername, reason, days)) == 0)
     {
+        Log::info(LOGNAME, "%s bans %s with reason \"%s\"",
+                stk_ctx->getProfileName().c_str(), playername.c_str(), reason.c_str());
         ctx->nprintf("Banned player %s.", 512, playername.c_str());
         ctx->flush();
         return true;
@@ -147,6 +155,8 @@ bool BanCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const 
 }
 bool UnbanCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const data)
 {
+    static const char* const LOGNAME = "UnbanCommand";
+
     STK_CTX(stk_ctx, ctx);
 
     auto parser = ctx->get_parser();
@@ -163,6 +173,8 @@ bool UnbanCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* cons
     int res;
     if ((res = db->unbanPlayer(playername)) == 0)
     {
+        Log::info(LOGNAME, "%s unbans %s",
+                stk_ctx->getProfileName().c_str(), playername.c_str());
         ctx->nprintf("Unbanned player %s.", 512, playername.c_str());
         ctx->flush();
         return false;
@@ -215,6 +227,7 @@ bool restrict_command(
         std::string& restriction_name,
         const PlayerRestriction restriction)
 {
+    static const char* const LOGNAME = "RestrictCommands";
     irr::core::stringw playername_w = StringUtils::utf8ToWide(playername);
 
     std::shared_ptr<STKPeer> target = STKHost::get()->findPeerByName(
@@ -256,12 +269,21 @@ bool restrict_command(
         if (new_el != old_el)
             stk_ctx->get_lobby()->updatePlayerList();
 
+        const char* const restriction_name = getRestrictionName(restriction);
+        const char* const state_name = state ? "on" : "off";
+        const std::string target_name = StringUtils::wideToUtf8(targetPlayer->getName());
+
+        Log::info(LOGNAME, "%s sets %s to %s for player %s",
+                stk_ctx->getProfileName().c_str(),
+                restriction_name,
+                state_name,
+                target_name.c_str());
         ctx->nprintf(
                 "Set %s to %s for player %s.",
                 512,
-                getRestrictionName(restriction),
-                state ? "on" : "off",
-                StringUtils::wideToUtf8(targetPlayer->getName()).c_str());
+                restriction_name,
+                state_name,
+                target_name.c_str());
         ctx->flush();
         return true;
     }
@@ -276,6 +298,8 @@ bool restrict_command(
                     playername.c_str());
             db->writeRestrictionsForUsername(playername_w, rv);
             ctx->flush();
+            Log::info(LOGNAME, "%s cleared all restrictions for player %s",
+                    stk_ctx->getProfileName().c_str(), playername.c_str());
             return true;
         }
 
@@ -286,13 +310,22 @@ bool restrict_command(
 
         db->writeRestrictionsForUsername(playername_w, rv);
 
+        const char* const restriction_name = getRestrictionName(restriction);
+        const char* const state_name = state ? "on" : "off";
+        const char* const target_name = playername.c_str();
+
         ctx->nprintf(
                 "Set %s to %s for offline player %s.",
                 512,
-                getRestrictionName(restriction),
-                state ? "on" : "off",
-                playername.c_str());
+                restriction_name,
+                state_name,
+                target_name);
         ctx->flush();
+        Log::info(LOGNAME, "%s sets %s to %s for offline player %s",
+                stk_ctx->getProfileName().c_str(),
+                restriction_name,
+                state_name,
+                target_name);
         return true;
 
     }
@@ -363,6 +396,7 @@ bool RestrictAliasCommand::execute(nnwcli::CommandExecutorContext* const ctx, vo
 }
 bool SetTeamCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const data)
 {
+    static const char* const LOGNAME = "SetTeamCommand";
     // Triggers eligibility change
     STK_CTX(stk_ctx, ctx);
     if (!data) return false;
@@ -385,15 +419,18 @@ bool SetTeamCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* co
         ctx->flush();
         return false;
     }
+    const char* full_team_name = "none";
     KartTeam team = KART_TEAM_NONE;
     
     if (teamname[0] == 'b')
     {
         team = KART_TEAM_BLUE;
+        full_team_name = "blue";
     }
     else if (teamname[0] == 'r')
     {
         team = KART_TEAM_RED;
+        full_team_name = "red";
     }
     std::shared_ptr<NetworkPlayerProfile> t_player = nullptr;
     auto t_peer = STKHost::get()->findPeerByName(
@@ -408,12 +445,18 @@ bool SetTeamCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* co
     lobby->forceChangeTeam(t_player.get(), team);
     lobby->updatePlayerList();
 
+    Log::info(LOGNAME, "%s sets %s's team to %s",
+            stk_ctx->getProfileName().c_str(),
+            StringUtils::wideToUtf8(t_peer->getPlayerProfiles()[0]->getName()).c_str(),
+            full_team_name);
+
     ctx->write("Player team has been updated.");
     ctx->flush();
     return true;
 }
 bool SetKartCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const data)
 {
+    static const char* const LOGNAME = "SetKartCommand";
     // Triggers eligibility change
     STK_CTX(stk_ctx, ctx);
     if (!data) return false;
@@ -494,6 +537,12 @@ bool SetKartCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* co
         std::string targetmsg = "You can choose any kart now.";
         lobby->sendStringToPeer(targetmsg, t_peer);
         t_player->unforceKart();
+
+        Log::info(LOGNAME, "%s unsets the kart of %s",
+                stk_ctx->getProfileName().c_str(),
+                StringUtils::wideToUtf8(t_player->getName()).c_str()
+                );
+
         if (permanent)
             db->writeRestrictionsForOID(t_player->getOnlineId(), "");
         if (t_peer.get() != peer)
@@ -510,6 +559,13 @@ bool SetKartCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* co
         t_player->forceKart(kartname);
         if (permanent)
             db->writeRestrictionsForOID(t_player->getOnlineId(), kartname);
+
+        Log::info(LOGNAME, "%s sets the kart of %s to %s",
+                stk_ctx->getProfileName().c_str(),
+                StringUtils::wideToUtf8(t_player->getName()).c_str(),
+                kartname.c_str()
+                );
+
         if (t_peer.get() != peer)
         {
             ctx->nprintf(
@@ -529,6 +585,8 @@ bool SetKartCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* co
 }
 bool SetHandicapCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const data)
 {
+    static const char* const LOGNAME = "SetHandicapCommand";
+
     STK_CTX(stk_ctx, ctx);
 
     auto parser = ctx->get_parser();
@@ -581,6 +639,10 @@ bool SetHandicapCommand::execute(nnwcli::CommandExecutorContext* const ctx, void
     t_player->setHandicap(level);
     lobby->updatePlayerList();
 
+    Log::info(LOGNAME, "%s sets the handicap of %s to %s", 
+            stk_ctx->getProfileName().c_str(),
+            StringUtils::wideToUtf8(t_player->getName()).c_str(),
+            levelname.c_str());
     ctx->write("Player handicap has been updated.");
     ctx->flush();
 
@@ -588,6 +650,8 @@ bool SetHandicapCommand::execute(nnwcli::CommandExecutorContext* const ctx, void
 }
 bool SetOwnerCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const data)
 {
+    static const char* const LOGNAME = "SetOwnerCommand";
+
     STK_CTX(stk_ctx, ctx);
 
     auto parser = ctx->get_parser();
@@ -631,6 +695,12 @@ bool SetOwnerCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* c
     // update the owner and inform
     lobby->updateServerOwner(t_peer);
 
+    if (stk_ctx->getVeto())
+    {
+        Log::info(LOGNAME, "%s changes the owner of the server to %s",
+                stk_ctx->getProfileName().c_str(),
+                StringUtils::wideToUtf8(t_player->getName()).c_str());
+    }
     ctx->write("Owner has been changed.");
     ctx->flush();
     return true;

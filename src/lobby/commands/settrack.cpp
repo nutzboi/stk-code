@@ -29,6 +29,8 @@
 
 bool SetTrackCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const data)
 {
+    static const char* const LOGNAME = "SetTrackCommand";
+
     STK_CTX(stk_ctx, ctx);
 
     ServerLobbyCommands::DispatchData* const dispatch_data =
@@ -96,5 +98,8 @@ bool SetTrackCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* c
         ctx->flush();
         return true;
     }
+    // Change this to check the veto whenever this command becomes votable
+    Log::info(LOGNAME, "%s sets the track/field/arena to \"%s\" with %d laps, goaltarget %s",
+            stk_ctx->getProfileName().c_str(), track_id.c_str(), laps, specvalue ? "on" : "off");
     return true;
 }

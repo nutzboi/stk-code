@@ -28,6 +28,8 @@
 
 bool EndGameCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const data)
 {
+    static const char* const LOGNAME = "EndGameCommand";
+
     STK_CTX(stk_ctx, ctx);
 
     auto parser = ctx->get_parser();
@@ -48,6 +50,12 @@ bool EndGameCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* co
 
     World* w = World::getWorld();
     if (!w) return false;
+
+    if (!stk_ctx->isCrowned() && stk_ctx->getVeto() >= m_min_veto)
+    {
+        Log::info(LOGNAME, "%s interrupted the game",
+                stk_ctx->getProfileName().c_str());
+    }
 
     w->scheduleInterruptRace();
 

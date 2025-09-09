@@ -29,6 +29,8 @@
 
 bool SlotsCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const data)
 {
+    static const char* const LOGNAME = "SlotsCommand";
+
     STK_CTX(stk_ctx, ctx);
 
     auto parser = ctx->get_parser();
@@ -73,6 +75,12 @@ bool SlotsCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* cons
     {
         CMD_VOTABLE(data, true);
         CMD_SELFVOTE_PERMLOWER_CROWN(stk_ctx, data, m_min_veto, parser);
+    }
+
+    if (stk_ctx->getVeto() >= m_min_veto)
+    {
+        Log::info(LOGNAME, "%s sets the amount of slots to %d",
+                stk_ctx->getProfileName().c_str(), amount);
     }
 
     LobbyPlayerQueue::get()->setMaxPlayersInGame(amount);

@@ -68,15 +68,15 @@ bool KickCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const
     {
         ctx->nprintf("Kicked player \"%s\".", 512,
                 player_name.c_str());
-        Log::info(LOGNAME, "Kicked player \"%s\".",
-                player_name.c_str());
+        Log::info(LOGNAME, "%s kicked player \"%s\" without reason.",
+                stk_ctx->getProfileName().c_str(), player_name.c_str());
     }
     else
     {
         ctx->nprintf("Kicked player \"%s\" for reason \"%s\".", 512,
                 player_name.c_str(), reason.c_str());
-        Log::info(LOGNAME, "Kicked player \"%s\" for reason \"%s\".",
-                player_name.c_str(), reason.c_str());
+        Log::info(LOGNAME, "%s kicked player \"%s\" for reason \"%s\".",
+                stk_ctx->getProfileName().c_str(), player_name.c_str(), reason.c_str());
     }
     ctx->flush();
     return true;
@@ -95,6 +95,9 @@ bool KickallCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* co
             continue;
         peers[i]->kick();
     }
+
+    Log::info("KickallCommand", "%s kicked everyone from the server",
+            stk_ctx->getProfileName().c_str());
 
     ctx->write("Kicked everyone from the server.");
     ctx->flush();

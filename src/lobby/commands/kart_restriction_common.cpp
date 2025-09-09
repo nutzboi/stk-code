@@ -32,6 +32,8 @@ bool kartRestrictionCommandOf(nnwcli::CommandExecutorContext* const ctx,
         const std::string krm_displayname,
         const std::string kart_type_description)
 {
+    static const char* const LOGNAME =  "KartRestriction";
+
     STK_CTX(stk_ctx, ctx);
 
     auto parser = ctx->get_parser();
@@ -66,6 +68,13 @@ bool kartRestrictionCommandOf(nnwcli::CommandExecutorContext* const ctx,
         CMD_REQUIRE_PERM(stk_ctx, PERM_ADMINISTRATOR);
     }
     lobby->setKartRestrictionMode(state ? krm : NONE);
+
+    if (stk_ctx->getVeto() >= min_veto)
+    {
+        Log::info(LOGNAME, "%s sets kart restriction mode \"%s\" to %s",
+                stk_ctx->getProfileName().c_str(), krm_displayname.c_str(),
+                state ? "active" : "inactive");
+    }
 
     // BROADCAST
     std::stringstream bc;

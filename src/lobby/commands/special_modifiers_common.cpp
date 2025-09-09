@@ -34,6 +34,7 @@ bool specialPowerupCommandFor(
         const std::string tsm_displayname,
         const std::string special_modifier_description)
 {
+    static const char* const LOGNAME = "SpecialModifiers";
     STK_CTX(stk_ctx, ctx);
 
     auto parser = ctx->get_parser();
@@ -71,6 +72,12 @@ bool specialPowerupCommandFor(
     else
     {
         CMD_REQUIRE_CROWN_OR_PERM(stk_ctx, PERM_ADMINISTRATOR);
+    }
+
+    if (!votable || stk_ctx->getVeto() >= min_veto)
+    {
+        Log::info(LOGNAME, "%s sets special modifier \"%s\" to %s",
+                stk_ctx->getProfileName().c_str(), tsm_displayname.c_str(), state ? "active" : "inactive");
     }
 
 

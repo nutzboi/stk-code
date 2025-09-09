@@ -32,6 +32,8 @@
 // it is not given by the bonus box
 bool NitrolessCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const data)
 {
+    static const char* const LOGNAME = "NitrolessCommand";
+
     STK_CTX(stk_ctx, ctx);
 
     auto parser = ctx->get_parser();
@@ -67,11 +69,21 @@ bool NitrolessCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* 
     else if (ServerConfig::m_soccer_log)
     {
         CMD_REQUIRE_PERM(stk_ctx, PERM_ADMINISTRATOR);
+
+        Log::info(LOGNAME, "%s sets nitroless mode to %s",
+                stk_ctx->getProfileName().c_str(), state ? "active" : "inactive");
+
     }
     else
     {
         CMD_VOTABLE(data, true);
         CMD_SELFVOTE_PERMLOWER_CROWN(stk_ctx, data, m_min_veto, parser);
+
+        if (stk_ctx->getVeto() > m_min_veto)
+        {
+            Log::info(LOGNAME, "%s sets nitroless mode to %s",
+                    stk_ctx->getProfileName().c_str(), state ? "active" : "inactive");
+        }
     }
 
     rm->setNitrolessMode(state);

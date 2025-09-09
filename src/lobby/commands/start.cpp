@@ -28,6 +28,8 @@
 
 bool StartCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const data)
 {
+    static const char* const LOGNAME = "StartCommand";
+
     STK_CTX(stk_ctx, ctx);
 
     ServerLobbyCommands::DispatchData* const dispatch_data =
@@ -103,6 +105,11 @@ bool StartCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* cons
     // CMD_SELFVOTE_PERMLOWER_CROWNLESS(stk_ctx, data, permlvl, parser);
     // Same thing, if the command can be used by the crowned one:
     CMD_SELFVOTE_PERMLOWER_CROWN(stk_ctx, data, m_min_veto, parser);
+
+    if (stk_ctx->getVeto() >= m_min_veto)
+    {
+        Log::info(LOGNAME, "%s starts the game by force", stk_ctx->getProfileName().c_str());
+    }
 
     lobby->startSelection();
 

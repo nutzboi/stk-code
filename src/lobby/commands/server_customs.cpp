@@ -29,6 +29,8 @@
 
 bool SetModeCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const data)
 {
+    static const char* const LOGNAME = "SetModeCommand";
+
     STK_CTX(stk_ctx, ctx);
 
     if (ServerConfig::m_ranked)
@@ -72,12 +74,19 @@ bool SetModeCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* co
 
     lobby->updateServerConfiguration(-1, mode, goaltarget);
 
+    if (!stk_ctx->isCrowned() && stk_ctx->getVeto() >= m_min_veto)
+    {
+        Log::info(LOGNAME, "%s sets mode of the server to %s",
+                stk_ctx->getProfileName().c_str(), RaceManager::get()->getMinorModeName().c_str());
+    }
+
     ctx->nprintf("Changed mode to %s.", 512, RaceManager::get()->getMinorModeName().c_str());
     ctx->flush();
     return true;
 }
 bool SetDifficultyCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const data)
 {
+    static const char* const LOGNAME = "SetDifficultyCommand";
     STK_CTX(stk_ctx, ctx);
 
     if (ServerConfig::m_ranked)
@@ -117,16 +126,26 @@ bool SetDifficultyCommand::execute(nnwcli::CommandExecutorContext* const ctx, vo
         CMD_REQUIRE_CROWN_OR_PERM(stk_ctx, m_override_perm);
     }
 
+    const std::string full_difficulty_name = RaceManager::get()->getDifficultyAsString(
+            RaceManager::get()->getDifficulty());
+
+    if (!stk_ctx->isCrowned() && stk_ctx->getVeto() >= m_min_veto)
+    {
+        Log::info(LOGNAME, "%s sets the difficulty to %s",
+                stk_ctx->getProfileName().c_str(), full_difficulty_name.c_str());
+    }
+
     lobby->updateServerConfiguration(diff, -1, -1);
 
-    ctx->nprintf("Changed mode to %s.", 512,
-            RaceManager::get()->getDifficultyAsString(
-            RaceManager::get()->getDifficulty()).c_str());
+    ctx->nprintf("Changed difficulty to %s.", 512,
+            full_difficulty_name.c_str());
     ctx->flush();
     return true;
 }
 bool SetGoalTargetCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const data)
 {
+    static const char* const LOGNAME = "SetGoalTargetCommand";
+
     STK_CTX(stk_ctx, ctx);
 
     if (ServerConfig::m_ranked)
@@ -155,6 +174,12 @@ bool SetGoalTargetCommand::execute(nnwcli::CommandExecutorContext* const ctx, vo
     }
 
     lobby->updateServerConfiguration(-1, -1, state ? 1 : 0);
+
+    if (!stk_ctx->isCrowned() && stk_ctx->getVeto() >= m_min_veto)
+    {
+        Log::info(LOGNAME, "%s sets the goal target to %s",
+                stk_ctx->getProfileName().c_str(), state ? "on" : "off");
+    }
 
     ctx->write("Goal target is now ");
     ctx->write(state ? "on." : "off.");

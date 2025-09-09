@@ -25,6 +25,8 @@
 
 bool InfiniteCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const data)
 {
+    static const char* LOGNAME = "InfiniteCommand";
+
     STK_CTX(stk_ctx, ctx);
 
     auto parser = ctx->get_parser();
@@ -36,6 +38,12 @@ bool InfiniteCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* c
     CMD_REQUIRE_CROWN_OR_PERM(stk_ctx, m_required_perm);
 
     RaceManager::get()->setInfiniteMode(state);
+
+    if (!stk_ctx->isCrowned())
+    {
+        Log::info(LOGNAME, "%s sets infinite mode to %s",
+                stk_ctx->getProfileName().c_str(), state ? "on" : "off");
+    }
 
     ctx->write("Set infinite mode to ");
 

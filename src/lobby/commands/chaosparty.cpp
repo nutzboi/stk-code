@@ -25,6 +25,7 @@
 
 bool ChaosPartyCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const data)
 {
+    static const char* const LOGNAME = "ChaosPartyCommand";
     STK_CTX(stk_ctx, ctx);
 
     auto parser = ctx->get_parser();
@@ -36,6 +37,9 @@ bool ChaosPartyCommand::execute(nnwcli::CommandExecutorContext* const ctx, void*
     parser->parse_finish();
 
     CMD_REQUIRE_PERM(stk_ctx, m_required_perm);
+
+    Log::info(LOGNAME, "%s sets chaosparty to %s",
+            stk_ctx->getProfileName().c_str(), state ? "on" : "off");
 
     ctx->write("Chaos party is now ");
     if (state)

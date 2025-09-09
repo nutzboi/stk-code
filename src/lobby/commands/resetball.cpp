@@ -30,6 +30,8 @@
 
 bool ResetBallCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const data)
 {
+    static const char* const LOGNAME = "ResetBallCommand";
+
     STK_CTX(stk_ctx, ctx);
 
     auto parser = ctx->get_parser();
@@ -64,6 +66,12 @@ bool ResetBallCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* 
 
     CMD_VOTABLE(data, true);
     CMD_SELFVOTE_PERMLOWER_CROWN(stk_ctx, data, m_min_veto, parser);
+
+    if (stk_ctx->getVeto() >= m_min_veto)
+    {
+        Log::info(LOGNAME, "%s resets the ball in the soccer world",
+                stk_ctx->getProfileName().c_str());
+    }
 
     TrackObject* ball = sw->getBall();
     if (ball)
