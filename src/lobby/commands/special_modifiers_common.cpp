@@ -21,6 +21,7 @@
 #include "network/server_config.hpp"
 #include "network/protocols/server_lobby.hpp"
 #include "lobby/stk_command.hpp"
+#include "utils/log.hpp"
 #include "lobby/stk_command_context.hpp"
 #include "lobby/server_lobby_commands.hpp"
 

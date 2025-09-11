@@ -22,6 +22,7 @@
 #include "network/protocols/server_lobby.hpp"
 #include "lobby/stk_command.hpp"
 #include "lobby/stk_command_context.hpp"
+#include "utils/log.hpp"
 #include "lobby/server_lobby_commands.hpp"
 
 bool kartRestrictionCommandOf(nnwcli::CommandExecutorContext* const ctx,

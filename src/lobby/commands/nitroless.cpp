@@ -24,6 +24,7 @@
 #include "network/stk_host.hpp"
 #include "network/stk_peer.hpp"
 #include "network/server_config.hpp"
+#include "utils/log.hpp"
 #include <parser/argline_parser.hpp>
 #include <sstream>
 #include <string>

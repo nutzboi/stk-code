@@ -21,6 +21,7 @@
 #include "lobby/stk_command.hpp"
 #include "lobby/stk_command_context.hpp"
 #include "network/protocols/server_lobby.hpp"
+#include "utils/log.hpp"
 #include <exception>
 #include <parser/argline_parser.hpp>
 

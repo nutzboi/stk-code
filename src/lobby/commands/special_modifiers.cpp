@@ -25,6 +25,7 @@
 #include "lobby/stk_command.hpp"
 #include "lobby/stk_command_context.hpp"
 #include "network/server_config.hpp"
+#include "utils/log.hpp"
 #include <parser/argline_parser.hpp>
 #include <string>
 

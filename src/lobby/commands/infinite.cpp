@@ -21,6 +21,7 @@
 #include "lobby/stk_command_context.hpp"
 #include "race/race_manager.hpp"
 #include <parser/argline_parser.hpp>
+#include "utils/log.hpp"
 #include <string>
 
 bool InfiniteCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const data)
