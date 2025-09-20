@@ -3,6 +3,9 @@
 #### Or in short, STK 2.Xue TME + CM :P
 SuperTuxKart is a free kart racing game. The SuperTuxKart homepage can be found at <https://supertuxkart.net/>.
 
+## Installing
+Grab the latest binary for your system [here](https://github.com/Nomagno/stk-code/releases/latest)
+
 ## Building from source
 
 Building instructions can be found in [`INSTALL.md`](/INSTALL.md)
