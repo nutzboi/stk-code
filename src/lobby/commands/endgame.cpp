@@ -23,6 +23,7 @@
 #include "modes/world.hpp"
 #include "network/protocols/server_lobby.hpp"
 #include "network/server_config.hpp"
+#include "network/soccer_udp_client.hpp"
 #include <parser/argline_parser.hpp>
 #include <string>
 
@@ -58,6 +59,17 @@ bool EndGameCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* co
     }
 
     w->scheduleInterruptRace();
+
+    // Send UDP event for game end if enabled
+    if (ServerConfig::m_soccer_udp_enabled)
+    {
+        auto udp_client = SoccerUDPClient::getInstance();
+        if (udp_client && udp_client->isConnected())
+        {
+            float game_time = w->getTime();
+            udp_client->sendGameEnd(game_time);
+        }
+    }
 
     lobby->sendStringToAllPeers("The game has been interrupted.");
 

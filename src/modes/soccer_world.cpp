@@ -56,6 +56,7 @@
 #include "utils/string_utils.hpp"
 #include "network/live_soccer.hpp"
 #include "network/database/sqlite_database.hpp"
+#include "network/soccer_udp_client.hpp"
 #include "network/protocols/lobby_protocol.hpp"
 //=============================================================================
 class BallGoalData
@@ -723,6 +724,25 @@ void SoccerWorld::onCheckGoalTriggered(bool first_goal)
 								getScore(KART_TEAM_BLUE),
 								m_time);
 		    }
+		    
+		    // Send UDP event if enabled
+		    if (ServerConfig::m_soccer_udp_enabled)
+		    {
+		        auto udp_client = SoccerUDPClient::getInstance();
+		        if (udp_client && udp_client->isConnected())
+		        {
+		            int team_number = (team_name == "red") ? KART_TEAM_RED : KART_TEAM_BLUE;
+		            udp_client->sendGoal(player_name_log, team_number, 
+		                               getScore(KART_TEAM_RED), 
+		                               getScore(KART_TEAM_BLUE), 
+		                               m_time);
+		        }
+		        else
+		        {
+		            Log::error("SoccerWorld", "UDP client not connected! enabled: %s", 
+		                     ServerConfig::m_soccer_udp_enabled ? "true" : "false");
+		        }
+		    }
 	    }
 #ifdef ENABLE_SQLITE3
 // If you don't have the table yet, you can create it with this command:
@@ -766,6 +786,24 @@ void SoccerWorld::onCheckGoalTriggered(bool first_goal)
 					    			getScore(KART_TEAM_RED),
 								getScore(KART_TEAM_BLUE),
 								m_time);
+		    }
+		    // Send UDP event if enabled
+		    if (ServerConfig::m_soccer_udp_enabled)
+		    {
+			    auto udp_client = SoccerUDPClient::getInstance();
+			    if (udp_client && udp_client->isConnected())
+			    {
+				    int team_number = (team_name == "red") ? KART_TEAM_RED : KART_TEAM_BLUE;
+				    udp_client->sendGoal(player_name_log, team_number,
+						    getScore(KART_TEAM_RED),
+						    getScore(KART_TEAM_BLUE),
+						    m_time);
+			    }
+			    else
+			    {
+				    Log::error("SoccerWorld", "UDP client not connected! enabled: %s",
+					ServerConfig::m_soccer_udp_enabled ? "true" : "false");
+			    }
 		    }
 	    }
 #ifdef ENABLE_SQLITE3

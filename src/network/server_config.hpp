@@ -239,6 +239,12 @@ namespace ServerConfig
     SERVER_CFG_PREFIX StringServerConfigParam m_server_livesoccer_ip
 	SERVER_CFG_DEFAULT(StringServerConfigParam("127.0.0.1", "server-livesoccer-ip", "IP for live soccer socket"));
 
+    SERVER_CFG_PREFIX BoolServerConfigParam m_soccer_udp_enabled
+        SERVER_CFG_DEFAULT(BoolServerConfigParam(false, "soccer-udp-enabled", "Enable UDP client for soccer events (true or false)"));
+
+    SERVER_CFG_PREFIX StringServerConfigParam m_soccer_udp_url
+        SERVER_CFG_DEFAULT(StringServerConfigParam("127.0.0.1:8766", "soccer-udp-url", "UDP server address:port for soccer events"));
+
     SERVER_CFG_PREFIX StringServerConfigParam m_soccer_ranking_path
 	SERVER_CFG_DEFAULT(StringServerConfigParam("soccer_ranking.txt", "soccer-ranking-path", "File path to the soccer ranking file."));
 

@@ -54,6 +54,7 @@
 #include "network/protocols/game_events_protocol.hpp"
 #include "network/protocols/global_log.hpp"
 #include "network/protocols/ranking.hpp"
+#include "network/soccer_udp_client.hpp"
 #include "network/race_event_manager.hpp"
 #include "network/remote_kart_info.hpp"
 #include "network/server_config.hpp"
@@ -231,6 +232,13 @@ ServerLobby::ServerLobby() : LobbyProtocol()
     m_default_vote = new PeerVote();
     m_allow_powerupper = ServerConfig::m_allow_powerupper;
     m_show_elo = ServerConfig::m_show_elo;
+    
+    // Initialize UDP client if enabled
+    if (ServerConfig::m_soccer_udp_enabled)
+    {
+        auto udp_client = SoccerUDPClient::getInstance();
+        udp_client->connect(ServerConfig::m_soccer_udp_url);
+    }
     m_show_rank = ServerConfig::m_show_rank;
     m_sent_empty_lobby_reset = false;
     m_last_wanrefresh_res = nullptr;
@@ -1486,6 +1494,40 @@ void ServerLobby::asynchronousUpdate()
                 GlobalLog::writeLog(log_msg + "\n", GlobalLogTypes::POS_LOG);
                 Log::info("AddonLog", log_msg.c_str());
             }
+            
+            // Send UDP event if enabled
+            if (ServerConfig::m_soccer_udp_enabled)
+            {
+                auto udp_client = SoccerUDPClient::getInstance();
+                if (udp_client->isConnected())
+                {
+                    // Get addon info for soccer mode - use the same logic as the original addon log
+                    std::string addon_info = "";
+                    if (RaceManager::get()->getMinorMode() == RaceManager::MINOR_MODE_SOCCER)
+                    {
+                        // Use the same track name that's used in the original addon log
+                        addon_info = winner_vote.m_track_name;
+                    }
+                    udp_client->sendGameStart(addon_info);
+                    
+                    // Send player join events for all current players
+                    auto all_profiles = STKHost::get()->getAllPlayerProfiles();
+                    for (auto& profile : all_profiles)
+                    {
+                        auto peer = profile->getPeer();
+                        if (!peer || !peer->isValidated())
+                            continue;
+                            
+                        // Only send for non-spectators
+                        if (!peer->isSpectator() && !peer->isWaitingForGame())
+                        {
+                            std::string player_name = StringUtils::wideToUtf8(profile->getName());
+                            int team = (int)profile->getTeam();
+                            udp_client->sendPlayerJoin(player_name, team);
+                        }
+                    }
+                }
+            }
 
 
             // Reset for next state usage
@@ -2002,6 +2044,25 @@ void ServerLobby::finishedLoadingLiveJoinClient(Event* event)
             Log::verbose("ServerLobby", "%s", msg.c_str());
 	    }
 	}
+        
+        // Send UDP event for live join if enabled
+        if (ServerConfig::m_soccer_udp_enabled)
+        {
+            auto udp_client = SoccerUDPClient::getInstance();
+            if (udp_client && udp_client->isConnected())
+            {
+                World* w = World::getWorld();
+                if (w)
+                {
+                    auto kart_team = w->getKartTeam(id);
+                    int team_number = (kart_team == KART_TEAM_RED) ? 0 : 1;
+                    float game_time = w->getTime();
+                    std::string player_name = StringUtils::wideToUtf8(rki.getPlayerName());
+                    
+                    udp_client->sendPlayerJoin(player_name, team_number, game_time);
+                }
+            }
+        }
     }
     if (peer->getAvailableKartIDs().empty())
     {
@@ -2169,6 +2230,21 @@ void ServerLobby::update(int ticks)
             LiveSoccer::getInstance()->sendResetEvent();
         }
 
+        // Send UDP event for game end if enabled
+        if (ServerConfig::m_soccer_udp_enabled)
+        {
+            auto udp_client = SoccerUDPClient::getInstance();
+            if (udp_client && udp_client->isConnected())
+            {
+                World* w = World::getWorld();
+                if (w)
+                {
+                    float game_time = w->getTime();
+                    udp_client->sendGameEnd(game_time);
+                }
+            }
+        }
+
         resetVotingTime();
         m_game_setup->stopGrandPrix();
         
@@ -2249,6 +2325,16 @@ void ServerLobby::update(int ticks)
             }
 	    time_msg = "The game ended after " + time + " seconds.\n";
             GlobalLog::writeLog(time_msg, GlobalLogTypes::POS_LOG);
+            
+            // Send WebSocket event if enabled
+            if (ServerConfig::m_soccer_udp_enabled && w)
+            {
+                auto udp_client = SoccerUDPClient::getInstance();
+                if (udp_client && udp_client->isConnected())
+                {
+                    udp_client->sendGameEnd(w->getTime());
+                }
+            }
 	}
         if ((m_replay_requested || RaceManager::get()->isRecordingRace())
                 && World::getWorld() && World::getWorld()->isRacePhase())	
@@ -2683,6 +2769,7 @@ void ServerLobby::startSelection(const Event *event)
     if (ServerConfig::m_soccer_log || ServerConfig::m_race_log)
     {
         GlobalLog::writeLog("GAME_START\n", GlobalLogTypes::POS_LOG);
+        
         time_t now;
         time(&now);
         char buf[sizeof "2011-10-08T07:07:09Z"];
@@ -3320,6 +3407,16 @@ void ServerLobby::clientDisconnected(Event* event)
                 msg2 =  player_name + " left the game at " + time + ". \n";
                 GlobalLog::writeLog(msg2, GlobalLogTypes::POS_LOG);
                 GlobalLog::removeIngamePlayer(id);
+                
+                // Send WebSocket event if enabled
+                if (ServerConfig::m_soccer_udp_enabled)
+                {
+                auto udp_client = SoccerUDPClient::getInstance();
+                if (udp_client && udp_client->isConnected())
+                {
+                    udp_client->sendPlayerLeave(player_name, w->getTime());
+                }
+                }
             }
         }
     }
@@ -5635,6 +5732,18 @@ void ServerLobby::clientInGameWantsToBackLobby(Event* event)
                 peer->getAddress().toString().c_str(), id);
             rki.setNetworkPlayerProfile(
                 std::shared_ptr<NetworkPlayerProfile>());
+            
+            // Send UDP event for player leave if enabled
+            if (ServerConfig::m_soccer_udp_enabled)
+            {
+                auto udp_client = SoccerUDPClient::getInstance();
+                if (udp_client && udp_client->isConnected())
+                {
+                    std::string player_name = StringUtils::wideToUtf8(rki.getPlayerName());
+                    float game_time = w->getTime();
+                    udp_client->sendPlayerLeave(player_name, game_time);
+                }
+            }
         }
         else
         {

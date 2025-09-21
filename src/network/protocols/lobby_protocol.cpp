@@ -37,6 +37,7 @@
 #include "network/protocols/game_events_protocol.hpp"
 #include "network/protocols/global_log.hpp"
 #include "network/race_event_manager.hpp"
+#include "network/soccer_udp_client.hpp"
 #include "race/race_manager.hpp"
 #include "states_screens/online/networking_lobby.hpp"
 #include "states_screens/race_result_gui.hpp"
@@ -172,6 +173,7 @@ void LobbyProtocol::configRemoteKart(
 	    std::string msg =  StringUtils::wideToUtf8(profile->getName()) + " joined the " + team + " team.\n";
 	    std::string empty_msg = " joined the " + team + " team.\n";
 	    if (!(msg == empty_msg)) GlobalLog::writeLog(msg, GlobalLogTypes::POS_LOG);
+	    
 	}
     }   // for i in players
     // Clean all previous AI if exists in offline game
