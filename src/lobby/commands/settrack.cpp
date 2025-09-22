@@ -59,8 +59,10 @@ bool SetTrackCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* c
 
     ServerLobby* const lobby = stk_ctx->get_lobby();
     STKPeer* const peer = stk_ctx->get_peer();
+    PeerEligibility old_el = PELG_YES;
 
-    const PeerEligibility old_el = peer->getEligibility();
+    if (peer)
+        old_el = peer->getEligibility();
 
     if (ServerConfig::m_command_track_mode)
     {
