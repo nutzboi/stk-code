@@ -30,6 +30,8 @@
 #include <parser/argline_parser.hpp>
 #include <curl/curl.h>
 #include <string>
+#include <thread>
+#include <memory>
 
 // ========================================================================
 
@@ -41,118 +43,125 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
 
 bool StkSeenCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const data)
 {
-    STK_CTX(stk_ctx, ctx);
+	STK_CTX(stk_ctx, ctx);
 
-    auto parser = ctx->get_parser();
-    ServerLobby* const lobby = stk_ctx->get_lobby();
-    if (!lobby) return false;
+	auto parser = ctx->get_parser();
+	ServerLobby* const lobby = stk_ctx->get_lobby();
+	if (!lobby) return false;
 
-    std::string playername;
+	std::string playername;
 
-    *parser >> playername;
-    parser->parse_finish();
+	*parser >> playername;
+	parser->parse_finish();
 
-    if (playername.length() < 3)
-    {
-	ctx->write("Player name must be at least 3 characters long");
-	ctx->flush();
-	return false;
-    }
-
-    ctx->write("Checking player data...");
-    ctx->flush();
-
-    CURL *curl;
-    CURLcode res;
-    std::string response;
-    curl = curl_easy_init();
-
-    if (!curl)
-    {
-        ctx->write("Error: Failed to initialize HTTP request.\n");
-        ctx->flush();
-        return false;
-    }
-
-    std::string post_data = "username=" + playername;
-    std::string ishigami_addr = ServerConfig::m_ishigami_address;
-    std::string full_url = ishigami_addr + "/stk-seen";
-    std::string response_string;
-    curl_easy_setopt(curl, CURLOPT_URL, full_url.c_str());
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_data.c_str());
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_string);
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L);
-
-    res = curl_easy_perform(curl);
-    if (res != CURLE_OK)
-    {
-	ctx->nprintf("Error: Request failed: %s\n", 512, curl_easy_strerror(res));
-	curl_easy_cleanup(curl);
-	ctx->flush();
-	return false;
-    }
-
-    long response_code;
-    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
-    curl_easy_cleanup(curl);
-
-    XMLNode *xml;
-    xml = file_manager->createXMLTreeFromString(response_string);
-
-    if (!xml)
-    {
-	ctx->write("Error: Unexpected response from server.");
-	ctx->flush();
-	return false;
-    }
-
-    std::string rec_success;
-    bool m_success;
-    m_success = false;
-
-    xml->get("success", &rec_success);
-    m_success = (rec_success == "yes");
-
-    if (!m_success)
-    {
-	std::string api_reason;
-        std::string reason;
-
-        xml->get("info", &api_reason);
-            
-        if (api_reason == "player_not_seen")
-        {
-            reason = StringUtils::insertValues("Player %s has not been seen on any server recently.", playername);
-        }
-        else if (api_reason == "sql_error")
-        {
-            reason = "SQL query failed. Please contact the administrator";
-        }
-	else if (api_reason == "optout")
+	if (playername.length() < 3)
 	{
-	    reason = "This player has opted out of this feature";
+		ctx->write("Player name must be at least 3 characters long");
+		ctx->flush();
+		return false;
 	}
-        else
-        {
-            reason = "Unspecified error";
-        }
 
-	ctx->write("Failed to get player data: ");
-        ctx->write(reason);
-        ctx->flush();
-	return false;
-    }
+	ctx->write("Checking player data...");
+	ctx->flush();
+	std::weak_ptr<STKPeer> peer_wk;
+	if (data)
+	{
+		auto dd = reinterpret_cast<ServerLobbyCommands::DispatchData*>(data);
+		peer_wk = dd->m_peer_wkptr;
+	}
+	std::string post_player = playername;
+	ServerLobby* lobby_raw = lobby;
 
-    std::string username, country, server, server_country, date;
-    xml->get("username", &username);
-    xml->get("country", &country);
-    xml->get("server", &server);
-    xml->get("server-country", &server_country);
-    xml->get("date", &date);
-    ctx->nprintf("Player %s (%s) was last seen on server %s (%s) at %s", 512,
-                    username.c_str(), country.c_str(), server.c_str(),
-                    server_country.c_str(), date.c_str());
-    ctx->flush();
-    return true;
+	std::thread([post_player, lobby_raw, peer_wk]()
+	{
+		std::string response_string;
+		CURL* curl = curl_easy_init();
+		if (!curl)
+		{
+			if (auto peer_locked = peer_wk.lock())
+			{
+				std::shared_ptr<STKPeer> peer = peer_locked;
+				lobby_raw->sendStringToPeer(std::string("Error: Failed to initialize HTTP request."), peer);
+			}
+			return;
+		}
+
+		std::string ishigami_addr = ServerConfig::m_ishigami_address;
+		std::string full_url = ishigami_addr + "/stk-seen";
+		std::string post_data = "username=" + post_player;
+		curl_easy_setopt(curl, CURLOPT_URL, full_url.c_str());
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_data.c_str());
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_string);
+		curl_easy_setopt(curl, CURLOPT_TIMEOUT, 6L);
+		curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 3L);
+		CURLcode res = curl_easy_perform(curl);
+		long response_code = 0;
+		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+		curl_easy_cleanup(curl);
+
+		if (res != CURLE_OK || response_code != 200)
+		{
+			if (auto peer_locked = peer_wk.lock())
+			{
+				std::shared_ptr<STKPeer> peer = peer_locked;
+				lobby_raw->sendStringToPeer(std::string("Error: Request failed."), peer);
+			}
+			return;
+		}
+
+		XMLNode* xml = file_manager->createXMLTreeFromString(response_string);
+		if (!xml)
+		{
+			if (auto peer_locked = peer_wk.lock())
+			{
+				std::shared_ptr<STKPeer> peer = peer_locked;
+				lobby_raw->sendStringToPeer(std::string("Error: Unexpected response from server."), peer);
+			}
+			return;
+		}
+
+		std::unique_ptr<XMLNode> xml_guard(xml);
+		std::string rec_success;
+		xml->get("success", &rec_success);
+		if (rec_success != "yes")
+		{
+			std::string api_reason;
+			xml->get("info", &api_reason);
+			std::string reason;
+			if (api_reason == "player_not_seen")
+				reason = StringUtils::insertValues("Player %s has not been seen on any server recently.", post_player);
+			else if (api_reason == "sql_error")
+				reason = "SQL query failed. Please contact the administrator";
+			else if (api_reason == "optout")
+				reason = "This player has opted out of this feature";
+			else
+				reason = "Unspecified error";
+
+			if (auto peer_locked = peer_wk.lock())
+			{
+				std::shared_ptr<STKPeer> peer = peer_locked;
+				lobby_raw->sendStringToPeer(std::string("Failed to get player data: ") + reason, peer);
+			}
+			return;
+		}
+
+		std::string username, country, server, server_country, date;
+		xml->get("username", &username);
+		xml->get("country", &country);
+		xml->get("server", &server);
+		xml->get("server-country", &server_country);
+		xml->get("date", &date);
+
+		if (auto peer_locked = peer_wk.lock())
+		{
+			std::string msg = StringUtils::insertValues(
+				"Player %s (%s) was last seen on server %s (%s) at %s",
+				username, country, server, server_country, date);
+			std::shared_ptr<STKPeer> peer = peer_locked;
+			lobby_raw->sendStringToPeer(msg, peer);
+		}
+	}).detach();
+
+	return true;
 }
