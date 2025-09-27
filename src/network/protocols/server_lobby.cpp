@@ -6686,6 +6686,7 @@ std::string ServerLobby::get_elo_change_string()
     std::string fileName = "elo_changes.txt";
     std::ifstream in_file2(fileName);
     std::string result = "";
+    std::string duration_line = "";
     std::string player;
     std::string elo_change;
     std::vector<std::string> split;
@@ -6694,6 +6695,14 @@ std::string ServerLobby::get_elo_change_string()
         std::string line;
         while (std::getline(in_file2, line))
         {
+            // Check if this is a game duration line
+            if (line.find("The game lasted") != std::string::npos)
+            {
+                duration_line = line;
+                continue;
+            }
+            
+            // Handle ELO change lines
             split = StringUtils::split(line, ' ');
             if (split.size() < 2) continue;
             player = split[0];
@@ -6701,6 +6710,20 @@ std::string ServerLobby::get_elo_change_string()
             result += player + " " + elo_change + "\n";
         }
     }
+    
+    // Add duration line with proper formatting
+    if (!duration_line.empty())
+    {
+        if (!result.empty())
+        {
+            result += "\n" + duration_line;
+        }
+        else
+        {
+            result = duration_line;
+        }
+    }
+    
     return result;
 }
 

@@ -23,6 +23,7 @@
 #include "network/protocols/server_lobby.hpp"
 #include <parser/argline_parser.hpp>
 #include <string>
+#include <sstream>
 
 bool ResultsCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const data)
 {
@@ -39,7 +40,25 @@ bool ResultsCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* co
     if (result.empty())
         ctx->write("No ELO changes");
     else
-        ctx->write(result);
+    {
+        // Check if result contains only duration line (no ELO changes)
+        bool has_elo_changes = false;
+        std::istringstream iss(result);
+        std::string line;
+        while (std::getline(iss, line))
+        {
+            if (line.find("The game lasted") == std::string::npos && !line.empty())
+            {
+                has_elo_changes = true;
+                break;
+            }
+        }
+        
+        if (!has_elo_changes)
+            ctx->write("No ELO changes\n\n" + result);
+        else
+            ctx->write(result);
+    }
 
     ctx->flush();
 
