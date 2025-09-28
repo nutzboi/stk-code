@@ -22,6 +22,7 @@
 #include "datetime.hpp"
 #include "lobby/commands/speedstats.hpp"
 #include "modes/soccer_world.hpp"
+#include "modes/soccer_roulette.hpp"
 #include "quit.hpp"
 #include "lobby/player_queue.hpp"
 #include "lobby/stk_command.hpp"
@@ -88,6 +89,18 @@ bool SpectateCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* c
 
     if (state)
     {
+        // Block spectator mode for players in soccer roulette teams
+        if (ServerConfig::m_soccer_roulette)
+        {
+            std::string player_name = StringUtils::wideToUtf8(peer->getPlayerProfiles()[0]->getName());
+            if (SoccerRoulette::get()->isPlayerInTeam(player_name))
+            {
+                ctx->write("You cannot spectate while assigned to a team in soccer roulette.");
+                ctx->flush();
+                return false;
+            }
+        }
+        
         // This command is a friend of the ServerLobby, and it can access its private members such as game setup
         if (lobby->m_process_type == PT_CHILD &&
                 peer->getHostId() == lobby->m_client_server_host_id.load())

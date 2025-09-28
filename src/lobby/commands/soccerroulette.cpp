@@ -96,7 +96,7 @@ bool SoccerRouletteCommand::execute(nnwcli::CommandExecutorContext* const ctx, v
     else if (subcmd == "reload")
     {
         SoccerRoulette::get()->reload();
-        ctx->write("Soccer Roulette fields reloaded from configuration");
+        ctx->write("Soccer Roulette fields and teams reloaded from configuration");
         ctx->flush();
     }
     else if (subcmd == "teams")

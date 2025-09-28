@@ -59,8 +59,12 @@ SoccerRoulette* SoccerRoulette::get()
 SoccerRoulette::SoccerRoulette()
 {
     m_current_field_index = 0;
-    loadFieldsFromConfig();
-    loadTeamsFromXML();
+    // Only load if soccer roulette is enabled
+    if (ServerConfig::m_soccer_roulette)
+    {
+        loadFieldsFromConfig();
+        loadTeamsFromXML();
+    }
 }
 // -----------------------------------------------------------------------------
 SoccerRoulette::~SoccerRoulette()
@@ -74,6 +78,9 @@ bool SoccerRoulette::isEnabled() const
 // -----------------------------------------------------------------------------
 void SoccerRoulette::loadFieldsFromConfig()
 {
+    if (!ServerConfig::m_soccer_roulette)
+        return;
+        
     m_fields.clear();   
     std::string fields_str = ServerConfig::m_soccer_roulette_fields;
     std::vector<std::string> fields = StringUtils::split(fields_str, ',');
@@ -97,6 +104,9 @@ void SoccerRoulette::loadFieldsFromConfig()
 // -----------------------------------------------------------------------------
 void SoccerRoulette::loadTeamsFromXML()
 {
+    if (!ServerConfig::m_soccer_roulette)
+        return;
+        
     m_player_teams.clear();
     if (ServerConfig::m_teams_xml_path.c_str()[0] == '\0')
     {
@@ -154,9 +164,18 @@ void SoccerRoulette::loadTeamsFromXML()
 // -----------------------------------------------------------------------------
 void SoccerRoulette::reload()
 {
+    if (!ServerConfig::m_soccer_roulette)
+        return;
+        
     m_current_field_index = 0;
     loadFieldsFromConfig();
     loadTeamsFromXML();
+    
+    auto sl = LobbyProtocol::get<ServerLobby>();
+    if (sl)
+    {
+        reassignTeams(nullptr);
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -664,4 +683,18 @@ void SoccerRoulette::setRouletteTimeout(STKCommandContext* const commander)
     std::string confirm_msg = "Game start timeout set to 5 minutes";
     sl->sendStringToAllPeers(confirm_msg);
     Log::info("SoccerRoulette", "Game start timeout set to 5 minutes");
+}
+
+// -----------------------------------------------------------------------------
+bool SoccerRoulette::isPlayerInTeam(const std::string& player_name)
+{
+    if (!ServerConfig::m_soccer_roulette)
+        return false;
+        
+    auto it = m_player_teams.find(player_name);
+    if (it == m_player_teams.end())
+        return false;
+        
+    // Check if player is in red or blue team (not spectator)
+    return it->second == "red" || it->second == "blue";
 }

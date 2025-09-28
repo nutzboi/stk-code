@@ -717,6 +717,13 @@ void ServerLobby::changeTeam(Event* event)
     uint8_t local_id = data.getUInt8();
     auto& player = event->getPeer()->getPlayerProfiles().at(local_id);
 
+    // Block manual team changes when soccer roulette is enabled
+    if (ServerConfig::m_soccer_roulette)
+    {
+        sendStringToPeer(L"Manual team changes are disabled during soccer roulette. Teams are automatically assigned.", event->getPeer());
+        return;
+    }
+
     // check if player can change teams
     if (event->getPeer()->hasRestriction(PRF_NOTEAM))
     {

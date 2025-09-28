@@ -60,7 +60,7 @@ public:
     void reassignTeams(STKCommandContext* commander);
     void loadTeamsFromXML();
     void setRouletteTimeout(STKCommandContext* commander);
+    bool isPlayerInTeam(const std::string& player_name);
 };
 
 #endif
-
