@@ -59,6 +59,8 @@ SoccerRoulette* SoccerRoulette::get()
 SoccerRoulette::SoccerRoulette()
 {
     m_current_field_index = 0;
+    m_group_members.clear();
+    m_group_to_color.clear();
     // Only load if soccer roulette is enabled
     if (ServerConfig::m_soccer_roulette)
     {
@@ -108,6 +110,7 @@ void SoccerRoulette::loadTeamsFromXML()
         return;
         
     m_player_teams.clear();
+    m_group_members.clear();
     if (ServerConfig::m_teams_xml_path.c_str()[0] == '\0')
     {
         Log::info("SoccerRoulette", "No XML path specified");
@@ -147,6 +150,8 @@ void SoccerRoulette::loadTeamsFromXML()
                 player_node->get("name", &player);
                 // store teams
                 m_player_teams[player] = team_name;
+                // store group membership
+                m_group_members[team_name].push_back(player);
                 // log the teams
                 Log::info("SoccerRoulette", "Team assignment: %s -> %s",
                           player.c_str(), team_name.c_str());
@@ -298,6 +303,13 @@ void SoccerRoulette::assignTeamToPlayer(NetworkPlayerProfile* profile)
         Log::info("SoccerRoulette", "Player %s not found in teams XML, assigned as spectator",
                   player_name.c_str());
         return;
+    }
+    
+    // If the team is a group name, check if there is a mapped color
+    auto gtc = m_group_to_color.find(team);
+    if (gtc != m_group_to_color.end())
+    {
+        team = gtc->second;
     }
     
     // assign a team when someone joins
@@ -563,13 +575,36 @@ void SoccerRoulette::calculateGameResult()
             output_file << "  \"points\": {" << std::endl;
             output_file << "    \"red\": " << red_points << "," << std::endl;
             output_file << "    \"blue\": " << blue_points << std::endl;
-            output_file << "  }";
+            output_file << "  }," << std::endl;
+            // Add labels block for backwards-compatible team naming
+            {
+                std::string red_label_out = getGroupForColor("red");
+                std::string blue_label_out = getGroupForColor("blue");
+                if (red_label_out.empty()) red_label_out = "red";
+                if (blue_label_out.empty()) blue_label_out = "blue";
+                output_file << "  \"labels\": {" << std::endl;
+                output_file << "    \"red\": \"" << red_label_out << "\"," << std::endl;
+                output_file << "    \"blue\": \"" << blue_label_out << "\"" << std::endl;
+                output_file << "  }";
+            }
             if (fastest_speed > 0)
             {
                 output_file << "," << std::endl;
                 output_file << "  \"fastest_goal\": {" << std::endl;
                 output_file << "    \"player\": \"" << fastest_player << "\"," << std::endl;
-                output_file << "    \"team\": \"" << fastest_team << "\"," << std::endl;
+                // Use label if available
+                std::string team_out = fastest_team;
+                if (fastest_team == "Red")
+                {
+                    std::string t = getGroupForColor("red");
+                    if (!t.empty()) team_out = t;
+                }
+                else if (fastest_team == "Blue")
+                {
+                    std::string t = getGroupForColor("blue");
+                    if (!t.empty()) team_out = t;
+                }
+                output_file << "    \"team\": \"" << team_out << "\"," << std::endl;
                 output_file << "    \"speed\": " << fastest_speed << std::endl;
                 output_file << "  }" << std::endl;
             }
@@ -696,5 +731,49 @@ bool SoccerRoulette::isPlayerInTeam(const std::string& player_name)
         return false;
         
     // Check if player is in red or blue team (not spectator)
-    return it->second == "red" || it->second == "blue";
+    const std::string& t = it->second;
+    if (t == "red" || t == "blue") return true;
+    auto gtc = m_group_to_color.find(t);
+    return gtc != m_group_to_color.end() && (gtc->second == "red" || gtc->second == "blue");
+}
+
+// -----------------------------------------------------------------------------
+bool SoccerRoulette::setGroupColor(const std::string& group, const std::string& color)
+{
+    if (group.empty()) return false;
+    if (!(color == "red" || color == "blue" || color == "spectator"))
+        return false;
+    m_group_to_color[group] = color;
+    Log::info("SoccerRoulette", "Group %s set to color %s", group.c_str(), color.c_str());
+    return true;
+}
+
+// -----------------------------------------------------------------------------
+std::string SoccerRoulette::getGroupColor(const std::string& group) const
+{
+    auto it = m_group_to_color.find(group);
+    if (it == m_group_to_color.end()) return "";
+    return it->second;
+}
+
+// -----------------------------------------------------------------------------
+std::vector<std::string> SoccerRoulette::listGroups() const
+{
+    std::vector<std::string> res;
+    res.reserve(m_group_members.size());
+    for (const auto& kv : m_group_members)
+        res.push_back(kv.first);
+    return res;
+}
+
+// -----------------------------------------------------------------------------
+std::string SoccerRoulette::getGroupForColor(const std::string& color) const
+{
+    // Find the first group mapped to this color
+    for (const auto& kv : m_group_to_color)
+    {
+        if (kv.second == color)
+            return kv.first;
+    }
+    return std::string();
 }

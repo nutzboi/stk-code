@@ -139,6 +139,50 @@ bool SoccerRouletteCommand::execute(nnwcli::CommandExecutorContext* const ctx, v
         ctx->write(current_field);
         ctx->flush();
     }
+    else if (subcmd == "assign" && !track_id.empty())
+    {
+        // Expected format: <group>=<color>
+        auto pos = track_id.find('=');
+        if (pos == std::string::npos)
+        {
+            ctx->write("Usage: /soccerroulette assign <group>=<red|blue|spectator>");
+            ctx->flush();
+            return false;
+        }
+        std::string group = track_id.substr(0, pos);
+        std::string color = track_id.substr(pos + 1);
+        if (!SoccerRoulette::get()->setGroupColor(group, color))
+        {
+            ctx->write("Invalid color. Allowed: red, blue, spectator");
+            ctx->flush();
+            return false;
+        }
+        // Reassign teams based on the new mapping
+        SoccerRoulette::get()->reassignTeams(stk_ctx);
+        ctx->nprintf("Assigned group %s to %s", 256, group.c_str(), color.c_str());
+        ctx->flush();
+    }
+    else if (subcmd == "groups")
+    {
+        const auto groups = SoccerRoulette::get()->listGroups();
+        if (groups.empty())
+        {
+            ctx->write("No groups found in teams XML.");
+            ctx->flush();
+        }
+        else
+        {
+            ctx->write("Groups (group=color): ");
+            for (size_t i = 0; i < groups.size(); i++)
+            {
+                const std::string& g = groups[i];
+                std::string c = SoccerRoulette::get()->getGroupColor(g);
+                if (c.empty()) c = "(unset)";
+                ctx->nprintf("%s=%s%s", 1024, g.c_str(), c.c_str(), (i + 1 < groups.size()) ? ", " : "");
+            }
+            ctx->flush();
+        }
+    }
     else if (subcmd == "kick" && !track_id.empty())
     {
         SoccerRoulette::get()->kickPlayer(track_id, stk_ctx);
@@ -150,7 +194,7 @@ bool SoccerRouletteCommand::execute(nnwcli::CommandExecutorContext* const ctx, v
     }
     else
     {
-        ctx->write("Unknown Soccer Roulette command. Format: /soccerroulette on|off|status|add <field>|remove <field>|list|reload|reset");
+        ctx->write("Unknown Soccer Roulette command. Format: /soccerroulette status|add <field>|remove <field>|list|reload|teams|start|reset|kick <player>|reassign teams|assign <group>=<color>|groups");
         ctx->flush();
         return false;
     }

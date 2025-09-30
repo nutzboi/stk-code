@@ -22,6 +22,8 @@ private:
     static SoccerRoulette* m_soccer_roulette;
     std::vector<std::string> m_fields;
     std::map<std::string, std::string> m_player_teams;
+    std::map<std::string, std::vector<std::string> > m_group_members;
+    std::map<std::string, std::string> m_group_to_color;
     int m_current_field_index;
     int m_minimap_socket;
     std::atomic<bool> m_minimap_running;
@@ -61,6 +63,10 @@ public:
     void loadTeamsFromXML();
     void setRouletteTimeout(STKCommandContext* commander);
     bool isPlayerInTeam(const std::string& player_name);
+    bool setGroupColor(const std::string& group, const std::string& color);
+    std::string getGroupColor(const std::string& group) const;
+    std::string getGroupForColor(const std::string& color) const;
+    std::vector<std::string> listGroups() const;
 };
 
 #endif

@@ -31,8 +31,8 @@ public:
     {
         m_name = "soccerroulette";
         m_description = "Manage soccer roulette.";
-        m_args = {{nnwcli::CT_STRING, "subcmd", "Operation: on|off|status|add <field>|remove <field>|list|reset"}};
-        m_optargs = {{nnwcli::CT_STRING, "field", "Field ID for operations \"add\" and \"remove\". For kick, uses player name."}};
+        m_args = {{nnwcli::CT_STRING, "subcmd", "Operation: status|add <field>|remove <field>|list|reload|teams|start|reset|kick <player>|reassign teams|assign <group>=<color>|groups"}};
+        m_optargs = {{nnwcli::CT_STRING, "arg", "For add/remove: <field>. For kick: <player>. For assign: <group>=<color>."}};
     }
     virtual bool execute(nnwcli::CommandExecutorContext* context, void* data) OVERRIDE;
 };
