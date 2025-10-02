@@ -25,6 +25,8 @@
 // TODO: move some constants to KartProperties, use all constants from KartProperties
 
 #include "items/swatter.hpp"
+#include "modes/soccer_roulette.hpp"
+#include "network/server_config.hpp"
 
 #include "achievements/achievements_status.hpp"
 #include "audio/sfx_base.hpp"
@@ -404,6 +406,13 @@ void Swatter::squashThingsAround()
 
     if (success)
     {
+        // Record swatter hit for victim when soccer roulette is enabled
+        if (ServerConfig::m_soccer_roulette)
+        {
+            int kid = m_closest_kart->getWorldKartId();
+            std::string player_name = core::stringc(RaceManager::get()->getKartInfo(kid).getPlayerName()).c_str();
+            SoccerRoulette::recordSwatterHit(player_name);
+        }
         World::getWorld()->kartHit(m_closest_kart->getWorldKartId(),
             m_kart->getWorldKartId());
 

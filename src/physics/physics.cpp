@@ -32,6 +32,7 @@
 #include "modes/soccer_world.hpp"
 #include "modes/world.hpp"
 #include "network/network_config.hpp"
+#include "network/server_config.hpp"
 #include "karts/explosion_animation.hpp"
 #include "physics/btKart.hpp"
 #include "physics/irr_debug_drawer.hpp"
@@ -285,6 +286,7 @@ void Physics::update(int ticks)
                     kp->getSwatterSquashSlowdown()) && !was_squashed)
                 {
                     World::getWorld()->kartHit(kart->getWorldKartId());
+                    
                 }
             }
             else if(obj->isSoccerBall() && 
@@ -325,6 +327,7 @@ void Physics::update(int ticks)
                     kp->getSwatterSquashSlowdown()) && !was_squashed)
                 {
                     World::getWorld()->kartHit(kart->getWorldKartId());
+                    
                 }
 
             }
@@ -787,4 +790,3 @@ void Physics::draw()
 // ----------------------------------------------------------------------------
 
 /* EOF */
-

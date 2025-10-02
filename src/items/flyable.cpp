@@ -28,6 +28,8 @@
 
 #include "audio/sfx_base.hpp"
 #include "achievements/achievements_status.hpp"
+#include "modes/soccer_roulette.hpp"
+#include "network/server_config.hpp"
 #include "config/player_manager.hpp"
 #include "graphics/explosion.hpp"
 #include "graphics/irr_driver.hpp"
@@ -598,6 +600,15 @@ void Flyable::explode(AbstractKart *kart_hit, PhysicalObject *object,
             // The explosion animation will register itself with the kart
             // and will free it later.
             ExplosionAnimation::create(kart, getXYZ(), kart==kart_hit);
+            
+            // Record cake hit for ALL affected karts (both direct and indirect hits)
+            if (ServerConfig::m_soccer_roulette && m_type == PowerupManager::POWERUP_CAKE && m_owner != kart)
+            {
+                int kid = kart->getWorldKartId();
+                std::string player_name = core::stringc(RaceManager::get()->getKartInfo(kid).getPlayerName()).c_str();
+                SoccerRoulette::recordCakeHit(player_name);
+            }
+            
             if (kart == kart_hit)
             {
                 world->kartHit(kart->getWorldKartId(),

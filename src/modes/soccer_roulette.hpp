@@ -67,6 +67,13 @@ public:
     std::string getGroupColor(const std::string& group) const;
     std::string getGroupForColor(const std::string& color) const;
     std::vector<std::string> listGroups() const;
+    
+    // Player stats tracking
+    static void recordSwatterHit(const std::string& player_name);
+    static void recordCakeHit(const std::string& player_name);
+    static int getSwatterHits(const std::string& player_name);
+    static int getCakeHits(const std::string& player_name);
+    static void resetPlayerStats();
 };
 
 #endif

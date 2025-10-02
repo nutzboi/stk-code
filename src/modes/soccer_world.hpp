@@ -25,6 +25,7 @@
 
 #include <sstream>
 #include <string>
+#include <unordered_map>
 
 class AbstractKart;
 class BallGoalData;
@@ -295,6 +296,13 @@ public:
     void tellCount() const;
     // ------------------------------------------------------------------------
     void tellCountIfDiffers() const;
+    // Swatter stats helpers (server-side only)
+    static void recordSwatterSquashed(AbstractKart* kart);
+    static int getSwatterHitsReceived(const std::string& player_name);
+    static void resetSwatterHits();
+    
+private:
+    static std::unordered_map<std::string, int> s_swatter_hits_by_player;
 };   // SoccerWorld
 
 

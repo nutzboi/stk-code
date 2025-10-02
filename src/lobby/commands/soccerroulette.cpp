@@ -183,6 +183,38 @@ bool SoccerRouletteCommand::execute(nnwcli::CommandExecutorContext* const ctx, v
             ctx->flush();
         }
     }
+    else if (subcmd == "stats")
+    {
+        std::string who = track_id;
+        if (who.empty())
+        {
+            ctx->write("Usage: /soccerroulette stats <name>");
+            ctx->flush();
+            return false;
+        }
+        // Resolve to an exact in-game profile name (case-insensitive, prefix ok)
+        std::string resolved = who;
+        std::shared_ptr<STKPeer> target_peer = STKHost::get()->findPeerByName(
+            core::stringw(who.c_str()), true/*ignoreCase*/, true/*prefixOnly*/);
+        if (target_peer && target_peer->hasPlayerProfiles())
+        {
+            // If multiple profiles (splitscreen), sum them up
+            int total_swatter = 0;
+            int total_cake = 0;
+            for (auto& prof : target_peer->getPlayerProfiles())
+            {
+                std::string n = core::stringc(prof->getName()).c_str();
+                total_swatter += SoccerRoulette::getSwatterHits(n);
+                total_cake += SoccerRoulette::getCakeHits(n);
+            }
+            ctx->nprintf("%s stats this match: swattered %d time(s), caked %d time(s).", 
+                        256, who.c_str(), total_swatter, total_cake);
+            ctx->flush();
+            return true;
+        }
+        ctx->nprintf("%s stats this match: swattered %d time(s), caked %d time(s).", 256, who.c_str(), 0, 0);
+        ctx->flush();
+    }
     else if (subcmd == "kick" && !track_id.empty())
     {
         SoccerRoulette::get()->kickPlayer(track_id, stk_ctx);

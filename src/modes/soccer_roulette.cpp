@@ -29,6 +29,10 @@
 
 SoccerRoulette* SoccerRoulette::m_soccer_roulette = NULL;
 
+// Static maps for tracking player stats
+static std::map<std::string, int> s_swatter_hits_by_player;
+static std::map<std::string, int> s_cake_hits_by_player;
+
 // -----------------------------------------------------------------------------
 void SoccerRoulette::create()
 {
@@ -776,4 +780,37 @@ std::string SoccerRoulette::getGroupForColor(const std::string& color) const
             return kv.first;
     }
     return std::string();
+}
+
+// -----------------------------------------------------------------------------
+void SoccerRoulette::recordSwatterHit(const std::string& player_name)
+{
+    s_swatter_hits_by_player[player_name]++;
+}
+
+// -----------------------------------------------------------------------------
+void SoccerRoulette::recordCakeHit(const std::string& player_name)
+{
+    s_cake_hits_by_player[player_name]++;
+}
+
+// -----------------------------------------------------------------------------
+int SoccerRoulette::getSwatterHits(const std::string& player_name)
+{
+    auto it = s_swatter_hits_by_player.find(player_name);
+    return (it != s_swatter_hits_by_player.end()) ? it->second : 0;
+}
+
+// -----------------------------------------------------------------------------
+int SoccerRoulette::getCakeHits(const std::string& player_name)
+{
+    auto it = s_cake_hits_by_player.find(player_name);
+    return (it != s_cake_hits_by_player.end()) ? it->second : 0;
+}
+
+// -----------------------------------------------------------------------------
+void SoccerRoulette::resetPlayerStats()
+{
+    s_swatter_hits_by_player.clear();
+    s_cake_hits_by_player.clear();
 }
