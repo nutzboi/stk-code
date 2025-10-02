@@ -68,6 +68,7 @@ public:
     // Implementation-independent data
 protected:
     std::string m_server_stats_table;
+    std::string m_game_stats_table;
     bool m_ip_ban_table_exists;
     bool m_ipv6_ban_table_exists;
     bool m_online_id_ban_table_exists;
@@ -103,6 +104,11 @@ public:
 
     virtual void writeDisconnectInfoTable(STKPeer* peer) = 0;
     virtual void initServerStatsTable() = 0;
+    virtual void initGameStatsTable() = 0;
+    virtual void writeGameStats(const std::string& player_name, uint32_t online_id,
+                               const std::string& game_mode, const std::string& track_name,
+                               int swatter_hits, int cake_hits, const std::string& team_color = "",
+                               const std::string& team_group = "") = 0;
     virtual bool writeReport(
          STKPeer* reporter, std::shared_ptr<NetworkPlayerProfile> reporter_npp,
        STKPeer* reporting, std::shared_ptr<NetworkPlayerProfile> reporting_npp,

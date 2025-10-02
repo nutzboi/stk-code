@@ -294,6 +294,7 @@ void ServerLobby::initServerStatsTable()
 
 #ifdef ENABLE_SQLITE3
     m_db->initServerStatsTable();
+    m_db->initGameStatsTable();
 #endif
 }   // initServerStatsTable
 
@@ -4939,9 +4940,10 @@ void ServerLobby::configPeersStartTime()
         ReplayRecorder::get()->setFilename(replay_name);
         Log::info("ServerLobby", "Starting replay recording with filename: %s", replay_name.c_str());
     }
-    // Reset per-match swatter stats and give nitro when soccer roulette game is about to start
+    // Write previous game stats to database and reset, give nitro when soccer roulette game is about to start
     if (ServerConfig::m_soccer_roulette)
     {
+        SoccerRoulette::writeStatsToDatabase();
         SoccerRoulette::resetPlayerStats();
         SoccerRoulette::get()->giveNitroToAll();
     }

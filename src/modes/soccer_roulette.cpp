@@ -26,6 +26,10 @@
 #include "karts/controller/controller.hpp"
 #include "network/protocols/server_lobby.hpp"
 #include "lobby/player_queue.hpp"
+#include <set>
+#ifdef ENABLE_SQLITE3
+#include "network/database/abstract_database.hpp"
+#endif
 
 SoccerRoulette* SoccerRoulette::m_soccer_roulette = NULL;
 
@@ -813,4 +817,80 @@ void SoccerRoulette::resetPlayerStats()
 {
     s_swatter_hits_by_player.clear();
     s_cake_hits_by_player.clear();
+}
+
+// -----------------------------------------------------------------------------
+void SoccerRoulette::writeStatsToDatabase()
+{
+#ifdef ENABLE_SQLITE3
+    if (!ServerConfig::m_sql_management)
+        return;
+        
+    // Get database instance
+    auto server_lobby = LobbyProtocol::get<ServerLobby>();
+    if (!server_lobby)
+        return;
+    auto db = server_lobby->getDatabase();
+    if (!db || !db->hasDatabase())
+        return;
+    
+    
+    // Generate team vs team string
+    std::string team_vs = "";
+    if (SoccerRoulette::get())
+    {
+        // Find which groups are mapped to red and blue
+        std::string red_group = SoccerRoulette::get()->getGroupForColor("red");
+        std::string blue_group = SoccerRoulette::get()->getGroupForColor("blue");
+        
+        if (!red_group.empty() && !blue_group.empty())
+            team_vs = red_group + " vs " + blue_group;
+        else
+            team_vs = "Red vs Blue";
+    }
+    else
+    {
+        team_vs = "Red vs Blue";
+    }
+    
+    // Collect all unique player names from both maps
+    std::set<std::string> all_players;
+    for (const auto& kv : s_swatter_hits_by_player)
+        all_players.insert(kv.first);
+    for (const auto& kv : s_cake_hits_by_player)
+        all_players.insert(kv.first);
+    
+    // Write stats for each player
+    for (const std::string& player_name : all_players)
+    {
+        int swatter_hits = getSwatterHits(player_name);
+        int cake_hits = getCakeHits(player_name);
+        
+        // Skip players with no hits
+        if (swatter_hits == 0 && cake_hits == 0)
+            continue;
+            
+        // Get online_id by looking through connected peers
+        uint32_t online_id = 0;
+        auto peers = STKHost::get()->getPeers();
+        for (auto& peer : peers)
+        {
+            auto profiles = peer->getPlayerProfiles();
+            for (auto& profile : profiles)
+            {
+                std::string profile_name = core::stringc(profile->getName()).c_str();
+                if (profile_name == player_name)
+                {
+                    online_id = profile->getOnlineId();
+                    break;
+                }
+            }
+            if (online_id != 0) break;
+        }
+        
+        // Write to database
+        db->writeGameStats(player_name, online_id, "", "",
+                          swatter_hits, cake_hits, team_vs, "");
+    }
+#endif
 }

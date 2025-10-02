@@ -74,6 +74,7 @@ public:
     static int getSwatterHits(const std::string& player_name);
     static int getCakeHits(const std::string& player_name);
     static void resetPlayerStats();
+    static void writeStatsToDatabase();
 };
 
 #endif
