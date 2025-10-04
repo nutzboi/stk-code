@@ -217,6 +217,33 @@ bool SoccerRouletteCommand::execute(nnwcli::CommandExecutorContext* const ctx, v
         ctx->nprintf("%s stats this match: swattered %d time(s), caked %d time(s), bowled %d time(s).", 256, who.c_str(), 0, 0, 0);
         ctx->flush();
     }
+    else if (subcmd == "bowling")
+    {
+        std::string who = track_id.empty() ? stk_ctx->getProfileName() : track_id;
+        std::string resolved = who;
+        std::shared_ptr<STKPeer> target_peer = STKHost::get()->findPeerByName(
+            core::stringw(who.c_str()), true/*ignoreCase*/, true/*prefixOnly*/);
+        if (target_peer && target_peer->hasPlayerProfiles())
+        {
+            // If multiple profiles (splitscreen), sum them up
+            int total_used = 0;
+            int total_puck = 0;
+            int total_players = 0;
+            for (auto& prof : target_peer->getPlayerProfiles())
+            {
+                std::string n = core::stringc(prof->getName()).c_str();
+                total_used += SoccerRoulette::getBowlingUsed(n);
+                total_puck += SoccerRoulette::getBowlingPuckHits(n);
+                total_players += SoccerRoulette::getBowlingPlayerHits(n);
+            }
+            ctx->nprintf("%s bowling stats this match: used %d, hit puck %d, hit players %d", 
+                        256, who.c_str(), total_used, total_puck, total_players);
+            ctx->flush();
+            return true;
+        }
+        ctx->nprintf("%s bowling stats this match: used %d, hit puck %d, hit players %d", 256, who.c_str(), 0, 0, 0);
+        ctx->flush();
+    }
     else if (subcmd == "kick" && !track_id.empty())
     {
         SoccerRoulette::get()->kickPlayer(track_id, stk_ctx);
@@ -228,7 +255,7 @@ bool SoccerRouletteCommand::execute(nnwcli::CommandExecutorContext* const ctx, v
     }
     else
     {
-        ctx->write("Unknown Soccer Roulette command. Format: /soccerroulette status|add <field>|remove <field>|list|reload|teams|start|reset|kick <player>|reassign teams|assign <group>=<color>|groups");
+        ctx->write("Unknown Soccer Roulette command. Format: /soccerroulette status|add <field>|remove <field>|list|reload|teams|start|reset|kick <player>|reassign teams|assign <group>=<color>|groups|stats [player]|bowling [player]");
         ctx->flush();
         return false;
     }

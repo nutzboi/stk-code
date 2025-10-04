@@ -37,6 +37,9 @@ SoccerRoulette* SoccerRoulette::m_soccer_roulette = NULL;
 static std::map<std::string, int> s_swatter_hits_by_player;
 static std::map<std::string, int> s_cake_hits_by_player;
 static std::map<std::string, int> s_bowling_hits_by_player;
+static std::map<std::string, int> s_bowling_used_by_player;
+static std::map<std::string, int> s_bowling_puck_hits_by_player;
+static std::map<std::string, int> s_bowling_player_hits_by_player;
 
 // -----------------------------------------------------------------------------
 void SoccerRoulette::create()
@@ -806,6 +809,24 @@ void SoccerRoulette::recordBowlingHit(const std::string& player_name)
 }
 
 // -----------------------------------------------------------------------------
+void SoccerRoulette::recordBowlingUsed(const std::string& player_name)
+{
+    s_bowling_used_by_player[player_name]++;
+}
+
+// -----------------------------------------------------------------------------
+void SoccerRoulette::recordBowlingPuckHit(const std::string& player_name)
+{
+    s_bowling_puck_hits_by_player[player_name]++;
+}
+
+// -----------------------------------------------------------------------------
+void SoccerRoulette::recordBowlingPlayerHit(const std::string& player_name)
+{
+    s_bowling_player_hits_by_player[player_name]++;
+}
+
+// -----------------------------------------------------------------------------
 int SoccerRoulette::getSwatterHits(const std::string& player_name)
 {
     auto it = s_swatter_hits_by_player.find(player_name);
@@ -827,11 +848,35 @@ int SoccerRoulette::getBowlingHits(const std::string& player_name)
 }
 
 // -----------------------------------------------------------------------------
+int SoccerRoulette::getBowlingUsed(const std::string& player_name)
+{
+    auto it = s_bowling_used_by_player.find(player_name);
+    return (it != s_bowling_used_by_player.end()) ? it->second : 0;
+}
+
+// -----------------------------------------------------------------------------
+int SoccerRoulette::getBowlingPuckHits(const std::string& player_name)
+{
+    auto it = s_bowling_puck_hits_by_player.find(player_name);
+    return (it != s_bowling_puck_hits_by_player.end()) ? it->second : 0;
+}
+
+// -----------------------------------------------------------------------------
+int SoccerRoulette::getBowlingPlayerHits(const std::string& player_name)
+{
+    auto it = s_bowling_player_hits_by_player.find(player_name);
+    return (it != s_bowling_player_hits_by_player.end()) ? it->second : 0;
+}
+
+// -----------------------------------------------------------------------------
 void SoccerRoulette::resetPlayerStats()
 {
     s_swatter_hits_by_player.clear();
     s_cake_hits_by_player.clear();
     s_bowling_hits_by_player.clear();
+    s_bowling_used_by_player.clear();
+    s_bowling_puck_hits_by_player.clear();
+    s_bowling_player_hits_by_player.clear();
 }
 
 // -----------------------------------------------------------------------------
@@ -876,6 +921,12 @@ void SoccerRoulette::writeStatsToDatabase()
         all_players.insert(kv.first);
     for (const auto& kv : s_bowling_hits_by_player)
         all_players.insert(kv.first);
+    for (const auto& kv : s_bowling_used_by_player)
+        all_players.insert(kv.first);
+    for (const auto& kv : s_bowling_puck_hits_by_player)
+        all_players.insert(kv.first);
+    for (const auto& kv : s_bowling_player_hits_by_player)
+        all_players.insert(kv.first);
     
     // Write stats for each player
     for (const std::string& player_name : all_players)
@@ -883,6 +934,9 @@ void SoccerRoulette::writeStatsToDatabase()
         int swatter_hits = getSwatterHits(player_name);
         int cake_hits = getCakeHits(player_name);
         int bowling_hits = getBowlingHits(player_name);
+        int bowling_used = getBowlingUsed(player_name);
+        int bowling_puck = getBowlingPuckHits(player_name);
+        int bowling_players = getBowlingPlayerHits(player_name);
         
         // Get online_id by looking through connected peers
         uint32_t online_id = 0;
@@ -904,7 +958,8 @@ void SoccerRoulette::writeStatsToDatabase()
         
         // Write to database
         db->writeGameStats(player_name, online_id, "", "",
-                          swatter_hits, cake_hits, bowling_hits, team_vs, "");
+                          swatter_hits, cake_hits, bowling_hits, 
+                          bowling_used, bowling_puck, bowling_players, team_vs, "");
     }
 #endif
 }

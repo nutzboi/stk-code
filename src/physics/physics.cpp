@@ -29,6 +29,7 @@
 #include "karts/kart_properties.hpp"
 #include "karts/rescue_animation.hpp"
 #include "karts/controller/local_player_controller.hpp"
+#include "modes/soccer_roulette.hpp"
 #include "modes/soccer_world.hpp"
 #include "modes/world.hpp"
 #include "network/network_config.hpp"
@@ -368,6 +369,17 @@ void Physics::update(int ticks)
                 int kartId = p->getUserPointer(0)->getPointerFlyable()->getOwnerId();
                 SoccerWorld* soccerWorld = (SoccerWorld*)World::getWorld();
                 soccerWorld->setBallHitter(kartId);
+                
+                // Track bowling ball puck hit in soccer roulette mode
+                if (ServerConfig::m_soccer_roulette)
+                {
+                    PowerupManager::PowerupType type = p->getUserPointer(0)->getPointerFlyable()->getType();
+                    if (type == PowerupManager::POWERUP_BOWLING)
+                    {
+                        std::string player_name = core::stringc(RaceManager::get()->getKartInfo(kartId).getPlayerName()).c_str();
+                        SoccerRoulette::recordBowlingPuckHit(player_name);
+                    }
+                }
             }
 
         }

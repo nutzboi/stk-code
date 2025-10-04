@@ -72,9 +72,15 @@ public:
     static void recordSwatterHit(const std::string& player_name);
     static void recordCakeHit(const std::string& player_name);
     static void recordBowlingHit(const std::string& player_name);
+    static void recordBowlingUsed(const std::string& player_name);
+    static void recordBowlingPuckHit(const std::string& player_name);
+    static void recordBowlingPlayerHit(const std::string& player_name);
     static int getSwatterHits(const std::string& player_name);
     static int getCakeHits(const std::string& player_name);
     static int getBowlingHits(const std::string& player_name);
+    static int getBowlingUsed(const std::string& player_name);
+    static int getBowlingPuckHits(const std::string& player_name);
+    static int getBowlingPlayerHits(const std::string& player_name);
     static void resetPlayerStats();
     static void writeStatsToDatabase();
 };

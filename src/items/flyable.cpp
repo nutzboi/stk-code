@@ -612,8 +612,29 @@ void Flyable::explode(AbstractKart *kart_hit, PhysicalObject *object,
             if (ServerConfig::m_soccer_roulette && m_type == PowerupManager::POWERUP_BOWLING && m_owner != kart)
             {
                 int kid = kart->getWorldKartId();
-                std::string player_name = core::stringc(RaceManager::get()->getKartInfo(kid).getPlayerName()).c_str();
-                SoccerRoulette::recordBowlingHit(player_name);
+                std::string target_name = core::stringc(RaceManager::get()->getKartInfo(kid).getPlayerName()).c_str();
+                
+                // Get shooter name
+                int owner_kid = m_owner->getWorldKartId();
+                std::string shooter_name = core::stringc(RaceManager::get()->getKartInfo(owner_kid).getPlayerName()).c_str();
+                
+                // Track bowling player hits for soccer roulette
+                // Use World::getKartTeam to get team information
+                World* world = World::getWorld();
+                if (world)
+                {
+                    KartTeam owner_team = world->getKartTeam(m_owner->getWorldKartId());
+                    KartTeam target_team = world->getKartTeam(kart->getWorldKartId());
+                    
+                    // Only count if different teams (and not spectator)
+                    if (owner_team != target_team && target_team != KART_TEAM_NONE)
+                    {
+                        SoccerRoulette::recordBowlingPlayerHit(shooter_name);
+                    }
+                }
+                
+                // Keep old tracking for backwards compatibility
+                SoccerRoulette::recordBowlingHit(target_name);
             }
             
             if (kart == kart_hit)

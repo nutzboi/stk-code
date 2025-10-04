@@ -1785,6 +1785,9 @@ void SQLiteDatabase::initGameStatsTable()
         "    swatter_hits_received INTEGER UNSIGNED NOT NULL DEFAULT 0,\n"
         "    cake_hits_received INTEGER UNSIGNED NOT NULL DEFAULT 0,\n"
         "    bowling_hits_received INTEGER UNSIGNED NOT NULL DEFAULT 0,\n"
+        "    bowling_balls_used INTEGER UNSIGNED NOT NULL DEFAULT 0,\n"
+        "    bowling_balls_hit_puck INTEGER UNSIGNED NOT NULL DEFAULT 0,\n"
+        "    bowling_balls_hit_players INTEGER UNSIGNED NOT NULL DEFAULT 0,\n"
         "    team_vs TEXT NOT NULL DEFAULT '', -- team1 vs team2 format\n"
         "    game_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP\n"
         ");";
@@ -1801,6 +1804,7 @@ void SQLiteDatabase::initGameStatsTable()
 void SQLiteDatabase::writeGameStats(const std::string& player_name, uint32_t online_id,
                                    const std::string& game_mode, const std::string& track_name,
                                    int swatter_hits, int cake_hits, int bowling_hits,
+                                   int bowling_used, int bowling_puck, int bowling_players,
                                    const std::string& team_color, const std::string& team_group)
 {
     if (m_game_stats_table.empty() || !m_db)
@@ -1809,14 +1813,17 @@ void SQLiteDatabase::writeGameStats(const std::string& player_name, uint32_t onl
     std::shared_ptr<BinderCollection> coll = std::make_shared<BinderCollection>();
     std::string query = StringUtils::insertValues(
         "INSERT INTO %s "
-        "(online_id, player_name, swatter_hits_received, cake_hits_received, bowling_hits_received, team_vs, game_date) "
-        "VALUES (%u, %s, %d, %d, %d, %s, datetime('now'));",
+        "(online_id, player_name, swatter_hits_received, cake_hits_received, bowling_hits_received, bowling_balls_used, bowling_balls_hit_puck, bowling_balls_hit_players, team_vs, game_date) "
+        "VALUES (%u, %s, %d, %d, %d, %d, %d, %d, %s, datetime('now'));",
         m_game_stats_table.c_str(),
         online_id,
         Binder(coll, player_name, "player_name"),
         swatter_hits,
         cake_hits,
         bowling_hits,
+        bowling_used,
+        bowling_puck,
+        bowling_players,
         Binder(coll, team_color, "team_vs")
     );
     

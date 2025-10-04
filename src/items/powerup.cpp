@@ -30,9 +30,11 @@
 #include "karts/controller/controller.hpp"
 #include "karts/kart_properties.hpp"
 #include "modes/world.hpp"
+#include "modes/soccer_roulette.hpp"
 #include "network/network_config.hpp"
 #include "network/network_string.hpp"
 #include "network/rewind_manager.hpp"
+#include "network/server_config.hpp"
 #include "physics/triangle_mesh.hpp"
 #include "tracks/track.hpp"
 #include "utils/string_utils.hpp"
@@ -312,6 +314,14 @@ void Powerup::use()
             m_sound_use->play();
         }
         ProjectileManager::get()->newProjectile(m_kart, m_type);
+        
+        // Track bowling ball usage in soccer roulette mode
+        if (ServerConfig::m_soccer_roulette && m_type == PowerupManager::POWERUP_BOWLING)
+        {
+            int kid = m_kart->getWorldKartId();
+            std::string player_name = core::stringc(RaceManager::get()->getKartInfo(kid).getPlayerName()).c_str();
+            SoccerRoulette::recordBowlingUsed(player_name);
+        }
         break ;
 
     case PowerupManager::POWERUP_SWATTER:
