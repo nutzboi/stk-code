@@ -71,8 +71,10 @@ public:
     // Player stats tracking
     static void recordSwatterHit(const std::string& player_name);
     static void recordCakeHit(const std::string& player_name);
+    static void recordBowlingHit(const std::string& player_name);
     static int getSwatterHits(const std::string& player_name);
     static int getCakeHits(const std::string& player_name);
+    static int getBowlingHits(const std::string& player_name);
     static void resetPlayerStats();
     static void writeStatsToDatabase();
 };

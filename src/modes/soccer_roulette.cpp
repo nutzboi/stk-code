@@ -36,6 +36,7 @@ SoccerRoulette* SoccerRoulette::m_soccer_roulette = NULL;
 // Static maps for tracking player stats
 static std::map<std::string, int> s_swatter_hits_by_player;
 static std::map<std::string, int> s_cake_hits_by_player;
+static std::map<std::string, int> s_bowling_hits_by_player;
 
 // -----------------------------------------------------------------------------
 void SoccerRoulette::create()
@@ -799,6 +800,12 @@ void SoccerRoulette::recordCakeHit(const std::string& player_name)
 }
 
 // -----------------------------------------------------------------------------
+void SoccerRoulette::recordBowlingHit(const std::string& player_name)
+{
+    s_bowling_hits_by_player[player_name]++;
+}
+
+// -----------------------------------------------------------------------------
 int SoccerRoulette::getSwatterHits(const std::string& player_name)
 {
     auto it = s_swatter_hits_by_player.find(player_name);
@@ -813,10 +820,18 @@ int SoccerRoulette::getCakeHits(const std::string& player_name)
 }
 
 // -----------------------------------------------------------------------------
+int SoccerRoulette::getBowlingHits(const std::string& player_name)
+{
+    auto it = s_bowling_hits_by_player.find(player_name);
+    return (it != s_bowling_hits_by_player.end()) ? it->second : 0;
+}
+
+// -----------------------------------------------------------------------------
 void SoccerRoulette::resetPlayerStats()
 {
     s_swatter_hits_by_player.clear();
     s_cake_hits_by_player.clear();
+    s_bowling_hits_by_player.clear();
 }
 
 // -----------------------------------------------------------------------------
@@ -853,11 +868,13 @@ void SoccerRoulette::writeStatsToDatabase()
         team_vs = "Red vs Blue";
     }
     
-    // Collect all unique player names from both maps
+    // Collect all unique player names from all maps
     std::set<std::string> all_players;
     for (const auto& kv : s_swatter_hits_by_player)
         all_players.insert(kv.first);
     for (const auto& kv : s_cake_hits_by_player)
+        all_players.insert(kv.first);
+    for (const auto& kv : s_bowling_hits_by_player)
         all_players.insert(kv.first);
     
     // Write stats for each player
@@ -865,11 +882,8 @@ void SoccerRoulette::writeStatsToDatabase()
     {
         int swatter_hits = getSwatterHits(player_name);
         int cake_hits = getCakeHits(player_name);
+        int bowling_hits = getBowlingHits(player_name);
         
-        // Skip players with no hits
-        if (swatter_hits == 0 && cake_hits == 0)
-            continue;
-            
         // Get online_id by looking through connected peers
         uint32_t online_id = 0;
         auto peers = STKHost::get()->getPeers();
@@ -890,7 +904,7 @@ void SoccerRoulette::writeStatsToDatabase()
         
         // Write to database
         db->writeGameStats(player_name, online_id, "", "",
-                          swatter_hits, cake_hits, team_vs, "");
+                          swatter_hits, cake_hits, bowling_hits, team_vs, "");
     }
 #endif
 }

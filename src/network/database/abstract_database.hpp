@@ -107,8 +107,8 @@ public:
     virtual void initGameStatsTable() = 0;
     virtual void writeGameStats(const std::string& player_name, uint32_t online_id,
                                const std::string& game_mode, const std::string& track_name,
-                               int swatter_hits, int cake_hits, const std::string& team_color = "",
-                               const std::string& team_group = "") = 0;
+                               int swatter_hits, int cake_hits, int bowling_hits = 0,
+                               const std::string& team_color = "", const std::string& team_group = "") = 0;
     virtual bool writeReport(
          STKPeer* reporter, std::shared_ptr<NetworkPlayerProfile> reporter_npp,
        STKPeer* reporting, std::shared_ptr<NetworkPlayerProfile> reporting_npp,

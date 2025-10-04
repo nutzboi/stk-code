@@ -609,6 +609,13 @@ void Flyable::explode(AbstractKart *kart_hit, PhysicalObject *object,
                 SoccerRoulette::recordCakeHit(player_name);
             }
             
+            if (ServerConfig::m_soccer_roulette && m_type == PowerupManager::POWERUP_BOWLING && m_owner != kart)
+            {
+                int kid = kart->getWorldKartId();
+                std::string player_name = core::stringc(RaceManager::get()->getKartInfo(kid).getPlayerName()).c_str();
+                SoccerRoulette::recordBowlingHit(player_name);
+            }
+            
             if (kart == kart_hit)
             {
                 world->kartHit(kart->getWorldKartId(),

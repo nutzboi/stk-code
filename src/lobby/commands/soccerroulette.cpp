@@ -201,18 +201,20 @@ bool SoccerRouletteCommand::execute(nnwcli::CommandExecutorContext* const ctx, v
             // If multiple profiles (splitscreen), sum them up
             int total_swatter = 0;
             int total_cake = 0;
+            int total_bowling = 0;
             for (auto& prof : target_peer->getPlayerProfiles())
             {
                 std::string n = core::stringc(prof->getName()).c_str();
                 total_swatter += SoccerRoulette::getSwatterHits(n);
                 total_cake += SoccerRoulette::getCakeHits(n);
+                total_bowling += SoccerRoulette::getBowlingHits(n);
             }
-            ctx->nprintf("%s stats this match: swattered %d time(s), caked %d time(s).", 
-                        256, who.c_str(), total_swatter, total_cake);
+            ctx->nprintf("%s stats this match: swattered %d time(s), caked %d time(s), bowled %d time(s).", 
+                        256, who.c_str(), total_swatter, total_cake, total_bowling);
             ctx->flush();
             return true;
         }
-        ctx->nprintf("%s stats this match: swattered %d time(s), caked %d time(s).", 256, who.c_str(), 0, 0);
+        ctx->nprintf("%s stats this match: swattered %d time(s), caked %d time(s), bowled %d time(s).", 256, who.c_str(), 0, 0, 0);
         ctx->flush();
     }
     else if (subcmd == "kick" && !track_id.empty())
