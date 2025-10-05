@@ -298,6 +298,7 @@ void ServerLobby::initServerStatsTable()
 #ifdef ENABLE_SQLITE3
     m_db->initServerStatsTable();
     m_db->initGameStatsTable();
+    m_db->initBallSideStatsTable();
 #endif
 }   // initServerStatsTable
 

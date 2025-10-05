@@ -1831,3 +1831,51 @@ void SQLiteDatabase::writeGameStats(const std::string& player_name, uint32_t onl
 }   // writeGameStats
 
 #endif // ENABLE_SQLITE3
+
+#ifdef ENABLE_SQLITE3
+//-----------------------------------------------------------------------------
+/** Creates the ball-side stats table if it doesn't exist yet. */
+void SQLiteDatabase::initBallSideStatsTable()
+{
+    if (!ServerConfig::m_sql_management || !m_db)
+        return;
+
+    std::ostringstream oss;
+    oss << "CREATE TABLE IF NOT EXISTS soccer_ball_side_stats (\n"
+        "  id INTEGER PRIMARY KEY AUTOINCREMENT,\n"
+        "  timestamp_ms INTEGER NOT NULL,\n"
+        "  datetime_text TEXT NOT NULL DEFAULT (datetime('now')),\n"
+        "  track_id TEXT NOT NULL,\n"
+        "  red_seconds REAL NOT NULL,\n"
+        "  blue_seconds REAL NOT NULL,\n"
+        "  red_pct REAL NOT NULL,\n"
+        "  blue_pct REAL NOT NULL,\n"
+        "  team_vs TEXT NOT NULL DEFAULT ''\n"
+        ");";
+    std::string query = oss.str();
+    easySQLQuery(query);
+    easySQLQuery("CREATE INDEX IF NOT EXISTS idx_sbss_time ON soccer_ball_side_stats(timestamp_ms);");
+    easySQLQuery("CREATE INDEX IF NOT EXISTS idx_sbss_track ON soccer_ball_side_stats(track_id);");
+}
+
+//-----------------------------------------------------------------------------
+void SQLiteDatabase::writeBallSideStats(uint64_t timestamp_ms, const std::string& track_id,
+                                        float red_seconds, float blue_seconds,
+                                        float red_pct, float blue_pct,
+                                        const std::string& team_vs)
+{
+    if (!m_db)
+        return;
+
+    auto coll = std::make_shared<BinderCollection>();
+    std::string q = StringUtils::insertValues(
+        "INSERT INTO soccer_ball_side_stats (timestamp_ms, track_id, red_seconds, blue_seconds, red_pct, blue_pct, datetime_text, team_vs) "
+        "VALUES (%d, %s, %f, %f, %f, %f, datetime('now'), %s);",
+        (int)timestamp_ms,
+        Binder(coll, track_id, "track_id"),
+        red_seconds, blue_seconds, red_pct, blue_pct,
+        Binder(coll, team_vs, "team_vs")
+    );
+    easySQLQuery(q, nullptr, coll->getBindFunction());
+}
+#endif // ENABLE_SQLITE3

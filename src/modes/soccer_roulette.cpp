@@ -800,8 +800,7 @@ void SoccerRoulette::writeBallSideStatsToDatabase()
     if (!sl)
         return;
     auto db = sl->getDatabase();
-    auto sqlite_db = dynamic_cast<SQLiteDatabase*>(db);
-    if (!sqlite_db || !sqlite_db->hasDatabase())
+    if (!db || !db->hasDatabase())
         return;
 
     const float red_s = m_last_red_side_time;
@@ -816,15 +815,20 @@ void SoccerRoulette::writeBallSideStatsToDatabase()
     const std::string track_id = Track::getCurrentTrack() ? Track::getCurrentTrack()->getIdent() : std::string("");
     const uint64_t ts = StkTime::getMonoTimeMs();
 
-    auto coll = std::make_shared<BinderCollection>();
-    std::string q = StringUtils::insertValues(
-        "INSERT INTO soccer_ball_side_stats (timestamp_ms, track_id, red_seconds, blue_seconds, red_pct, blue_pct) "
-        "VALUES (%d, %s, %f, %f, %f, %f);",
-        (int)ts,
-        Binder(coll, track_id, "track_id"),
-        red_s, blue_s, red_pct, blue_pct
-    );
-    sqlite_db->easySQLQuery(q, nullptr, coll->getBindFunction());
+    std::string team_vs;
+    if (SoccerRoulette::get())
+    {
+        std::string red_group = SoccerRoulette::get()->getGroupForColor("red");
+        std::string blue_group = SoccerRoulette::get()->getGroupForColor("blue");
+        if (!red_group.empty() && !blue_group.empty())
+            team_vs = red_group + " vs " + blue_group;
+        else
+            team_vs = "Red vs Blue";
+    }
+    else
+        team_vs = "Red vs Blue";
+
+    db->writeBallSideStats(ts, track_id, red_s, blue_s, red_pct, blue_pct, team_vs);
 #endif
 }
 
