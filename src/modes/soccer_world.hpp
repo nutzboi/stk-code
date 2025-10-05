@@ -160,6 +160,13 @@ private:
     int m_init_red_goals;
     int m_init_blue_goals;
 
+    // Ball position tracking for roulette (seconds on each half)
+    float m_time_on_red_side = 0.0f;
+    float m_time_on_blue_side = 0.0f;
+    float m_field_center_x = 0.0f;
+    bool  m_track_ball_time = false;
+    float m_ball_sample_accum = 0.0f; // accumulate dt to sample at 2 Hz
+
 public:
 
     SoccerWorld();

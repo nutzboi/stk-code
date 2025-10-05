@@ -212,6 +212,7 @@ private:
 
     /** Timeout counter for various state. */
     std::atomic<int64_t> m_timeout;
+    std::atomic<int64_t> m_pole_timing;
 
     std::mutex m_keys_mutex;
 

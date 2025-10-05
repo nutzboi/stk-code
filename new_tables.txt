@@ -1,3 +1,16 @@
+CREATE TABLE IF NOT EXISTS soccer_ball_side_stats (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  timestamp_ms INTEGER NOT NULL,
+  track_id TEXT NOT NULL,
+  red_seconds REAL NOT NULL,
+  blue_seconds REAL NOT NULL,
+  red_pct REAL NOT NULL,
+  blue_pct REAL NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_sbss_time ON soccer_ball_side_stats(timestamp_ms);
+CREATE INDEX IF NOT EXISTS idx_sbss_track ON soccer_ball_side_stats(track_id);
+
 CREATE TABLE permissions (
     online_id INTEGER UNSIGNED NOT NULL PRIMARY KEY UNIQUE,
     level INTEGER NOT NULL DEFAULT 0

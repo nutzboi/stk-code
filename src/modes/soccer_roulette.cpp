@@ -17,6 +17,9 @@
 #include "network/network_player_profile.hpp"
 #include "network/stk_peer.hpp"
 #include "network/server_config.hpp"
+#include "network/protocols/lobby_protocol.hpp"
+#include "network/database/sqlite_database.hpp"
+#include "tracks/track.hpp"
 #include <fstream>
 #include <sstream>
 #include <sys/socket.h>
@@ -747,6 +750,82 @@ bool SoccerRoulette::isPlayerInTeam(const std::string& player_name)
     if (t == "red" || t == "blue") return true;
     auto gtc = m_group_to_color.find(t);
     return gtc != m_group_to_color.end() && (gtc->second == "red" || gtc->second == "blue");
+}
+
+// -----------------------------------------------------------------------------
+void SoccerRoulette::setBallTrackingData(float red_time, float blue_time)
+{
+    m_last_red_side_time = std::max(0.0f, red_time);
+    m_last_blue_side_time = std::max(0.0f, blue_time);
+}
+
+// -----------------------------------------------------------------------------
+void SoccerRoulette::clearBallTrackingData()
+{
+    m_last_red_side_time = 0.0f;
+    m_last_blue_side_time = 0.0f;
+}
+
+// -----------------------------------------------------------------------------
+std::string SoccerRoulette::getBallPositionPercentages() const
+{
+    const float total_time = m_last_red_side_time + m_last_blue_side_time;
+    if (total_time <= 0.0f)
+        return ""; // nothing tracked
+    const float red_percentage = (m_last_red_side_time / total_time) * 100.0f;
+    const float blue_percentage = (m_last_blue_side_time / total_time) * 100.0f;
+    std::ostringstream ss;
+    ss.setf(std::ios::fixed);
+    ss.precision(0);
+    ss << "Red: " << red_percentage << "% Blue: " << blue_percentage << "%";
+    return ss.str();
+}
+
+// -----------------------------------------------------------------------------
+std::string SoccerRoulette::getFixedMixedBar() const
+{
+    // Return "🟥🟥🟥🟥🟦🟦🟦🟦"
+    std::string red4, blue4;
+    for (int i = 0; i < 4; i++) red4  += "\xF0\x9F\x9F\xA5"; // 🟥
+    for (int i = 0; i < 4; i++) blue4 += "\xF0\x9F\x9F\xA6"; // 🟦
+    return red4 + blue4;
+}
+// -----------------------------------------------------------------------------
+void SoccerRoulette::writeBallSideStatsToDatabase()
+{
+#ifdef ENABLE_SQLITE3
+    if (!ServerConfig::m_sql_management)
+        return;
+    auto sl = LobbyProtocol::get<ServerLobby>();
+    if (!sl)
+        return;
+    auto db = sl->getDatabase();
+    auto sqlite_db = dynamic_cast<SQLiteDatabase*>(db);
+    if (!sqlite_db || !sqlite_db->hasDatabase())
+        return;
+
+    const float red_s = m_last_red_side_time;
+    const float blue_s = m_last_blue_side_time;
+    if (red_s <= 0.0f && blue_s <= 0.0f)
+        return;
+
+    const float total = red_s + blue_s;
+    const float red_pct = total > 0.0f ? (red_s / total) * 100.0f : 0.0f;
+    const float blue_pct = total > 0.0f ? (blue_s / total) * 100.0f : 0.0f;
+
+    const std::string track_id = Track::getCurrentTrack() ? Track::getCurrentTrack()->getIdent() : std::string("");
+    const uint64_t ts = StkTime::getMonoTimeMs();
+
+    auto coll = std::make_shared<BinderCollection>();
+    std::string q = StringUtils::insertValues(
+        "INSERT INTO soccer_ball_side_stats (timestamp_ms, track_id, red_seconds, blue_seconds, red_pct, blue_pct) "
+        "VALUES (%d, %s, %f, %f, %f, %f);",
+        (int)ts,
+        Binder(coll, track_id, "track_id"),
+        red_s, blue_s, red_pct, blue_pct
+    );
+    sqlite_db->easySQLQuery(q, nullptr, coll->getBindFunction());
+#endif
 }
 
 // -----------------------------------------------------------------------------

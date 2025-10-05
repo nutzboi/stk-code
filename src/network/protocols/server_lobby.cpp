@@ -35,6 +35,7 @@
 #include "modes/capture_the_flag.hpp"
 #include "modes/linear_world.hpp"
 #include "modes/soccer_world.hpp"
+#include "modes/soccer_roulette.hpp"
 #include "network/crypto.hpp"
 #include <cstdint>
 
@@ -76,6 +77,7 @@
 #include "utils/string_utils.hpp"
 #include "utils/time.hpp"
 #include <algorithm>
+#include <cmath>
 #include <cassert>
 #include <cstdlib>
 #include <cstring>
@@ -260,6 +262,7 @@ ServerLobby::ServerLobby() : LobbyProtocol()
 
     m_jumble_rng.seed(std::random_device{}());
     loadJumbleWordList();
+    m_pole_timing.store(std::numeric_limits<int64_t>::max());
 }   // ServerLobby
 
 //-----------------------------------------------------------------------------
@@ -2130,6 +2133,16 @@ void ServerLobby::update(int ticks)
     {
 	    checkRPSTimeouts();
     }
+    if (ServerConfig::m_soccer_roulette)
+    {
+        const int64_t due = m_pole_timing.load();
+        if (due != std::numeric_limits<int64_t>::max() &&
+            (int64_t)StkTime::getMonoTimeMs() >= due)
+        {
+            setPoleEnabled(true);
+            m_pole_timing.store(std::numeric_limits<int64_t>::max());
+        }
+    }
     if (world_started)
     {
         for (unsigned i = 0; i < RaceManager::get()->getNumPlayers(); i++)
@@ -3240,6 +3253,11 @@ void ServerLobby::checkRaceFinished()
     if (!RaceEventManager::get()->isRaceOver()) return;
 
     Log::info("ServerLobby", "The game is considered finished.");
+
+    if (ServerConfig::m_soccer_roulette)
+    {
+        SoccerRoulette::get()->writeBallSideStatsToDatabase();
+    }
     // notify the network world that it is stopped
     RaceEventManager::get()->stop();
 
@@ -5064,7 +5082,26 @@ void ServerLobby::resetServer()
     }
     if (ServerConfig::m_soccer_roulette)
     {
-	    setPoleEnabled(true);
+        std::string perc = SoccerRoulette::get()->getBallPositionPercentages();
+        if (!perc.empty())
+        {
+            std::stringstream ss;
+            const std::string mixed = SoccerRoulette::get()->getFixedMixedBar();
+            ss << mixed << "\n";
+            ss << mixed << "\n";
+            ss << mixed << "\n";
+            ss << mixed << "\n";
+            ss << perc << "\n";
+            ss << "In 10 seconds you can vote for pole";
+            sendStringToAllPeers(ss.str());
+            // delay pole by 10s (independent timer)
+            m_pole_timing.store((int64_t)StkTime::getMonoTimeMs() + 10000);
+        }
+        else
+        {
+            setPoleEnabled(true);
+        }
+        SoccerRoulette::get()->clearBallTrackingData();
     }
     // Clear live join tracking when server resets
     clearGameTracking();

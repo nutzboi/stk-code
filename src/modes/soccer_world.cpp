@@ -338,6 +338,34 @@ void SoccerWorld::init()
     }
     m_bgd->init(radius);
 
+    // Init roulette ball-time tracking
+    m_time_on_red_side = 0.0f;
+    m_time_on_blue_side = 0.0f;
+    m_track_ball_time = ServerConfig::m_soccer_roulette;
+    m_ball_sample_accum = 0.0f;
+    if (m_track_ball_time)
+    {
+        // Compute field center X using goals
+        CheckManager* cm = Track::getCurrentTrack()->getCheckManager();
+        CheckGoal* red_goal = nullptr;
+        CheckGoal* blue_goal = nullptr;
+        for (unsigned i = 0; i < cm->getCheckStructureCount(); i++)
+        {
+            CheckGoal* cg = dynamic_cast<CheckGoal*>(cm->getCheckStructure(i));
+            if (!cg) continue;
+            if (cg->getTeam() == KART_TEAM_RED) red_goal = cg; else if (cg->getTeam() == KART_TEAM_BLUE) blue_goal = cg;
+        }
+        if (red_goal && blue_goal)
+        {
+            m_field_center_x = (red_goal->getPoint(CheckGoal::POINT_CENTER).getX() +
+                                blue_goal->getPoint(CheckGoal::POINT_CENTER).getX()) * 0.5f;
+        }
+        else
+        {
+            m_field_center_x = getBallPosition().getX();
+        }
+    }
+
 }   // init
 
 //-----------------------------------------------------------------------------
@@ -382,6 +410,11 @@ void SoccerWorld::reset(bool restart)
     m_bgd->reset();
     m_ticks_back_to_own_goal = -1;
     m_ball->setEnabled(false);
+
+    // Reset roulette tracking for a new match
+    m_time_on_red_side = 0.0f;
+    m_time_on_blue_side = 0.0f;
+    m_track_ball_time = ServerConfig::m_soccer_roulette;
 
     // Make the player kart in profiling mode up
     // ie make this kart less likely to affect gaming result
@@ -454,6 +487,19 @@ const std::string& SoccerWorld::getIdent() const
 void SoccerWorld::update(int ticks)
 {
     updateBallPosition(ticks);
+    // Accumulate ball time on each side for roulette at ~2 Hz
+    if (m_track_ball_time)
+    {
+        const float dt = stk_config->ticks2Time(ticks);
+        m_ball_sample_accum += dt;
+        if (m_ball_sample_accum >= 0.5f) // 2 samples per second
+        {
+            const float x = getBallPosition().getX();
+            if (x < m_field_center_x) m_time_on_red_side += m_ball_sample_accum; 
+            else                      m_time_on_blue_side += m_ball_sample_accum;
+            m_ball_sample_accum = 0.0f;
+        }
+    }
     if (Track::getCurrentTrack()->hasNavMesh())
     {
         updateSectorForKarts();
@@ -1279,6 +1325,15 @@ btTransform SoccerWorld::getRescueTransform(unsigned int rescue_pos) const
 void SoccerWorld::enterRaceOverState()
 {
     WorldWithRank::enterRaceOverState();
+
+    // Save ball tracking totals into SoccerRoulette so ServerLobby can print
+    // after the world is gone.
+    if (ServerConfig::m_soccer_roulette)
+    {
+        SoccerRoulette* sr = SoccerRoulette::get();
+        if (sr)
+            sr->setBallTrackingData(m_time_on_red_side, m_time_on_blue_side);
+    }
 
     if (UserConfigParams::m_arena_ai_stats)
     {

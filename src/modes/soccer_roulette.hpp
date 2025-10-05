@@ -31,6 +31,9 @@ private:
     int m_minimap_update_interval_ms;
     std::string m_minimap_server_ip;
     int m_minimap_server_port;
+    // Accumulated times for last finished game (in seconds)
+    float m_last_red_side_time = 0.0f;
+    float m_last_blue_side_time = 0.0f;
     void loadFieldsFromConfig();
     void minimapExportThread();
     void exportMinimapData();
@@ -68,6 +71,22 @@ public:
     std::string getGroupForColor(const std::string& color) const;
     std::vector<std::string> listGroups() const;
     
+    // Ball position tracking (persisted per finished game)
+    void setBallTrackingData(float red_time, float blue_time);
+    void clearBallTrackingData();
+    void getBallSideTimes(float& red_time, float& blue_time) const
+    {
+        red_time = m_last_red_side_time;
+        blue_time = m_last_blue_side_time;
+    }
+    bool hasBallTrackingData() const
+    {
+        return (m_last_red_side_time > 0.0f || m_last_blue_side_time > 0.0f);
+    }
+    std::string getBallPositionPercentages() const;
+    std::string getFixedMixedBar() const;
+    void writeBallSideStatsToDatabase();
+
     // Player stats tracking
     static void recordSwatterHit(const std::string& player_name);
     static void recordCakeHit(const std::string& player_name);
