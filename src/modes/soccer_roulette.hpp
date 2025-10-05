@@ -31,6 +31,7 @@ private:
     int m_minimap_update_interval_ms;
     std::string m_minimap_server_ip;
     int m_minimap_server_port;
+    std::atomic<bool> m_active{false};
     // Accumulated times for last finished game (in seconds)
     float m_last_red_side_time = 0.0f;
     float m_last_blue_side_time = 0.0f;
@@ -45,6 +46,8 @@ public:
     static void destroy();
     static SoccerRoulette* get();
     bool isEnabled() const;
+    bool isActive() const { return m_active.load(); }
+    void setActive(bool v) { m_active.store(v); }
     void reload();
     void resetIndex();
     std::string getNextField();

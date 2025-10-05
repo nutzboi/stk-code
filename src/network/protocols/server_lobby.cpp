@@ -2134,7 +2134,7 @@ void ServerLobby::update(int ticks)
     {
 	    checkRPSTimeouts();
     }
-    if (ServerConfig::m_soccer_roulette)
+    if (ServerConfig::m_soccer_roulette && SoccerRoulette::get() && SoccerRoulette::get()->isActive())
     {
         const int64_t due = m_pole_timing.load();
         if (due != std::numeric_limits<int64_t>::max() &&
@@ -3255,7 +3255,7 @@ void ServerLobby::checkRaceFinished()
 
     Log::info("ServerLobby", "The game is considered finished.");
 
-    if (ServerConfig::m_soccer_roulette)
+    if (ServerConfig::m_soccer_roulette && SoccerRoulette::get() && SoccerRoulette::get()->isActive())
     {
         SoccerRoulette::get()->writeBallSideStatsToDatabase();
     }
@@ -4960,7 +4960,7 @@ void ServerLobby::configPeersStartTime()
         Log::info("ServerLobby", "Starting replay recording with filename: %s", replay_name.c_str());
     }
     // Write previous game stats to database and reset, give nitro when soccer roulette game is about to start
-    if (ServerConfig::m_soccer_roulette)
+    if (ServerConfig::m_soccer_roulette && SoccerRoulette::get() && SoccerRoulette::get()->isActive())
     {
         SoccerRoulette::writeStatsToDatabase();
         SoccerRoulette::resetPlayerStats();

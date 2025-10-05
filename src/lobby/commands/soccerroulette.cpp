@@ -112,6 +112,7 @@ bool SoccerRouletteCommand::execute(nnwcli::CommandExecutorContext* const ctx, v
         if (success)
         {
             msg = "Soccer Roulette started with field: " + next_field;
+            SoccerRoulette::get()->setActive(true);
             // Recalculate eligibility so players not in teams.xml get a cross immediately
             auto peers = STKHost::get()->getPeers();
             for (auto& peer : peers)
@@ -134,6 +135,7 @@ bool SoccerRouletteCommand::execute(nnwcli::CommandExecutorContext* const ctx, v
     else if (subcmd == "reset")
     {
         SoccerRoulette::get()->resetFieldIndex();
+        SoccerRoulette::get()->setActive(false);
         std::string current_field = SoccerRoulette::get()->getCurrentField();
         ctx->write("Soccer Roulette field index reset. Next field will be: ");
         ctx->write(current_field);
