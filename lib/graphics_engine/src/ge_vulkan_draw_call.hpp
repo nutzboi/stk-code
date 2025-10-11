@@ -2,6 +2,7 @@
 #define HEADER_GE_VULKAN_DRAW_CALL_HPP
 
 #include <array>
+#include <atomic>
 #include <functional>
 #include <map>
 #include <memory>
@@ -118,6 +119,7 @@ struct DrawCallData
     uint32_t m_dynamic_offset;
 };
 
+class GEVulkanHiZDepth;
 class GEVulkanDrawCall
 {
 private:
@@ -168,11 +170,15 @@ private:
 
     bool m_update_data_descriptor_sets;
 
-    VkDescriptorSetLayout m_data_layout;
+    VkDescriptorSetLayout m_data_layout, m_displace_color_descriptor_set_layout;
 
     VkDescriptorPool m_descriptor_pool;
 
     std::vector<VkDescriptorSet> m_data_descriptor_sets;
+
+    VkDescriptorSet m_displace_color_descriptor_set;
+
+    std::weak_ptr<std::atomic<VkImageView> > m_displace_color_image_view;
 
     VkPipelineLayout m_pipeline_layout, m_skybox_layout;
 
@@ -190,6 +196,8 @@ private:
 
     std::unordered_map<std::string, std::pair<uint32_t, std::vector<int> > >
         m_materials_data;
+
+    GEVulkanHiZDepth* m_hiz_depth;
 
     // ------------------------------------------------------------------------
     void createAllPipelines(GEVulkanDriver* vk);
@@ -288,7 +296,7 @@ public:
     void renderPipeline(GEVulkanDriver* vk, VkCommandBuffer cmd,
                         GEVulkanPipelineType pt, bool& rebind_base_vertex);
     // ------------------------------------------------------------------------
-    bool renderSkyBox(GEVulkanDriver* vk, VkCommandBuffer cmd);
+    bool renderSkyBox(GEVulkanDriver* vk, VkCommandBuffer cmd, bool srgb);
     // ------------------------------------------------------------------------
     void renderDeferredLighting(GEVulkanDriver* vk, VkCommandBuffer cmd);
     // ------------------------------------------------------------------------
@@ -329,6 +337,8 @@ public:
             return true;
         return m_materials_data.find(shader) != m_materials_data.end();
     }
+    // ------------------------------------------------------------------------
+    GEVulkanHiZDepth* getHiZDepth() const               { return m_hiz_depth; }
 };   // GEVulkanDrawCall
 
 }
