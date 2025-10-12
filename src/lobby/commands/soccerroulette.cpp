@@ -25,6 +25,7 @@
 #include "network/protocols/server_lobby.hpp"
 #include "lobby/player_queue.hpp"
 #include "network/stk_host.hpp"
+#include "network/database/abstract_database.hpp"
 #include <parser/argline_parser.hpp>
 #include <string>
 
@@ -255,9 +256,23 @@ bool SoccerRouletteCommand::execute(nnwcli::CommandExecutorContext* const ctx, v
         SoccerRoulette::get()->loadTeamsFromXML();
         SoccerRoulette::get()->reassignTeams(stk_ctx);
     }
+    else if (subcmd == "empty" && track_id == "database")
+    {
+        auto db = lobby->getDatabase();
+        if (db && db->hasDatabase())
+        {
+            db->emptySoccerRouletteDatabase();
+            ctx->write("Soccer Roulette database tables have been emptied");
+        }
+        else
+        {
+            ctx->write("Database not available");
+        }
+        ctx->flush();
+    }
     else
     {
-        ctx->write("Unknown Soccer Roulette command. Format: /soccerroulette status|add <field>|remove <field>|list|reload|teams|start|reset|kick <player>|reassign teams|assign <group>=<color>|groups|stats [player]|bowling [player]");
+        ctx->write("Unknown Soccer Roulette command. Format: /soccerroulette status|add <field>|remove <field>|list|reload|teams|start|reset|kick <player>|reassign teams|assign <group>=<color>|groups|stats [player]|bowling [player]|empty database");
         ctx->flush();
         return false;
     }

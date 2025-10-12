@@ -128,6 +128,9 @@ public:
     virtual void initServerStatsTable() OVERRIDE;
     virtual void initGameStatsTable() OVERRIDE;
     virtual void initBallSideStatsTable() OVERRIDE;
+    virtual void initSoccerRouletteGameResultsTable() OVERRIDE;
+    virtual void initSoccerRouletteGoalDetailsTable() OVERRIDE;
+    virtual void initSoccerRoulettePlayerPerformanceTable() OVERRIDE;
     virtual void writeGameStats(const std::string& player_name, uint32_t online_id,
                                const std::string& game_mode, const std::string& track_name,
                                int swatter_hits, int cake_hits, int bowling_hits = 0,
@@ -137,6 +140,21 @@ public:
                                     float red_seconds, float blue_seconds,
                                     float red_pct, float blue_pct,
                                     const std::string& team_vs) OVERRIDE;
+    virtual int writeSoccerRouletteGameResult(
+        uint64_t timestamp_ms, const std::string& track_id,
+        int red_score, int blue_score, int red_total_points, int blue_total_points,
+        const std::string& red_team_name, const std::string& blue_team_name,
+        const std::string& team_vs, const std::string& fastest_player,
+        const std::string& fastest_team, float fastest_speed, float game_duration) OVERRIDE;
+    virtual void writeSoccerRouletteGoalDetail(
+        int game_id, const std::string& player_name, const std::string& team,
+        float speed, float goal_time, uint64_t timestamp_ms) OVERRIDE;
+    virtual void writeSoccerRoulettePlayerPerformance(
+        int game_id, const std::string& player_name, uint32_t online_id,
+        const std::string& team, int goals_scored, float total_speed,
+        float fastest_speed, int points_from_goals, int points_from_fastest,
+        int total_points, const std::string& team_vs) OVERRIDE;
+    virtual void emptySoccerRouletteDatabase() OVERRIDE;
     virtual bool writeReport(
          STKPeer* reporter, std::shared_ptr<NetworkPlayerProfile> reporter_npp,
        STKPeer* reporting, std::shared_ptr<NetworkPlayerProfile> reporting_npp,

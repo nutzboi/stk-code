@@ -50,6 +50,7 @@ public:
     static void showTeamGoalHistory(std::stringstream& oss, int team);
     static void clearHistory() { s_goal_history.clear(); }
     static void saveGoalHistoryToFile();
+    static const std::vector<GoalData>& getGoalHistory() { return s_goal_history; }
 };
 /** \brief An implementation of WorldWithRank, to provide the soccer game mode
  *  Notice: In soccer world, true goal means blue, false means red.

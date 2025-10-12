@@ -452,192 +452,183 @@ void SoccerRoulette::resetFieldIndex()
 // --------------------------------------------------------------------------------
 void SoccerRoulette::calculateGameResult()
 {
+#ifdef ENABLE_SQLITE3
     try
     {
-        std::string input_file_path = ServerConfig::m_gh_path_soccer_roulette.c_str();
-        std::string output_file_path = ServerConfig::m_gh_path_soccer_roulette.c_str() + std::string(".json");
-        std::ifstream input_file(input_file_path);
-        if (!input_file.is_open())
+        auto sl = LobbyProtocol::get<ServerLobby>();
+        if (!sl)
         {
-            Log::error("SoccerRoulette", "Failed to open goal history file for reading");
+            Log::error("SoccerRoulette", "ServerLobby not available");
             return;
         }
-        std::ofstream output_file(output_file_path, std::ios::app);
-        if (!output_file.is_open())
+        auto db = sl->getDatabase();
+        if (!db || !db->hasDatabase())
         {
-            Log::error("SoccerRoulette", "Failed to open results file for writing");
-            input_file.close();
+            Log::error("SoccerRoulette", "Database not available");
             return;
         }
-        std::string line;
-        std::string game_timestamp;
-        std::vector<std::string> game_lines;
-        bool in_game = false;
-        while (std::getline(input_file, line))
+        
+        const auto& goal_history = GoalHistory::getGoalHistory();
+        if (goal_history.empty())
         {
-            if (line.find("=== Soccer Game ") != std::string::npos)
-            {
-                if (in_game)
-                {
-                    game_lines.clear();
-                }
-                in_game = true;
-                game_timestamp = line.substr(16, 19);
-                game_lines.push_back(line);
-            }
-            else if (in_game)
-            {
-                game_lines.push_back(line);
-            }
+            Log::info("SoccerRoulette", "No goals to process");
+            return;
         }
-        if (in_game && !game_lines.empty())
+        
+        int red_score = 0;
+        int blue_score = 0;
+        float fastest_speed = 0;
+        std::string fastest_player;
+        std::string fastest_team;
+        std::map<std::string, int> red_players_points;
+        std::map<std::string, int> blue_players_points;
+        std::map<std::string, int> red_players_goals;
+        std::map<std::string, int> blue_players_goals;
+        std::map<std::string, float> red_players_total_speed;
+        std::map<std::string, float> blue_players_total_speed;
+        std::map<std::string, float> red_players_fastest_speed;
+        std::map<std::string, float> blue_players_fastest_speed;
+        
+        for (const auto& goal : goal_history)
         {
-            int red_score = 0;
-            int blue_score = 0;
-            std::string score_line;
-            for (const auto& line : game_lines)
+            std::string team_name = (goal.team == 0) ? "Red" : "Blue";
+            std::string player_name = goal.player_name;
+            float speed = goal.speed;
+            
+            if (goal.team == 0)
             {
-                if (line.find("Final Score:") != std::string::npos)
+                red_score++;
+                red_players_points[player_name] += 1;
+                red_players_goals[player_name]++;
+                red_players_total_speed[player_name] += speed;
+                if (red_players_fastest_speed[player_name] < speed)
                 {
-                    score_line = line;
-                    size_t red_pos = line.find("Red ") + 4;
-                    size_t dash_pos = line.find(" - ");
-                    size_t blue_pos = dash_pos + 3;
-                    size_t blue_end = line.find(" Blue");
-                    if (red_pos != std::string::npos && dash_pos != std::string::npos && blue_pos != std::string::npos && blue_end != std::string::npos)
-                    {
-                        red_score = std::stoi(line.substr(red_pos, dash_pos - red_pos));
-                        blue_score = std::stoi(line.substr(blue_pos, blue_end - blue_pos));
-                    }
-                    break;
+                    red_players_fastest_speed[player_name] = speed;
                 }
-            }
-            int red_points = 0;
-            int blue_points = 0;
-            if (red_score > blue_score)
-            {
-                red_points += 10;
-            }
-            else if (blue_score > red_score)
-            {
-                blue_points += 10;
-            }
-            std::map<std::string, int> red_players_points;
-            std::map<std::string, int> blue_players_points;
-            float fastest_speed = 0;
-            std::string fastest_player;
-            std::string fastest_team;
-            bool in_goal_details = false;
-            for (const auto& line : game_lines)
-            {
-                if (line.find("Goal Details:") != std::string::npos)
-                {
-                    in_goal_details = true;
-                    continue;
-                }
-                if (in_goal_details && !line.empty() && line[0] != '=')
-                {
-                    size_t team_pos = line.find(" - ") + 3;
-                    size_t team_end = line.find(" goal by ");
-                    size_t player_pos = team_end + 9;
-                    size_t player_end = line.find(" (");
-                    size_t speed_pos = player_end + 2;
-                    size_t speed_end = line.find(" km/h)");
-                    if (team_pos != std::string::npos && team_end != std::string::npos && player_pos != std::string::npos && player_end != std::string::npos && speed_pos != std::string::npos && speed_end != std::string::npos)
-                    {
-                        std::string team = line.substr(team_pos, team_end - team_pos);
-                        std::string player = line.substr(player_pos, player_end - player_pos);
-                        float speed = std::stof(line.substr(speed_pos, speed_end - speed_pos));
-                        if (speed > fastest_speed)
-                        {
-                            fastest_speed = speed;
-                            fastest_player = player;
-                            fastest_team = team;
-                        }
-                        if (team == "Red")
-                        {
-                            red_players_points[player] += 1;
-                            red_points += 1;
-                        }
-                        else if (team == "Blue")
-                        {
-                            blue_players_points[player] += 1;
-                            blue_points += 1;
-                        }
-                    }
-                }
-            }
-            if (!fastest_team.empty())
-            {
-                if (fastest_team == "Red")
-                {
-                    red_players_points[fastest_player] += 3;
-                    red_points += 3;
-                }
-                else if (fastest_team == "Blue")
-                {
-                    blue_players_points[fastest_player] += 3;
-                    blue_points += 3;
-                }
-            }
-            // write
-            output_file << "{" << std::endl;
-            output_file << "  \"timestamp\": \"" << game_timestamp << "\"," << std::endl;
-            output_file << "  \"score\": {" << std::endl;
-            output_file << "    \"red\": " << red_score << "," << std::endl;
-            output_file << "    \"blue\": " << blue_score << std::endl;
-            output_file << "  }," << std::endl;
-            output_file << "  \"points\": {" << std::endl;
-            output_file << "    \"red\": " << red_points << "," << std::endl;
-            output_file << "    \"blue\": " << blue_points << std::endl;
-            output_file << "  }," << std::endl;
-            // Add labels block for backwards-compatible team naming
-            {
-                std::string red_label_out = getGroupForColor("red");
-                std::string blue_label_out = getGroupForColor("blue");
-                if (red_label_out.empty()) red_label_out = "red";
-                if (blue_label_out.empty()) blue_label_out = "blue";
-                output_file << "  \"labels\": {" << std::endl;
-                output_file << "    \"red\": \"" << red_label_out << "\"," << std::endl;
-                output_file << "    \"blue\": \"" << blue_label_out << "\"" << std::endl;
-                output_file << "  }";
-            }
-            if (fastest_speed > 0)
-            {
-                output_file << "," << std::endl;
-                output_file << "  \"fastest_goal\": {" << std::endl;
-                output_file << "    \"player\": \"" << fastest_player << "\"," << std::endl;
-                // Use label if available
-                std::string team_out = fastest_team;
-                if (fastest_team == "Red")
-                {
-                    std::string t = getGroupForColor("red");
-                    if (!t.empty()) team_out = t;
-                }
-                else if (fastest_team == "Blue")
-                {
-                    std::string t = getGroupForColor("blue");
-                    if (!t.empty()) team_out = t;
-                }
-                output_file << "    \"team\": \"" << team_out << "\"," << std::endl;
-                output_file << "    \"speed\": " << fastest_speed << std::endl;
-                output_file << "  }" << std::endl;
             }
             else
             {
-                output_file << std::endl;
+                blue_score++;
+                blue_players_points[player_name] += 1;
+                blue_players_goals[player_name]++;
+                blue_players_total_speed[player_name] += speed;
+                if (blue_players_fastest_speed[player_name] < speed)
+                {
+                    blue_players_fastest_speed[player_name] = speed;
+                }
             }
             
-            output_file << "}" << std::endl;
+            if (speed > fastest_speed)
+            {
+                fastest_speed = speed;
+                fastest_player = player_name;
+                fastest_team = team_name;
+            }
         }
-        input_file.close();
-        output_file.close();
-        Log::info("SoccerRoulette", "Game results calculated and saved to JSON file");
+        
+        int red_total_points = 0;
+        int blue_total_points = 0;
+        
+        if (red_score > blue_score)
+        {
+            red_total_points += 10;
+        }
+        else if (blue_score > red_score)
+        {
+            blue_total_points += 10;
+        }
+        
+        red_total_points += red_score;
+        blue_total_points += blue_score;
+        
+        if (!fastest_team.empty())
+        {
+            if (fastest_team == "Red")
+            {
+                red_players_points[fastest_player] += 3;
+                red_total_points += 3;
+            }
+            else if (fastest_team == "Blue")
+            {
+                blue_players_points[fastest_player] += 3;
+                blue_total_points += 3;
+            }
+        }
+        
+        std::string red_team_name = getGroupForColor("red");
+        std::string blue_team_name = getGroupForColor("blue");
+        if (red_team_name.empty()) red_team_name = "red";
+        if (blue_team_name.empty()) blue_team_name = "blue";
+        
+        std::string team_vs = red_team_name + " vs " + blue_team_name;
+        
+        uint64_t timestamp_ms = StkTime::getMonoTimeMs();
+        std::string track_id = Track::getCurrentTrack() ? Track::getCurrentTrack()->getIdent() : "";
+        
+        int game_id = db->writeSoccerRouletteGameResult(
+            timestamp_ms, track_id,
+            red_score, blue_score, red_total_points, blue_total_points,
+            red_team_name, blue_team_name, team_vs,
+            fastest_player, fastest_team, fastest_speed, 0.0f
+        );
+        
+        if (game_id <= 0)
+        {
+            Log::error("SoccerRoulette", "Failed to write game result to database");
+            return;
+        }
+        
+        for (const auto& goal : goal_history)
+        {
+            std::string team_name = (goal.team == 0) ? "Red" : "Blue";
+            db->writeSoccerRouletteGoalDetail(
+                game_id, goal.player_name, team_name,
+                goal.speed, 0.0f, timestamp_ms
+            );
+        }
+        
+        for (const auto& pair : red_players_points)
+        {
+            const std::string& player_name = pair.first;
+            int goals_scored = red_players_goals[player_name];
+            float total_speed = red_players_total_speed[player_name];
+            float fastest_speed = red_players_fastest_speed[player_name];
+            int points_from_goals = goals_scored;
+            int points_from_fastest = (player_name == fastest_player && fastest_team == "Red") ? 3 : 0;
+            
+            db->writeSoccerRoulettePlayerPerformance(
+                game_id, player_name, 0, "red",
+                goals_scored, total_speed, fastest_speed, 
+                points_from_goals, points_from_fastest, pair.second, team_vs
+            );
+        }
+        
+        for (const auto& pair : blue_players_points)
+        {
+            const std::string& player_name = pair.first;
+            int goals_scored = blue_players_goals[player_name];
+            float total_speed = blue_players_total_speed[player_name];
+            float fastest_speed = blue_players_fastest_speed[player_name];
+            int points_from_goals = goals_scored;
+            int points_from_fastest = (player_name == fastest_player && fastest_team == "Blue") ? 3 : 0;
+            
+            db->writeSoccerRoulettePlayerPerformance(
+                game_id, player_name, 0, "blue",
+                goals_scored, total_speed, fastest_speed,
+                points_from_goals, points_from_fastest, pair.second, team_vs
+            );
+        }
+        
+        Log::info("SoccerRoulette", "Game results calculated and saved to database: %s vs %s (%d-%d)", 
+                 red_team_name.c_str(), blue_team_name.c_str(), red_score, blue_score);
     }
     catch (const std::exception& e)
     {
         Log::error("SoccerRoulette", "Exception while calculating game results: %s", e.what());
     }
+#else
+    Log::error("SoccerRoulette", "SQLite not enabled, cannot save to database");
+#endif
 }
 void SoccerRoulette::kickPlayer(const std::string& player_name, STKCommandContext* const commander)
 {

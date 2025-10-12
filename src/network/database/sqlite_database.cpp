@@ -1878,4 +1878,187 @@ void SQLiteDatabase::writeBallSideStats(uint64_t timestamp_ms, const std::string
     );
     easySQLQuery(q, nullptr, coll->getBindFunction());
 }
+
+void SQLiteDatabase::initSoccerRouletteGameResultsTable()
+{
+    if (!ServerConfig::m_sql_management || !m_db)
+        return;
+        
+    std::ostringstream oss;
+    oss << "CREATE TABLE IF NOT EXISTS soccer_roulette_game_results (\n"
+        "    game_id INTEGER PRIMARY KEY AUTOINCREMENT,\n"
+        "    timestamp_ms INTEGER NOT NULL,\n"
+        "    datetime_text TEXT NOT NULL DEFAULT (datetime('now')),\n"
+        "    track_id TEXT NOT NULL,\n"
+        "    red_score INTEGER NOT NULL DEFAULT 0,\n"
+        "    blue_score INTEGER NOT NULL DEFAULT 0,\n"
+        "    red_total_points INTEGER NOT NULL DEFAULT 0,\n"
+        "    blue_total_points INTEGER NOT NULL DEFAULT 0,\n"
+        "    red_team_name TEXT NOT NULL DEFAULT 'red',\n"
+        "    blue_team_name TEXT NOT NULL DEFAULT 'blue',\n"
+        "    team_vs TEXT NOT NULL DEFAULT '',\n"
+        "    fastest_goal_player TEXT,\n"
+        "    fastest_goal_team TEXT,\n"
+        "    fastest_goal_speed REAL,\n"
+        "    game_duration_seconds REAL,\n"
+        "    total_goals INTEGER NOT NULL DEFAULT 0\n"
+        ");";
+    
+    std::string query = oss.str();
+    easySQLQuery(query);
+    
+    easySQLQuery("CREATE INDEX IF NOT EXISTS idx_srrg_time ON soccer_roulette_game_results(timestamp_ms);");
+    easySQLQuery("CREATE INDEX IF NOT EXISTS idx_srrg_track ON soccer_roulette_game_results(track_id);");
+    easySQLQuery("CREATE INDEX IF NOT EXISTS idx_srrg_teams ON soccer_roulette_game_results(team_vs);");
+}
+
+void SQLiteDatabase::initSoccerRouletteGoalDetailsTable()
+{
+    if (!ServerConfig::m_sql_management || !m_db)
+        return;
+        
+    std::ostringstream oss;
+    oss << "CREATE TABLE IF NOT EXISTS soccer_roulette_goal_details (\n"
+        "    goal_id INTEGER PRIMARY KEY AUTOINCREMENT,\n"
+        "    game_id INTEGER NOT NULL,\n"
+        "    player_name TEXT NOT NULL,\n"
+        "    team TEXT NOT NULL,\n"
+        "    goal_speed REAL NOT NULL,\n"
+        "    goal_time_seconds REAL NOT NULL,\n"
+        "    timestamp_ms INTEGER NOT NULL,\n"
+        "    FOREIGN KEY (game_id) REFERENCES soccer_roulette_game_results(game_id)\n"
+        ");";
+    
+    std::string query = oss.str();
+    easySQLQuery(query);
+    
+    easySQLQuery("CREATE INDEX IF NOT EXISTS idx_srgd_game ON soccer_roulette_goal_details(game_id);");
+    easySQLQuery("CREATE INDEX IF NOT EXISTS idx_srgd_player ON soccer_roulette_goal_details(player_name);");
+}
+
+void SQLiteDatabase::initSoccerRoulettePlayerPerformanceTable()
+{
+    if (!ServerConfig::m_sql_management || !m_db)
+        return;
+        
+    std::ostringstream oss;
+    oss << "CREATE TABLE IF NOT EXISTS soccer_roulette_player_performance (\n"
+        "    performance_id INTEGER PRIMARY KEY AUTOINCREMENT,\n"
+        "    game_id INTEGER NOT NULL,\n"
+        "    player_name TEXT NOT NULL,\n"
+        "    online_id INTEGER UNSIGNED,\n"
+        "    team TEXT NOT NULL,\n"
+        "    goals_scored INTEGER NOT NULL DEFAULT 0,\n"
+        "    total_goal_speed REAL NOT NULL DEFAULT 0.0,\n"
+        "    fastest_goal_speed REAL NOT NULL DEFAULT 0.0,\n"
+        "    points_from_goals INTEGER NOT NULL DEFAULT 0,\n"
+        "    points_from_fastest_goal INTEGER NOT NULL DEFAULT 0,\n"
+        "    total_points INTEGER NOT NULL DEFAULT 0,\n"
+        "    team_vs TEXT NOT NULL DEFAULT '',\n"
+        "    FOREIGN KEY (game_id) REFERENCES soccer_roulette_game_results(game_id)\n"
+        ");";
+    
+    std::string query = oss.str();
+    easySQLQuery(query);
+    
+    easySQLQuery("CREATE INDEX IF NOT EXISTS idx_srpp_game ON soccer_roulette_player_performance(game_id);");
+    easySQLQuery("CREATE INDEX IF NOT EXISTS idx_srpp_player ON soccer_roulette_player_performance(player_name);");
+}
+
+int SQLiteDatabase::writeSoccerRouletteGameResult(
+    uint64_t timestamp_ms, const std::string& track_id,
+    int red_score, int blue_score, int red_total_points, int blue_total_points,
+    const std::string& red_team_name, const std::string& blue_team_name,
+    const std::string& team_vs, const std::string& fastest_player,
+    const std::string& fastest_team, float fastest_speed, float game_duration)
+{
+    if (!m_db) return -1;
+    
+    std::shared_ptr<BinderCollection> coll = std::make_shared<BinderCollection>();
+    std::string query = StringUtils::insertValues(
+        "INSERT INTO soccer_roulette_game_results "
+        "(timestamp_ms, track_id, red_score, blue_score, red_total_points, blue_total_points, "
+        "red_team_name, blue_team_name, team_vs, fastest_goal_player, fastest_goal_team, "
+        "fastest_goal_speed, game_duration_seconds, total_goals) "
+        "VALUES (%d, %s, %d, %d, %d, %d, %s, %s, %s, %s, %s, %f, %f, %d);",
+        (int)timestamp_ms,
+        Binder(coll, track_id, "track_id"),
+        red_score, blue_score, red_total_points, blue_total_points,
+        Binder(coll, red_team_name, "red_team_name"),
+        Binder(coll, blue_team_name, "blue_team_name"),
+        Binder(coll, team_vs, "team_vs"),
+        Binder(coll, fastest_player, "fastest_player"),
+        Binder(coll, fastest_team, "fastest_team"),
+        fastest_speed, game_duration,
+        red_score + blue_score
+    );
+    
+    easySQLQuery(query, nullptr, coll->getBindFunction());
+    
+    std::vector<std::vector<std::string>> output;
+    easySQLQuery("SELECT last_insert_rowid();", &output);
+    if (!output.empty() && !output[0].empty()) {
+        return std::stoi(output[0][0]);
+    }
+    return -1;
+}
+
+void SQLiteDatabase::writeSoccerRouletteGoalDetail(
+    int game_id, const std::string& player_name, const std::string& team,
+    float speed, float goal_time, uint64_t timestamp_ms)
+{
+    if (!m_db) return;
+    
+    std::shared_ptr<BinderCollection> coll = std::make_shared<BinderCollection>();
+    std::string query = StringUtils::insertValues(
+        "INSERT INTO soccer_roulette_goal_details "
+        "(game_id, player_name, team, goal_speed, goal_time_seconds, timestamp_ms) "
+        "VALUES (%d, %s, %s, %f, %f, %d);",
+        game_id,
+        Binder(coll, player_name, "player_name"),
+        Binder(coll, team, "team"),
+        speed, goal_time, (int)timestamp_ms
+    );
+    
+    easySQLQuery(query, nullptr, coll->getBindFunction());
+}
+
+void SQLiteDatabase::writeSoccerRoulettePlayerPerformance(
+    int game_id, const std::string& player_name, uint32_t online_id,
+    const std::string& team, int goals_scored, float total_speed,
+    float fastest_speed, int points_from_goals, int points_from_fastest,
+    int total_points, const std::string& team_vs)
+{
+    if (!m_db) return;
+    
+    std::shared_ptr<BinderCollection> coll = std::make_shared<BinderCollection>();
+    std::string query = StringUtils::insertValues(
+        "INSERT INTO soccer_roulette_player_performance "
+        "(game_id, player_name, online_id, team, goals_scored, total_goal_speed, "
+        "fastest_goal_speed, points_from_goals, points_from_fastest_goal, total_points, team_vs) "
+        "VALUES (%d, %s, %u, %s, %d, %f, %f, %d, %d, %d, %s);",
+        game_id,
+        Binder(coll, player_name, "player_name"),
+        online_id,
+        Binder(coll, team, "team"),
+        goals_scored, total_speed, fastest_speed,
+        points_from_goals, points_from_fastest, total_points,
+        Binder(coll, team_vs, "team_vs")
+    );
+    
+    easySQLQuery(query, nullptr, coll->getBindFunction());
+}
+
+void SQLiteDatabase::emptySoccerRouletteDatabase()
+{
+    if (!m_db) return;
+    
+    easySQLQuery("DELETE FROM soccer_roulette_player_performance;");
+    easySQLQuery("DELETE FROM soccer_roulette_goal_details;");
+    easySQLQuery("DELETE FROM soccer_roulette_game_results;");
+    
+    easySQLQuery("DELETE FROM sqlite_sequence WHERE name='soccer_roulette_game_results';");
+    easySQLQuery("DELETE FROM sqlite_sequence WHERE name='soccer_roulette_goal_details';");
+    easySQLQuery("DELETE FROM sqlite_sequence WHERE name='soccer_roulette_player_performance';");
+}
 #endif // ENABLE_SQLITE3

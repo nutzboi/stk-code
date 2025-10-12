@@ -299,6 +299,9 @@ void ServerLobby::initServerStatsTable()
     m_db->initServerStatsTable();
     m_db->initGameStatsTable();
     m_db->initBallSideStatsTable();
+    m_db->initSoccerRouletteGameResultsTable();
+    m_db->initSoccerRouletteGoalDetailsTable();
+    m_db->initSoccerRoulettePlayerPerformanceTable();
 #endif
 }   // initServerStatsTable
 
