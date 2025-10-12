@@ -3259,10 +3259,6 @@ void ServerLobby::checkRaceFinished()
 
     Log::info("ServerLobby", "The game is considered finished.");
 
-    if (ServerConfig::m_soccer_roulette && SoccerRoulette::get() && SoccerRoulette::get()->isActive())
-    {
-        SoccerRoulette::get()->writeBallSideStatsToDatabase();
-    }
     // notify the network world that it is stopped
     RaceEventManager::get()->stop();
 
@@ -3343,6 +3339,7 @@ void ServerLobby::checkRaceFinished()
 	    checkSoccerRoulette();
 	    GoalHistory::saveGoalHistoryToFile();
 	    SoccerRoulette::get()->calculateGameResult();
+	    SoccerRoulette::get()->writeBallSideStatsToDatabase();
     } 
     if (ServerConfig::m_tiers_roulette)
     {
