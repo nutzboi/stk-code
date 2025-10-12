@@ -1780,6 +1780,7 @@ void SQLiteDatabase::initGameStatsTable()
     std::ostringstream oss;
     oss << "CREATE TABLE IF NOT EXISTS " << table_name << " (\n"
         "    game_id INTEGER PRIMARY KEY AUTOINCREMENT,\n"
+        "    soccer_roulette_game_id INTEGER,\n"
         "    online_id INTEGER UNSIGNED NOT NULL,\n"
         "    player_name TEXT NOT NULL,\n"
         "    swatter_hits_received INTEGER UNSIGNED NOT NULL DEFAULT 0,\n"
@@ -1789,7 +1790,8 @@ void SQLiteDatabase::initGameStatsTable()
         "    bowling_balls_hit_puck INTEGER UNSIGNED NOT NULL DEFAULT 0,\n"
         "    bowling_balls_hit_players INTEGER UNSIGNED NOT NULL DEFAULT 0,\n"
         "    team_vs TEXT NOT NULL DEFAULT '', -- team1 vs team2 format\n"
-        "    game_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP\n"
+        "    game_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n"
+        "    FOREIGN KEY (soccer_roulette_game_id) REFERENCES soccer_roulette_game_results(game_id)\n"
         ");";
     
     std::string query = oss.str();
@@ -1801,7 +1803,7 @@ void SQLiteDatabase::initGameStatsTable()
 
 //-----------------------------------------------------------------------------
 /** Writes game stats for a player to the database. */
-void SQLiteDatabase::writeGameStats(const std::string& player_name, uint32_t online_id,
+void SQLiteDatabase::writeGameStats(int game_id, const std::string& player_name, uint32_t online_id,
                                    const std::string& game_mode, const std::string& track_name,
                                    int swatter_hits, int cake_hits, int bowling_hits,
                                    int bowling_used, int bowling_puck, int bowling_players,
@@ -1813,9 +1815,10 @@ void SQLiteDatabase::writeGameStats(const std::string& player_name, uint32_t onl
     std::shared_ptr<BinderCollection> coll = std::make_shared<BinderCollection>();
     std::string query = StringUtils::insertValues(
         "INSERT INTO %s "
-        "(online_id, player_name, swatter_hits_received, cake_hits_received, bowling_hits_received, bowling_balls_used, bowling_balls_hit_puck, bowling_balls_hit_players, team_vs, game_date) "
-        "VALUES (%u, %s, %d, %d, %d, %d, %d, %d, %s, datetime('now'));",
+        "(soccer_roulette_game_id, online_id, player_name, swatter_hits_received, cake_hits_received, bowling_hits_received, bowling_balls_used, bowling_balls_hit_puck, bowling_balls_hit_players, team_vs, game_date) "
+        "VALUES (%d, %u, %s, %d, %d, %d, %d, %d, %d, %s, datetime('now'));",
         m_game_stats_table.c_str(),
+        game_id,
         online_id,
         Binder(coll, player_name, "player_name"),
         swatter_hits,
@@ -1843,6 +1846,7 @@ void SQLiteDatabase::initBallSideStatsTable()
     std::ostringstream oss;
     oss << "CREATE TABLE IF NOT EXISTS soccer_ball_side_stats (\n"
         "  id INTEGER PRIMARY KEY AUTOINCREMENT,\n"
+        "  game_id INTEGER,\n"
         "  timestamp_ms INTEGER NOT NULL,\n"
         "  datetime_text TEXT NOT NULL DEFAULT (datetime('now')),\n"
         "  track_id TEXT NOT NULL,\n"
@@ -1850,16 +1854,18 @@ void SQLiteDatabase::initBallSideStatsTable()
         "  blue_seconds REAL NOT NULL,\n"
         "  red_pct REAL NOT NULL,\n"
         "  blue_pct REAL NOT NULL,\n"
-        "  team_vs TEXT NOT NULL DEFAULT ''\n"
+        "  team_vs TEXT NOT NULL DEFAULT '',\n"
+        "  FOREIGN KEY (game_id) REFERENCES soccer_roulette_game_results(game_id)\n"
         ");";
     std::string query = oss.str();
     easySQLQuery(query);
     easySQLQuery("CREATE INDEX IF NOT EXISTS idx_sbss_time ON soccer_ball_side_stats(timestamp_ms);");
     easySQLQuery("CREATE INDEX IF NOT EXISTS idx_sbss_track ON soccer_ball_side_stats(track_id);");
+    easySQLQuery("CREATE INDEX IF NOT EXISTS idx_sbss_game ON soccer_ball_side_stats(game_id);");
 }
 
 //-----------------------------------------------------------------------------
-void SQLiteDatabase::writeBallSideStats(uint64_t timestamp_ms, const std::string& track_id,
+void SQLiteDatabase::writeBallSideStats(int game_id, uint64_t timestamp_ms, const std::string& track_id,
                                         float red_seconds, float blue_seconds,
                                         float red_pct, float blue_pct,
                                         const std::string& team_vs)
@@ -1869,8 +1875,9 @@ void SQLiteDatabase::writeBallSideStats(uint64_t timestamp_ms, const std::string
 
     auto coll = std::make_shared<BinderCollection>();
     std::string q = StringUtils::insertValues(
-        "INSERT INTO soccer_ball_side_stats (timestamp_ms, track_id, red_seconds, blue_seconds, red_pct, blue_pct, datetime_text, team_vs) "
-        "VALUES (%d, %s, %f, %f, %f, %f, datetime('now'), %s);",
+        "INSERT INTO soccer_ball_side_stats (game_id, timestamp_ms, track_id, red_seconds, blue_seconds, red_pct, blue_pct, datetime_text, team_vs) "
+        "VALUES (%d, %d, %s, %f, %f, %f, %f, datetime('now'), %s);",
+        game_id,
         (int)timestamp_ms,
         Binder(coll, track_id, "track_id"),
         red_seconds, blue_seconds, red_pct, blue_pct,

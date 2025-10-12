@@ -4979,7 +4979,7 @@ void ServerLobby::configPeersStartTime()
     // Write previous game stats to database and reset, give nitro when soccer roulette game is about to start
     if (ServerConfig::m_soccer_roulette && SoccerRoulette::get() && SoccerRoulette::get()->isActive())
     {
-        SoccerRoulette::writeStatsToDatabase();
+        SoccerRoulette::writeStatsToDatabase(SoccerRoulette::get()->m_last_game_id);
         SoccerRoulette::resetPlayerStats();
         SoccerRoulette::get()->giveNitroToAll();
     }

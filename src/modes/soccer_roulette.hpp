@@ -42,6 +42,8 @@ private:
     ~SoccerRoulette();
 
 public:
+    // Last game ID for linking ball side stats
+    int m_last_game_id = -1;
     static void create();
     static void destroy();
     static SoccerRoulette* get();
@@ -104,7 +106,7 @@ public:
     static int getBowlingPuckHits(const std::string& player_name);
     static int getBowlingPlayerHits(const std::string& player_name);
     static void resetPlayerStats();
-    static void writeStatsToDatabase();
+    static void writeStatsToDatabase(int game_id = -1);
 };
 
 #endif

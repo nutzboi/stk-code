@@ -578,6 +578,8 @@ void SoccerRoulette::calculateGameResult()
             return;
         }
         
+        m_last_game_id = game_id;
+        
         for (const auto& goal : goal_history)
         {
             std::string team_name = (goal.team == 0) ? "Red" : "Blue";
@@ -819,7 +821,7 @@ void SoccerRoulette::writeBallSideStatsToDatabase()
     else
         team_vs = "Red vs Blue";
 
-    db->writeBallSideStats(ts, track_id, red_s, blue_s, red_pct, blue_pct, team_vs);
+    db->writeBallSideStats(m_last_game_id, ts, track_id, red_s, blue_s, red_pct, blue_pct, team_vs);
 #endif
 }
 
@@ -954,7 +956,7 @@ void SoccerRoulette::resetPlayerStats()
 }
 
 // -----------------------------------------------------------------------------
-void SoccerRoulette::writeStatsToDatabase()
+void SoccerRoulette::writeStatsToDatabase(int game_id)
 {
 #ifdef ENABLE_SQLITE3
     if (!ServerConfig::m_sql_management)
@@ -1031,7 +1033,7 @@ void SoccerRoulette::writeStatsToDatabase()
         }
         
         // Write to database
-        db->writeGameStats(player_name, online_id, "", "",
+        db->writeGameStats(game_id, player_name, online_id, "", "",
                           swatter_hits, cake_hits, bowling_hits, 
                           bowling_used, bowling_puck, bowling_players, team_vs, "");
     }

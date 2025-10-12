@@ -110,13 +110,13 @@ public:
     virtual void initSoccerRouletteGameResultsTable() = 0;
     virtual void initSoccerRouletteGoalDetailsTable() = 0;
     virtual void initSoccerRoulettePlayerPerformanceTable() = 0;
-    virtual void writeGameStats(const std::string& player_name, uint32_t online_id,
+    virtual void writeGameStats(int game_id, const std::string& player_name, uint32_t online_id,
                                const std::string& game_mode, const std::string& track_name,
                                int swatter_hits, int cake_hits, int bowling_hits = 0,
                                int bowling_used = 0, int bowling_puck = 0, int bowling_players = 0,
                                const std::string& team_color = "", const std::string& team_group = "") = 0;
     // Write ball side statistics (roulette): stores both epoch ms and formatted datetime
-    virtual void writeBallSideStats(uint64_t timestamp_ms, const std::string& track_id,
+    virtual void writeBallSideStats(int game_id, uint64_t timestamp_ms, const std::string& track_id,
                                     float red_seconds, float blue_seconds,
                                     float red_pct, float blue_pct,
                                     const std::string& team_vs) = 0;
