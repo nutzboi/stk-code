@@ -2063,9 +2063,11 @@ void SQLiteDatabase::emptySoccerRouletteDatabase()
     easySQLQuery("DELETE FROM soccer_roulette_player_performance;");
     easySQLQuery("DELETE FROM soccer_roulette_goal_details;");
     easySQLQuery("DELETE FROM soccer_roulette_game_results;");
+    easySQLQuery("DELETE FROM v1_soccer_game_stats;");
     
     easySQLQuery("DELETE FROM sqlite_sequence WHERE name='soccer_roulette_game_results';");
     easySQLQuery("DELETE FROM sqlite_sequence WHERE name='soccer_roulette_goal_details';");
     easySQLQuery("DELETE FROM sqlite_sequence WHERE name='soccer_roulette_player_performance';");
+    easySQLQuery("DELETE FROM sqlite_sequence WHERE name='v1_soccer_game_stats';");
 }
 #endif // ENABLE_SQLITE3
