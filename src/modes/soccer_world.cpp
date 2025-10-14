@@ -906,6 +906,17 @@ void SoccerWorld::onCheckGoalTriggered(bool first_goal)
                 }
             }
             tellCountIfDiffers();
+
+            if (ServerConfig::m_soccer_roulette)
+            {
+                SoccerRoulette* sr = SoccerRoulette::get();
+                if (sr && sr->isGoldenGoalActive())
+                {
+                    sr->deactivateGoldenGoal();
+                    World::getWorld()->scheduleInterruptRace();
+                    return;
+                }
+            }
         }
     }
     for (unsigned i = 0; i < m_karts.size(); i++)

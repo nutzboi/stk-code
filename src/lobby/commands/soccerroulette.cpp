@@ -17,6 +17,7 @@
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "network/server_config.hpp"
+#include "utils/log.hpp"
 #include "soccerroulette.hpp"
 #include "lobby/server_lobby_commands.hpp"
 #include "lobby/stk_command.hpp"
@@ -141,6 +142,21 @@ bool SoccerRouletteCommand::execute(nnwcli::CommandExecutorContext* const ctx, v
         ctx->write("Soccer Roulette field index reset. Next field will be: ");
         ctx->write(current_field);
         ctx->flush();
+    }
+    else if (subcmd == "golden-goal")
+    {
+        SoccerRoulette::get()->activateGoldenGoal();
+        std::string who = stk_ctx->getProfileName();
+        Log::warn("SoccerRoulette", "Golden goal activated by %s", who.c_str());
+        if (stk_ctx->get_lobby() && stk_ctx->get_lobby()->getCurrentState() == ServerLobby::RACING)
+        {
+            stk_ctx->get_lobby()->sendStringToAllPeers("Golden goal activated. Next goal ends the match.");
+        }
+        else
+        {
+            ctx->write("Golden goal activated. Next goal of the upcoming match will end it instantly.");
+            ctx->flush();
+        }
     }
     else if (subcmd == "assign" && !track_id.empty())
     {
@@ -272,7 +288,7 @@ bool SoccerRouletteCommand::execute(nnwcli::CommandExecutorContext* const ctx, v
     }
     else
     {
-        ctx->write("Unknown Soccer Roulette command. Format: /soccerroulette status|add <field>|remove <field>|list|reload|teams|start|reset|kick <player>|reassign teams|assign <group>=<color>|groups|stats [player]|bowling [player]|empty database");
+        ctx->write("Unknown Soccer Roulette command. Format: /soccerroulette status|add <field>|remove <field>|list|reload|teams|start|reset|golden-goal|kick <player>|reassign teams|assign <group>=<color>|groups|stats [player]|bowling [player]|empty database");
         ctx->flush();
         return false;
     }

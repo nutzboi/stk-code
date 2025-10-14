@@ -32,6 +32,7 @@ private:
     std::string m_minimap_server_ip;
     int m_minimap_server_port;
     std::atomic<bool> m_active{false};
+    std::atomic<bool> m_golden_goal_active{false};
     // Accumulated times for last finished game (in seconds)
     float m_last_red_side_time = 0.0f;
     float m_last_blue_side_time = 0.0f;
@@ -50,6 +51,9 @@ public:
     bool isEnabled() const;
     bool isActive() const { return m_active.load(); }
     void setActive(bool v) { m_active.store(v); }
+    bool isGoldenGoalActive() const { return m_golden_goal_active.load(); }
+    void activateGoldenGoal() { m_golden_goal_active.store(true); }
+    void deactivateGoldenGoal() { m_golden_goal_active.store(false); }
     void reload();
     void resetIndex();
     std::string getNextField();
@@ -110,3 +114,4 @@ public:
 };
 
 #endif
+
