@@ -3,7 +3,7 @@
 > **An extensive fork of SuperTuxKart specifically developed for TierS servers with advanced multiplayer functionalities**
 
 # About this fork:
-This fork is specifically developed for **TierS servers** and is used by multiple STK servers worldwide. It contains extensive modifications for server hosting with advanced moderation tools, many commands.
+This fork is specifically developed for **TierS Servers** and is used by multiple STK servers worldwide. It contains extensive modifications for server hosting with advanced moderation tools, many commands.
 
 ### Goals
 Creating a robust, scalable version of SuperTuxKart that is optimally suited for:
@@ -62,6 +62,11 @@ For detailed installation instructions, see [INSTALL.md](INSTALL.md).
 
 We welcome contributions from the community!
 ### Bug Reports
+Recommended method:
+- Go to https://tiersservers.eu/bugs (you must be logged in).
+- Create a bug report on our own bug tracker
+
+Another way:
 - Open an issue for bugs on our servers
 - Provide detailed information about the problem
 - Add logs if available
