@@ -44,7 +44,7 @@ cd stk-code
 mkdir build && cd build
 
 # Configure CMake
-cmake -DNO_SHADERC=on
+cmake -DNO_SHADERC=on -DSERVER_ONLY=on
 
 # Build
 make -j4
