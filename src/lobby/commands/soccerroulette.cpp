@@ -137,8 +137,14 @@ bool SoccerRouletteCommand::execute(nnwcli::CommandExecutorContext* const ctx, v
     else if (subcmd == "reset")
     {
         SoccerRoulette::get()->resetFieldIndex();
-        SoccerRoulette::get()->setActive(false);
         std::string current_field = SoccerRoulette::get()->getCurrentField();
+        // Ensure lobby uses the reset field next by overriding any preselected forced track
+        if (lobby)
+        {
+            lobby->setForcedTrack(current_field, 10, false, true, true);
+            // Advance internal rotation so the subsequent auto-selection moves to the next field
+            SoccerRoulette::get()->getNextField();
+        }
         ctx->write("Soccer Roulette field index reset. Next field will be: ");
         ctx->write(current_field);
         ctx->flush();
