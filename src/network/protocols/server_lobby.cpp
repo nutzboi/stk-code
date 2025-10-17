@@ -17,6 +17,7 @@
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "network/protocols/server_lobby.hpp"
+#include "network/database/sqlite_database.hpp"
 
 #include "addons/addon.hpp"
 #include "config/user_config.hpp"
@@ -7392,52 +7393,50 @@ void ServerLobby::determineRPSWinner(RPSChallenge& challenge)
 // -- 
 void ServerLobby::loadJumbleWordList()
 {
-    const std::string filename = "wordlist.txt";
-    std::ifstream file(filename);
-    
     m_jumble_word_list.clear();
-    
-    if (file.is_open())
+
+    AbstractDatabase* db = getDatabase();
+    if (!db || !db->hasDatabase())
     {
-        std::string word;
-        while (std::getline(file, word))
+        Log::warn("ServerLobby", "Jumbleword: database not available; word list will be empty.");
+        return;
+    }
+
+    SQLiteDatabase* sqlite_db = dynamic_cast<SQLiteDatabase*>(db);
+    if (!sqlite_db)
+    {
+        Log::warn("ServerLobby", "Jumbleword: database is not SQLite; word list will be empty.");
+        return;
+    }
+
+    std::vector<std::vector<std::string>> rows;
+    // Words are expected to be pre-normalized (lowercase, trimmed)
+    bool ok = sqlite_db->easySQLQuery(
+        "SELECT word FROM wordlist WHERE length(word) >= 3 ORDER BY word;",
+        &rows);
+    if (!ok)
+    {
+        Log::warn("ServerLobby", "Jumbleword: failed to read words from SQLite.");
+        return;
+    }
+
+    m_jumble_word_list.reserve(rows.size());
+    for (const auto& r : rows)
+    {
+        if (r.empty()) continue;
+        const std::string& w = r[0];
+        if (w.empty()) continue;
+        // Validate: only a-z to match previous constraints
+        bool valid = true;
+        for (char c : w)
         {
-            if (word.empty() || word.length() < 3)
-                continue;
-                
-            size_t start = word.find_first_not_of(" \t\n\r");
-            if (start == std::string::npos)
-                continue;
-                
-            size_t end = word.find_last_not_of(" \t\n\r");
-            word = word.substr(start, end - start + 1);
-            
-            for (char& c : word)
-                c = std::tolower(c);
-            
-            bool valid = true;
-            for (char c : word)
-            {
-                if (c < 'a' || c > 'z')
-                {
-                    valid = false;
-                    break;
-                }
-            }
-            
-            if (valid)
-                m_jumble_word_list.push_back(word);
+            if (c < 'a' || c > 'z') { valid = false; break; }
         }
-        
-        file.close();
-        
-        Log::info("ServerLobby", "Successfully loaded %d words from %s.",
-                 (int)m_jumble_word_list.size(), filename.c_str());
+        if (!valid) continue;
+        m_jumble_word_list.push_back(w);
     }
-    else
-    {
-        Log::warn("ServerLobby", "Could not open word list file: %s", filename.c_str());
-    }
+
+    Log::info("ServerLobby", "Jumbleword: loaded %d words from SQLite.", (int)m_jumble_word_list.size());
 }
 
 std::string ServerLobby::jumbleWord(const std::string& word)
