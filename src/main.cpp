@@ -1030,6 +1030,7 @@ int handleCmdLinePreliminary()
     if (CommandLine::has("--seed", &n))
     {
         srand(n);
+        RandomGenerator::seed(n);
         Log::info("main", "STK using random seed (%d)", n);
     }
 
@@ -2488,7 +2489,7 @@ int main(int argc, char *argv[])
                 }
                 Log::warn("OpenGL", "Driver is too old!");
             }
-            else if (!CVS->isGLSL())
+            else if (!CVS->isGLSL() && irr_driver->getVideoDriver()->getDriverType() != video::EDT_VULKAN)
             {
                 #if !defined(MOBILE_STK)
                 if (UserConfigParams::m_old_driver_popup)
@@ -2533,6 +2534,7 @@ int main(int argc, char *argv[])
                 PlayerManager::get()->enforceCurrentPlayer();
             }
 
+#ifndef SERVER_ONLY // No GUI files in server builds
             // If there is a current player, it was saved in the config file,
             // so we immediately start the main menu (unless it was requested
             // to always show the login screen). Otherwise show the login
@@ -2554,6 +2556,7 @@ int main(int argc, char *argv[])
                     RegisterScreen::getInstance()->setParent(UserScreen::getInstance());
                 }
             }
+#endif // ifndef SERVER_ONLY
 #ifdef ENABLE_WIIUSE
             // Show a dialog to allow connection of wiimotes. */
             if(WiimoteManager::isEnabled())

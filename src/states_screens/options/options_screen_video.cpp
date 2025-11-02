@@ -15,6 +15,8 @@
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+#ifndef SERVER_ONLY
+
 // Manages includes common to all options screens
 #include "states_screens/options/options_common.hpp"
 
@@ -29,11 +31,11 @@
 #include "states_screens/dialogs/recommend_video_settings.hpp"
 #include "utils/profiler.hpp"
 
-#ifndef SERVER_ONLY
+
 #include <ge_main.hpp>
 #include <ge_vulkan_driver.hpp>
 #include <ge_vulkan_texture_descriptor.hpp>
-#endif
+
 
 #include <IrrlichtDevice.h>
 
@@ -47,7 +49,7 @@ void OptionsScreenVideo::initPresets()
         false /* light */, 0 /* shadow */, false /* bloom */, false /* lightshaft */,
         false /* glow */, false /* mlaa */, false /* ssao */, false /* light scatter */,
         false /* animatedCharacters */, 1 /* particles */, 0 /* image_quality */,
-        true /* degraded IBL */, 0 /* Geometry Detail */
+        true /* degraded IBL */, 0 /* Geometry Detail */, false /* PCSS */, false /* ssr */
     });
 
     m_presets.push_back // Level 2
@@ -55,23 +57,23 @@ void OptionsScreenVideo::initPresets()
         false /* light */, 0 /* shadow */, false /* bloom */, false /* lightshaft */,
         false /* glow */, false /* mlaa */, false /* ssao */, false /* light scatter */,
         true /* animatedCharacters */, 2 /* particles */, 1 /* image_quality */,
-        true /* degraded IBL */, 1 /* Geometry Detail */
+        true /* degraded IBL */, 1 /* Geometry Detail */, false /* PCSS */, false /* ssr */
     });
 
     m_presets.push_back // Level 3
     ({
         true /* light */, 0 /* shadow */, false /* bloom */, false /* lightshaft */,
         false /* glow */, false /* mlaa */, false /* ssao */, false /* light scatter */,
-        true /* animatedCharacters */, 2 /* particles */, 1 /* image_quality */,
-        true /* degraded IBL */, 2 /* Geometry Detail */
+        true /* animatedCharacters */, 2 /* particles */, 2 /* image_quality */,
+        true /* degraded IBL */, 2 /* Geometry Detail */, false /* PCSS */, false /* ssr */
     });
 
     m_presets.push_back // Level 4
     ({
-        true /* light */, 0 /* shadow */, false /* bloom */, true /* lightshaft */,
+        true /* light */, 0 /* shadow */, false /* bloom */, false /* lightshaft */,
         true /* glow */, true /* mlaa */, false /* ssao */, true /* light scatter */,
         true /* animatedCharacters */, 2 /* particles */, 2 /* image_quality */,
-        false /* degraded IBL */, 3 /* Geometry Detail */
+        true /* degraded IBL */, 2 /* Geometry Detail */, false /* PCSS */, true /* ssr */
     });
 
     m_presets.push_back // Level 5
@@ -79,7 +81,7 @@ void OptionsScreenVideo::initPresets()
         true /* light */, 512 /* shadow */, true /* bloom */, true /* lightshaft */,
         true /* glow */, true /* mlaa */, false /* ssao */, true /* light scatter */,
         true /* animatedCharacters */, 2 /* particles */, 3 /* image_quality */,
-        false /* degraded IBL */, 3 /* Geometry Detail */
+        false /* degraded IBL */, 3 /* Geometry Detail */, false /* PCSS */, true /* ssr */
     });
 
     m_presets.push_back // Level 6
@@ -87,7 +89,7 @@ void OptionsScreenVideo::initPresets()
         true /* light */, 1024 /* shadow */, true /* bloom */, true /* lightshaft */,
         true /* glow */, true /* mlaa */, true /* ssao */, true /* light scatter */,
         true /* animatedCharacters */, 2 /* particles */, 3 /* image_quality */,
-        false /* degraded IBL */, 4 /* Geometry Detail */
+        false /* degraded IBL */, 4 /* Geometry Detail */, false /* PCSS */, true /* ssr */
     });
 
     m_presets.push_back // Level 7
@@ -95,7 +97,7 @@ void OptionsScreenVideo::initPresets()
         true /* light */, 2048 /* shadow */, true /* bloom */, true /* lightshaft */,
         true /* glow */, true /* mlaa */, true /* ssao */, true /* light scatter */,
         true /* animatedCharacters */, 2 /* particles */, 3 /* image_quality */,
-        false /* degraded IBL */, 5 /* Geometry Detail */
+        false /* degraded IBL */, 5 /* Geometry Detail */, true /* PCSS */, true /* ssr */
     });
 
     m_blur_presets.push_back
@@ -147,7 +149,7 @@ int OptionsScreenVideo::getImageQuality()
         (UserConfigParams::m_high_definition_textures & 0x01) == 0x00 &&
         UserConfigParams::m_hq_mipmap == false)
         return 1;
-    if (UserConfigParams::m_anisotropic == 16 &&
+    if (UserConfigParams::m_anisotropic == 4 &&
         (UserConfigParams::m_high_definition_textures & 0x01) == 0x01 &&
         UserConfigParams::m_hq_mipmap == false)
         return 2;
@@ -159,9 +161,8 @@ int OptionsScreenVideo::getImageQuality()
 }   // getImageQuality
 
 // --------------------------------------------------------------------------------------------
-void OptionsScreenVideo::setImageQuality(int quality)
+void OptionsScreenVideo::setImageQuality(int quality, bool force_reload_texture)
 {
-#ifndef SERVER_ONLY
     core::dimension2du prev_max_size = irr_driver->getVideoDriver()
         ->getDriverAttributes().getAttributeAsDimension2d("MAX_TEXTURE_SIZE");
     GE::GEVulkanTextureDescriptor* td = NULL;
@@ -184,11 +185,11 @@ void OptionsScreenVideo::setImageQuality(int quality)
                 td->setSamplerUse(GE::GVS_3D_MESH_MIPMAP_16);
             break;
         case 2:
-            UserConfigParams::m_anisotropic = 16;
+            UserConfigParams::m_anisotropic = 4;
             UserConfigParams::m_high_definition_textures = 0x03;
             UserConfigParams::m_hq_mipmap = false;
             if (td)
-                td->setSamplerUse(GE::GVS_3D_MESH_MIPMAP_16);
+                td->setSamplerUse(GE::GVS_3D_MESH_MIPMAP_4);
             break;
         case 3:
             UserConfigParams::m_anisotropic = 16;
@@ -210,12 +211,11 @@ void OptionsScreenVideo::setImageQuality(int quality)
     {
         ShaderBase::killShaders();
         SP::initSamplers();
-        if (prev_max_size != cur_max_size)
+        if (prev_max_size != cur_max_size || force_reload_texture)
             SP::SPTextureManager::get()->reloadTexture("");
     }
-    else if (prev_max_size != cur_max_size)
+    else if (prev_max_size != cur_max_size || force_reload_texture)
         STKTexManager::getInstance()->reloadAllTextures(true/*mesh_texture_only*/);
-#endif
 }   // setImageQuality
 
 // --------------------------------------------------------------------------------------------
@@ -332,7 +332,6 @@ void OptionsScreenVideo::init()
     // disabled)
     bool in_game = StateManager::get()->getGameState() == GUIEngine::INGAME_MENU;
 
-#ifndef SERVER_ONLY
     gfx->setActive(!in_game && CVS->isGLSL());
     getWidget<ButtonWidget>("custom")->setActive(!in_game || !CVS->isGLSL());
     if (getWidget<SpinnerWidget>("scale_rtts")->isActivated())
@@ -341,7 +340,6 @@ void OptionsScreenVideo::init()
             GE::getDriver()->getDriverType() == video::EDT_VULKAN);
     }
     getWidget<ButtonWidget>("benchmarkCurrent")->setActive(!in_game);
-#endif
 
     // If a benchmark was requested and the game had to reload
     // the graphics engine, start the benchmark when the
@@ -379,10 +377,9 @@ void OptionsScreenVideo::updateGfxSlider()
             m_presets[l].ssao == UserConfigParams::m_ssao &&
             m_presets[l].light_scatter == UserConfigParams::m_light_scatter &&
             m_presets[l].degraded_ibl == UserConfigParams::m_degraded_IBL &&
-            m_presets[l].geometry_detail == (UserConfigParams::m_geometry_level == 0 ? 2 :
-                                             UserConfigParams::m_geometry_level == 2 ? 0 :
-                                             UserConfigParams::m_geometry_level) &&
-            UserConfigParams::m_pcss_threshold == 2048)
+            m_presets[l].geometry_detail == UserConfigParams::m_geometry_level &&
+            m_presets[l].pc_soft_shadows == UserConfigParams::m_pcss &&
+            m_presets[l].ssr == UserConfigParams::m_ssr)
         {
             gfx->setValue(l + 1);
             found = true;
@@ -396,17 +393,13 @@ void OptionsScreenVideo::updateGfxSlider()
         gfx->setCustomText( _("Custom") );
     }
 
-#ifndef SERVER_ONLY
     // Enable the blur slider if the modern renderer is used
     getWidget<GUIEngine::SpinnerWidget>("blur_level")->
         setActive(UserConfigParams::m_dynamic_lights && CVS->isGLSL());
     // Same with Render resolution slider
-    getWidget<GUIEngine::SpinnerWidget>("scale_rtts")->
-        setActive((UserConfigParams::m_dynamic_lights && CVS->isGLSL()) ||
-        GE::getDriver()->getDriverType() == video::EDT_VULKAN);
+    updateScaleRTTsSlider();
 
     updateTooltip();
-#endif
 } // updateGfxSlider
 
 // --------------------------------------------------------------------------------------------
@@ -441,25 +434,27 @@ void OptionsScreenVideo::updateBlurSlider()
 
 void OptionsScreenVideo::updateScaleRTTsSlider()
 {
-    GUIEngine::SpinnerWidget* scale_rtts_level = 
-        getWidget<GUIEngine::SpinnerWidget>("scale_rtts");
-    assert( scale_rtts_level != NULL );
+    bool rtts_on = (UserConfigParams::m_dynamic_lights && CVS->isGLSL()) ||
+        GE::getDriver()->getDriverType() == video::EDT_VULKAN;
+
+    GUIEngine::SpinnerWidget* rtts_slider = getWidget<GUIEngine::SpinnerWidget>("scale_rtts");
+    assert( rtts_slider != NULL );
+
+    rtts_slider->setActive(rtts_on);
 
     bool found = false;
+    float rtts_value = (rtts_on) ? UserConfigParams::m_scale_rtts_factor : 1.0f;
     for (unsigned int l = 0; l < m_scale_rtts_custom_presets.size(); l++)
     {
-        if (m_scale_rtts_custom_presets[l].value == UserConfigParams::m_scale_rtts_factor)
+        if (m_scale_rtts_custom_presets[l].value == rtts_value)
         {
-            scale_rtts_level->setValue(l);
+            rtts_slider->setValue(l);
             found = true;
             if (m_scale_rtts_custom_presets[l].value > 1.0f)
-            {
-                scale_rtts_level->markAsIncorrect();
-            }
+                rtts_slider->markAsIncorrect();
             else
-            {
-                scale_rtts_level->markAsCorrect();
-            }
+                rtts_slider->markAsCorrect();
+
             break;
         }
     }
@@ -467,7 +462,7 @@ void OptionsScreenVideo::updateScaleRTTsSlider()
     if (!found)
     {
         //I18N: custom video settings
-        scale_rtts_level->setCustomText( _("Custom") );
+        rtts_slider->setCustomText( _("Custom") );
     }
 } // updateScaleRTTsSlider
 
@@ -529,7 +524,8 @@ void OptionsScreenVideo::updateTooltip()
     //I18N: in graphical options
     tooltip = tooltip + L"\n" + _("Ambient occlusion: %s",
         UserConfigParams::m_ssao ? enabled : disabled);
-
+    tooltip = tooltip + L"\n" + _("Screen space reflection: %s",
+        UserConfigParams::m_ssr ? enabled : disabled);
     //I18N: in graphical options
     tooltip = tooltip + L"\n" + _("Animated Characters: %s",
         UserConfigParams::m_animated_characters ? enabled : disabled);
@@ -547,9 +543,7 @@ void OptionsScreenVideo::updateTooltip()
         quality == 2 ? medium   : high);
 
     //I18N: in graphical options
-    int geometry_detail = (UserConfigParams::m_geometry_level == 0 ? 2 :
-                           UserConfigParams::m_geometry_level == 2 ? 0 :
-                           UserConfigParams::m_geometry_level);
+    int geometry_detail = UserConfigParams::m_geometry_level;
     tooltip = tooltip + L"\n" + _("Geometry detail: %s",
         geometry_detail == 0 ? very_low  :
         geometry_detail == 1 ? low       :
@@ -617,14 +611,13 @@ void OptionsScreenVideo::eventCallback(Widget* widget, const std::string& name,
         getWidget<GUIEngine::SpinnerWidget>("blur_level")->setActive(level >= 2);
 
         // Same with Render resolution slider
-#ifndef SERVER_ONLY
         getWidget<GUIEngine::SpinnerWidget>("scale_rtts")->
             setActive(UserConfigParams::m_dynamic_lights ||
             GE::getDriver()->getDriverType() == video::EDT_VULKAN);
-#endif
+
         UserConfigParams::m_animated_characters = m_presets[level].animatedCharacters;
         UserConfigParams::m_particles_effects = m_presets[level].particles;
-        setImageQuality(m_presets[level].image_quality);
+        setImageQuality(m_presets[level].image_quality, false/*force_reload_texture*/);
         UserConfigParams::m_bloom              = m_presets[level].bloom;
         UserConfigParams::m_glow               = m_presets[level].glow;
         UserConfigParams::m_dynamic_lights     = m_presets[level].lights;
@@ -634,12 +627,12 @@ void OptionsScreenVideo::eventCallback(Widget* widget, const std::string& name,
         UserConfigParams::m_ssao               = m_presets[level].ssao;
         UserConfigParams::m_light_scatter      = m_presets[level].light_scatter;
         UserConfigParams::m_degraded_IBL       = m_presets[level].degraded_ibl;
-        UserConfigParams::m_geometry_level     = (m_presets[level].geometry_detail == 0 ? 2 :
-                                                  m_presets[level].geometry_detail == 2 ? 0 :
-                                                  m_presets[level].geometry_detail);
-        UserConfigParams::m_pcss_threshold     = 2048;
+        UserConfigParams::m_geometry_level     = m_presets[level].geometry_detail;
+        UserConfigParams::m_pcss               = m_presets[level].pc_soft_shadows;
+        UserConfigParams::m_ssr                = m_presets[level].ssr;
 
         updateGfxSlider();
+        setSSR();
     }
     else if (name == "blur_level")
     {
@@ -676,33 +669,31 @@ void OptionsScreenVideo::eventCallback(Widget* widget, const std::string& name,
             StringUtils::fromString(fps, max_fps);
             UserConfigParams::m_max_fps = max_fps;
         }
-#if !defined(SERVER_ONLY) && defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
         update_swap_interval(UserConfigParams::m_swap_interval);
 #endif
     } // vSync
     else if (name == "scale_rtts")
     {
-        GUIEngine::SpinnerWidget* scale_rtts_level =
+        GUIEngine::SpinnerWidget* rtts_slider =
             getWidget<GUIEngine::SpinnerWidget>("scale_rtts");
-        assert( scale_rtts_level != NULL );
+        assert( rtts_slider != NULL );
 
-        const int level = scale_rtts_level->getValue();
+        const int level = rtts_slider->getValue();
         assert(level < (int)m_scale_rtts_custom_presets.size());
 
         UserConfigParams::m_scale_rtts_factor = m_scale_rtts_custom_presets[level].value;
-#ifndef SERVER_ONLY
+
         GE::GEVulkanDriver* gevk = GE::getVKDriver();
         if (gevk && GE::getGEConfig()->m_render_scale != UserConfigParams::m_scale_rtts_factor)
         {
             GE::getGEConfig()->m_render_scale = UserConfigParams::m_scale_rtts_factor;
             gevk->updateDriver();
         }
-#endif
         updateScaleRTTsSlider();
     } // scale_rtts
     else if (name == "benchmarkCurrent")
     {
-#ifndef SERVER_ONLY
         // To avoid crashes and ensure the proper settings are used during the benchmark,
         // we apply the settings. If this doesn't require restarting the screen, we start
         // the benchmark immediately, otherwise we schedule it to start after the restart.
@@ -710,7 +701,6 @@ void OptionsScreenVideo::eventCallback(Widget* widget, const std::string& name,
             profiler.startBenchmark();
         else
             RaceManager::get()->scheduleBenchmark();
-#endif
     } // benchmarkCurrent
     /*else if (name == "benchmarkRecommend")
     {
@@ -722,25 +712,21 @@ void OptionsScreenVideo::eventCallback(Widget* widget, const std::string& name,
 
 void OptionsScreenVideo::tearDown()
 {
-#ifndef SERVER_ONLY
     applySettings();
     Screen::tearDown();
     // save changes when leaving screen
     user_config->saveConfig();
-#endif
 }   // tearDown
 
 // --------------------------------------------------------------------------------------------
 /* Returns 1 or 2 if a restart will be done, 0 otherwise */
 int OptionsScreenVideo::applySettings()
 {
-#ifndef SERVER_ONLY
     if (m_prev_adv_pipline != UserConfigParams::m_dynamic_lights && CVS->isGLSL())
     {
         irr_driver->sameRestart();
         return 1;
     }
-#endif
     return 0;
 }   // applySettings
 
@@ -760,3 +746,30 @@ void OptionsScreenVideo::unloaded()
 }   // unloaded
 
 // --------------------------------------------------------------------------------------------
+
+void OptionsScreenVideo::setSSR()
+{
+    if (!UserConfigParams::m_ssr)
+        GE::getGEConfig()->m_screen_space_reflection_type = GE::GSSRT_DISABLED;
+    else
+    {
+        int val = UserConfigParams::m_geometry_level;
+        switch (val)
+        {
+        case 3:
+            GE::getGEConfig()->m_screen_space_reflection_type = GE::GSSRT_HIZ100;
+            break;
+        case 4:
+            GE::getGEConfig()->m_screen_space_reflection_type = GE::GSSRT_HIZ200;
+            break;
+        case 5:
+            GE::getGEConfig()->m_screen_space_reflection_type = GE::GSSRT_HIZ400;
+            break;
+        default:
+            GE::getGEConfig()->m_screen_space_reflection_type = GE::GSSRT_FAST;
+            break;
+        }
+    }
+}   // setSSR
+
+#endif // ifndef SERVER_ONLY

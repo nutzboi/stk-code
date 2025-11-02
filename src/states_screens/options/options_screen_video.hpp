@@ -15,7 +15,7 @@
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-
+#ifndef SERVER_ONLY // No GUI files in server builds
 #ifndef __HEADER_OPTIONS_SCREEN_VIDEO_HPP__
 #define __HEADER_OPTIONS_SCREEN_VIDEO_HPP__
 
@@ -40,6 +40,8 @@ struct GFXPreset
     int image_quality;
     bool degraded_ibl;
     int geometry_detail;
+    bool pc_soft_shadows;
+    bool ssr;
 };
 
 struct BlurPreset
@@ -101,7 +103,9 @@ public:
     void         updateBlurSlider();
     void         updateScaleRTTsSlider();
     static int getImageQuality();
-    static void setImageQuality(int quality);
+    static void setImageQuality(int quality, bool force_reload_texture);
+    static void setSSR();
 };
 
 #endif
+#endif // ifndef SERVER_ONLY
