@@ -121,6 +121,8 @@ bool SpectateCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* c
     peer->testEligibility();
     LobbyPlayerQueue::get()->onPeerEligibilityChange(dispatch_data->m_peer_wkptr.lock(), old_el);
     lobby->updatePlayerList();
+    // Reevaluate owner if necessary (for example, current owner toggled spectate)
+    lobby->updateServerOwner(nullptr);
 
     return true;
 }

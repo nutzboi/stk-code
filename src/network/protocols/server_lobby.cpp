@@ -4315,8 +4315,29 @@ void ServerLobby::updateServerOwner(std::shared_ptr<STKPeer> owner)
         m_state.load() > RESULT_DISPLAY ||
         ServerConfig::m_owner_less)
         return;
-    if (!owner && !m_server_owner.expired())
-        return;
+    // If no explicit owner is provided, decide whether the current owner is
+    // still eligible to keep the crown. If not, reassign.
+    if (!owner)
+    {
+        auto current_owner = m_server_owner.lock();
+        if (current_owner)
+        {
+            const bool owner_invalid =
+                !current_owner->isValidated() ||
+                current_owner->isAIPeer() ||
+                current_owner->alwaysSpectate() ||
+                // Only matching host id can be server owner in case of
+                // graphics-client-server
+                !(
+                    m_process_type == PT_MAIN ||
+                    current_owner->getHostId() == m_client_server_host_id.load()
+                );
+
+            if (!owner_invalid)
+                return; // keep current owner
+            // else: fall through to find a new eligible owner
+        }
+    }
     auto peers = STKHost::get()->getPeers();
     if (peers.empty())
         return;
@@ -4332,7 +4353,7 @@ void ServerLobby::updateServerOwner(std::shared_ptr<STKPeer> owner)
         {
             // Only matching host id can be server owner in case of
             // graphics-client-server
-            if (peer->isValidated() && !peer->isAIPeer() &&
+            if (peer->isValidated() && !peer->isAIPeer() && !peer->alwaysSpectate() &&
                 (m_process_type == PT_MAIN ||
                 peer->getHostId() == m_client_server_host_id.load()))
             {
