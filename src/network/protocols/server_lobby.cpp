@@ -7273,16 +7273,8 @@ void ServerLobby::checkRPSTimeouts()
                 if (challenger_peer && challenged_peer)
                     break;
             }
-            if (!it->accepted)
-            {
-                if (challenger_peer)
-                {
-                    std::string msg = it->challenged_name + " didn't accept your Rock Paper Scissors challenge.";
-                    sendStringToPeer(msg, challenger_peer);
-                }   
-                it = m_rps_challenges.erase(it);
-            }
-            else if (it->challenger_choice == RPS_NONE && it->challenged_choice == RPS_NONE)
+            // Challenges are now auto-accepted, so check if choices were made
+            if (it->challenger_choice == RPS_NONE && it->challenged_choice == RPS_NONE)
             {
                 std::string msg = "Rock Paper Scissors game timed out. Neither player made a choice.";
                 if (challenger_peer)

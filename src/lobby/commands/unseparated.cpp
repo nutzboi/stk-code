@@ -57,19 +57,17 @@ bool RPSCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const 
     std::transform(arg_lower.begin(), arg_lower.end(), arg_lower.begin(),
                    [](unsigned char c){ return std::tolower(c); });
 
-    if (arg_lower == "accept" || arg_lower == "a")
+    // Handle decline (d) - challenged player can decline the challenge
+    if (arg_lower == "decline" || arg_lower == "d")
     {
-        for (auto& challenge : lobby->m_rps_challenges)
+        for (auto it = lobby->m_rps_challenges.begin(); it != lobby->m_rps_challenges.end(); ++it)
         {
-            if (challenge.challenged_id == peer_id && !challenge.accepted)
+            if (it->challenged_id == peer_id)
             {
-                challenge.accepted = true;
-                challenge.timeout = StkTime::getMonoTimeMs() + 20000; // 20 seconds to choose
-
                 std::shared_ptr<STKPeer> challenger_peer = NULL;
                 for (auto& p : STKHost::get()->getPeers())
                 {
-                    if (p->getHostId() == challenge.challenger_id)
+                    if (p->getHostId() == it->challenger_id)
                     {
                         challenger_peer = p;
                         break;
@@ -78,12 +76,15 @@ bool RPSCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const 
 
                 if (challenger_peer)
                 {
-                    std::string msg = player_name + " accepted your Rock Paper Scissors challenge! You have 20 seconds to choose /rps rock (r), /rps paper (p), or /rps scissors (s).";
+                    std::string msg = player_name + " declined your Rock Paper Scissors challenge.";
                     lobby->sendStringToPeer(msg, challenger_peer);
                 }
 
-                ctx->nprintf("You accepted the Rock Paper Scissors challenge from %s! You have 10 seconds to choose /rps rock (r), /rps paper (p), or /rps scissors (s).", 2048, challenge.challenger_name.c_str());
+                ctx->nprintf("You declined the Rock Paper Scissors challenge from %s.", 512,
+                        it->challenger_name.c_str());
                 ctx->flush();
+
+                lobby->m_rps_challenges.erase(it);
                 return true;
             }
         }
@@ -101,8 +102,6 @@ bool RPSCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const 
     {
         for (auto& challenge : lobby->m_rps_challenges)
         {
-            if (!challenge.accepted)
-                continue;
 
             RPSChoice* source_choice;
             RPSChoice* target_choice;
@@ -185,16 +184,16 @@ bool RPSCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const 
     challenge.challenged_id = target_id;
     challenge.challenger_name = player_name;
     challenge.challenged_name = target_name;
-    challenge.timeout = StkTime::getMonoTimeMs() + 40000; // 40 seconds to accept
-    challenge.accepted = false;
+    challenge.timeout = StkTime::getMonoTimeMs() + 20000; // 20 seconds to choose
+    challenge.accepted = true; // Auto-accept challenges
 
     lobby->m_rps_challenges.push_back(challenge);
 
-    ctx->write("You challenged " + target_name + " to Rock Paper Scissors!");
+    ctx->write("You challenged " + target_name + " to Rock Paper Scissors! You have 20 seconds to choose /rps rock (r), /rps paper (p), or /rps scissors (s).");
     ctx->flush();
 
     lobby->sendStringToPeer(player_name + " challenged you to Rock Paper Scissors! "
-            "Type /rps accept to play.", target_peer);
+            "Choose /rps rock (r), /rps paper (p), /rps scissors (s), or /rps decline (d).", target_peer);
     return true;
 }
 bool JumblewordCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const data)

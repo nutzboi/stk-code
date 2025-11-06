@@ -30,9 +30,9 @@ public:
     RPSCommand() : STKCommand(false)
     {
         m_name = "rps";
-        m_args = {{nnwcli::CT_STRING, "option", "r/p/s, playername or \"accept\""}};
+        m_args = {{nnwcli::CT_STRING, "option", "r/p/s/d, or playername"}};
         m_description = "Send Rock Paper Scissors challenge for the player, choose the variant"
-            " or accept other challenges.";
+            " (rock/paper/scissors) or decline (d) a challenge.";
     }
     // Implemented in unseparated.cpp
     virtual bool execute(nnwcli::CommandExecutorContext* context, void* data) OVERRIDE;
