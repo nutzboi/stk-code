@@ -961,7 +961,7 @@ void SoccerRoulette::writeStatsToDatabase(int game_id)
 #ifdef ENABLE_SQLITE3
     if (!ServerConfig::m_sql_management)
         return;
-        
+    
     // Get database instance
     auto server_lobby = LobbyProtocol::get<ServerLobby>();
     if (!server_lobby)
@@ -1004,6 +1004,12 @@ void SoccerRoulette::writeStatsToDatabase(int game_id)
     for (const auto& kv : s_bowling_player_hits_by_player)
         all_players.insert(kv.first);
     
+    if (all_players.empty())
+    {
+        Log::info("SoccerRoulette", "No player stats to write for game_id %d", game_id);
+        return;
+    }
+    
     // Write stats for each player
     for (const std::string& player_name : all_players)
     {
@@ -1037,5 +1043,8 @@ void SoccerRoulette::writeStatsToDatabase(int game_id)
                           swatter_hits, cake_hits, bowling_hits, 
                           bowling_used, bowling_puck, bowling_players, team_vs, "");
     }
+    
+    Log::info("SoccerRoulette", "Wrote stats for %d players to database for game_id %d", 
+              (int)all_players.size(), game_id);
 #endif
 }

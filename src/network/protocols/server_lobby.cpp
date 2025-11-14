@@ -3341,6 +3341,7 @@ void ServerLobby::checkRaceFinished()
 	    GoalHistory::saveGoalHistoryToFile();
 	    SoccerRoulette::get()->calculateGameResult();
 	    SoccerRoulette::get()->writeBallSideStatsToDatabase();
+	    SoccerRoulette::get()->writeStatsToDatabase(SoccerRoulette::get()->m_last_game_id);
     } 
     if (ServerConfig::m_tiers_roulette)
     {
@@ -4995,10 +4996,8 @@ void ServerLobby::configPeersStartTime()
         ReplayRecorder::get()->setFilename(replay_name);
         Log::info("ServerLobby", "Starting replay recording with filename: %s", replay_name.c_str());
     }
-    // Write previous game stats to database and reset, give nitro when soccer roulette game is about to start
     if (ServerConfig::m_soccer_roulette && SoccerRoulette::get() && SoccerRoulette::get()->isActive())
     {
-        SoccerRoulette::writeStatsToDatabase(SoccerRoulette::get()->m_last_game_id);
         SoccerRoulette::resetPlayerStats();
         SoccerRoulette::get()->giveNitroToAll();
     }
