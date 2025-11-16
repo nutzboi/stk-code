@@ -110,6 +110,7 @@
 #include <fstream>
 #include <random>
 #include "network/live_soccer.hpp"
+#include "network/live_soccer_roulette.hpp"
 int ServerLobby::m_fixed_laps = -1;
 // ========================================================================
 class SubmitRankingRequest : public Online::XMLRequest
@@ -2255,6 +2256,11 @@ void ServerLobby::update(int ticks)
         {
             LiveSoccer::getInstance()->sendResetEvent();
         }
+        
+        if (ServerConfig::m_soccer_roulette)
+        {
+            LiveSoccerRoulette::getInstance()->sendResetEvent();
+        }
 
         // Send UDP event for game end if enabled
         if (ServerConfig::m_soccer_udp_enabled)
@@ -4186,12 +4192,19 @@ void ServerLobby::updatePlayerList(bool update_when_reset_server)
     const int prev_lobby_players = m_lobby_players.load();
     m_lobby_players.store((int)all_profiles.size());
 
-    if (m_state.load() == WAITING_FOR_START_GAME && ServerConfig::m_soccer_log && !ServerConfig::m_soccer_roulette)
+    if (m_state.load() == WAITING_FOR_START_GAME)
     {
         const int cur = (int)all_profiles.size();
         if (cur == 0 && !m_sent_empty_lobby_reset)
         {
-            LiveSoccer::getInstance()->sendResetEvent();
+            if (ServerConfig::m_soccer_log && !ServerConfig::m_soccer_roulette)
+            {
+                LiveSoccer::getInstance()->sendResetEvent();
+            }
+            if (ServerConfig::m_soccer_roulette)
+            {
+                LiveSoccerRoulette::getInstance()->sendResetEvent();
+            }
             m_sent_empty_lobby_reset = true;
         }
         else if (cur > 0 && m_sent_empty_lobby_reset)

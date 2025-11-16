@@ -217,6 +217,16 @@ public:
     const std::vector<ScorerData>& getScorers(KartTeam team) const
        { return (team == KART_TEAM_BLUE ? m_blue_scorers : m_red_scorers); }
     // ------------------------------------------------------------------------
+    /** Get ball possession times for roulette mode */
+    void getBallPossessionTimes(float& red_time, float& blue_time) const
+    {
+        red_time = m_time_on_red_side;
+        blue_time = m_time_on_blue_side;
+    }
+    // ------------------------------------------------------------------------
+    /** Check if ball tracking is enabled */
+    bool isBallTrackingEnabled() const { return m_track_ball_time; }
+    // ------------------------------------------------------------------------
     int getBallNode() const;
     // ------------------------------------------------------------------------
     const Vec3& getBallPosition() const

@@ -56,6 +56,7 @@
 #include <string>
 #include "utils/string_utils.hpp"
 #include "network/live_soccer.hpp"
+#include "network/live_soccer_roulette.hpp"
 #include "network/database/sqlite_database.hpp"
 #include "network/soccer_udp_client.hpp"
 #include "network/protocols/lobby_protocol.hpp"
@@ -452,6 +453,12 @@ void SoccerWorld::onGo()
 	LiveSoccer::getInstance()->startExport();
         LiveSoccer::getInstance()->resetGame();
     }
+    // Start live roulette export for roulette mode
+    if (ServerConfig::m_soccer_roulette)
+    {
+	LiveSoccerRoulette::getInstance()->startExport();
+        LiveSoccerRoulette::getInstance()->resetGame();
+    }
 }   // onGo
 
 //-----------------------------------------------------------------------------
@@ -468,6 +475,11 @@ void SoccerWorld::terminateRace()
     if (ServerConfig::m_soccer_log && !ServerConfig::m_soccer_roulette)
     {
 	    LiveSoccer::getInstance()->stopExport();
+    }
+    // Stop live roulette export for roulette mode
+    if (ServerConfig::m_soccer_roulette)
+    {
+	    LiveSoccerRoulette::getInstance()->stopExport();
     }
     WorldWithRank::terminateRace();
 } // terminateRace
@@ -771,6 +783,15 @@ void SoccerWorld::onCheckGoalTriggered(bool first_goal)
 								getScore(KART_TEAM_BLUE),
 								m_time);
 		    }
+	    }
+	    // Also send goal to roulette live export if active
+	    if (ServerConfig::m_soccer_roulette && LiveSoccerRoulette::getInstance()->isActive())
+	    {
+		    int team_number = (team_name == "red") ? KART_TEAM_RED : KART_TEAM_BLUE;
+		    LiveSoccerRoulette::getInstance()->updateGoal(player_name_log, team_number,
+					    			getScore(KART_TEAM_RED),
+								getScore(KART_TEAM_BLUE),
+								m_time);
 		    
 		    // Send UDP event if enabled
 		    if (ServerConfig::m_soccer_udp_enabled)
@@ -834,6 +855,15 @@ void SoccerWorld::onCheckGoalTriggered(bool first_goal)
 								getScore(KART_TEAM_BLUE),
 								m_time);
 		    }
+	    }
+	    // Also send own goal to roulette live export if active
+	    if (ServerConfig::m_soccer_roulette && LiveSoccerRoulette::getInstance()->isActive())
+	    {
+		    int team_number = (team_name == "red") ? KART_TEAM_RED : KART_TEAM_BLUE;
+		    LiveSoccerRoulette::getInstance()->updateGoal(player_name_log, team_number,
+					    			getScore(KART_TEAM_RED),
+								getScore(KART_TEAM_BLUE),
+								m_time);
 		    // Send UDP event if enabled
 		    if (ServerConfig::m_soccer_udp_enabled)
 		    {

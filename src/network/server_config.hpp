@@ -239,6 +239,12 @@ namespace ServerConfig
     SERVER_CFG_PREFIX StringServerConfigParam m_server_livesoccer_ip
 	SERVER_CFG_DEFAULT(StringServerConfigParam("127.0.0.1", "server-livesoccer-ip", "IP for live soccer socket"));
 
+    SERVER_CFG_PREFIX StringServerConfigParam m_server_liveroulette_port
+	SERVER_CFG_DEFAULT(StringServerConfigParam("9878", "server-liveroulette-port", "Port for live soccer roulette socket"));
+
+    SERVER_CFG_PREFIX StringServerConfigParam m_server_liveroulette_ip
+	SERVER_CFG_DEFAULT(StringServerConfigParam("127.0.0.1", "server-liveroulette-ip", "IP for live soccer roulette socket"));
+
     SERVER_CFG_PREFIX BoolServerConfigParam m_soccer_udp_enabled
         SERVER_CFG_DEFAULT(BoolServerConfigParam(false, "soccer-udp-enabled", "Enable UDP client for soccer events (true or false)"));
 
