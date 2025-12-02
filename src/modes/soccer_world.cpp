@@ -784,7 +784,7 @@ void SoccerWorld::onCheckGoalTriggered(bool first_goal)
 								m_time);
 		    }
 	    }
-	    // Also send goal to roulette live export if active
+
 	    if (ServerConfig::m_soccer_roulette && LiveSoccerRoulette::getInstance()->isActive())
 	    {
 		    int team_number = (team_name == "red") ? KART_TEAM_RED : KART_TEAM_BLUE;
@@ -792,25 +792,24 @@ void SoccerWorld::onCheckGoalTriggered(bool first_goal)
 					    			getScore(KART_TEAM_RED),
 								getScore(KART_TEAM_BLUE),
 								m_time);
-		    
-		    // Send UDP event if enabled
-		    if (ServerConfig::m_soccer_udp_enabled)
-		    {
-		        auto udp_client = SoccerUDPClient::getInstance();
-		        if (udp_client && udp_client->isConnected())
-		        {
-		            int team_number = (team_name == "red") ? KART_TEAM_RED : KART_TEAM_BLUE;
-		            udp_client->sendGoal(player_name_log, team_number, 
-		                               getScore(KART_TEAM_RED), 
-		                               getScore(KART_TEAM_BLUE), 
-		                               m_time);
-		        }
-		        else
-		        {
-		            Log::error("SoccerWorld", "UDP client not connected! enabled: %s", 
-		                     ServerConfig::m_soccer_udp_enabled ? "true" : "false");
-		        }
-		    }
+	    }
+
+	    if (ServerConfig::m_soccer_udp_enabled)
+	    {
+	        auto udp_client = SoccerUDPClient::getInstance();
+	        if (udp_client && udp_client->isConnected())
+	        {
+	            int team_number = (team_name == "red") ? KART_TEAM_RED : KART_TEAM_BLUE;
+	            udp_client->sendGoal(player_name_log, team_number, 
+	                               getScore(KART_TEAM_RED), 
+	                               getScore(KART_TEAM_BLUE), 
+	                               m_time);
+	        }
+	        else
+	        {
+	            Log::error("SoccerWorld", "UDP client not connected! enabled: %s", 
+	                     ServerConfig::m_soccer_udp_enabled ? "true" : "false");
+	        }
 	    }
 #ifdef ENABLE_SQLITE3
 // If you don't have the table yet, you can create it with this command:
@@ -856,7 +855,7 @@ void SoccerWorld::onCheckGoalTriggered(bool first_goal)
 								m_time);
 		    }
 	    }
-	    // Also send own goal to roulette live export if active
+
 	    if (ServerConfig::m_soccer_roulette && LiveSoccerRoulette::getInstance()->isActive())
 	    {
 		    int team_number = (team_name == "red") ? KART_TEAM_RED : KART_TEAM_BLUE;
@@ -864,23 +863,23 @@ void SoccerWorld::onCheckGoalTriggered(bool first_goal)
 					    			getScore(KART_TEAM_RED),
 								getScore(KART_TEAM_BLUE),
 								m_time);
-		    // Send UDP event if enabled
-		    if (ServerConfig::m_soccer_udp_enabled)
+	    }
+
+	    if (ServerConfig::m_soccer_udp_enabled)
+	    {
+		    auto udp_client = SoccerUDPClient::getInstance();
+		    if (udp_client && udp_client->isConnected())
 		    {
-			    auto udp_client = SoccerUDPClient::getInstance();
-			    if (udp_client && udp_client->isConnected())
-			    {
-				    int team_number = (team_name == "red") ? KART_TEAM_RED : KART_TEAM_BLUE;
-				    udp_client->sendGoal(player_name_log, team_number,
-						    getScore(KART_TEAM_RED),
-						    getScore(KART_TEAM_BLUE),
-						    m_time);
-			    }
-			    else
-			    {
-				    Log::error("SoccerWorld", "UDP client not connected! enabled: %s",
-					ServerConfig::m_soccer_udp_enabled ? "true" : "false");
-			    }
+			    int team_number = (team_name == "red") ? KART_TEAM_RED : KART_TEAM_BLUE;
+			    udp_client->sendGoal(player_name_log, team_number,
+					    getScore(KART_TEAM_RED),
+					    getScore(KART_TEAM_BLUE),
+					    m_time);
+		    }
+		    else
+		    {
+			    Log::error("SoccerWorld", "UDP client not connected! enabled: %s",
+				    ServerConfig::m_soccer_udp_enabled ? "true" : "false");
 		    }
 	    }
 #ifdef ENABLE_SQLITE3
