@@ -3076,6 +3076,11 @@ void Track::copyFromMainProcess()
     for (unsigned i = 0; i < m_item_manager->getNumberOfItems(); i++)
     {
         ItemState* it = m_item_manager->getItem(i);
+
+        std::string attachid = "";
+        if (it->m_attached != NULL)
+            attachid = it->m_attached->getID();
+
         nim->insertItem(new Item(it->getType(), it->getXYZ(), it->getNormal(),
             //TODO: ATTACH FIX: Currently just getting the attached ID, meaning parent libraries aren't
             // supported in copyFromMainProcess for now (and hence not at all, this is the
@@ -3083,7 +3088,7 @@ void Track::copyFromMainProcess()
             // the stupid part is it requires a recursive function to build the full path, which is easy but annoying
             // also, overall I do not believe that multiple parents are supported in the item.cpp code
             // (it's just the code that uses StringUtilsSplit), fix that
-            NULL/*mesh*/, NULL/*lowres_mesh*/, "", NULL/*owner*/, it->m_compound, it->m_stop_time, it->m_attached->getID()));
+            NULL/*mesh*/, NULL/*lowres_mesh*/, "", NULL/*owner*/, it->m_compound, it->m_stop_time, attachid));
     }
     m_item_manager = nim;
 }   // copyFromMainProcess
