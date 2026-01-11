@@ -2,7 +2,8 @@ name: switch
 on:
   push:
     branches:
-      - master
+      - tyre2X
+      - tyre2X-dev
       - feature/gh-actions-switch-cache
     tags:
       - '*'
