@@ -14,7 +14,8 @@ name: linux
 on:
   push:
     branches:
-      - master
+      - tyre2X
+      - tyre2X-dev
     tags:
       - '*'
   pull_request: {}

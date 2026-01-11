@@ -18,7 +18,8 @@ env:
 on:
   push:
     branches:
-      - '**'
+      - tyre2X
+      - tyre2X-dev
     tags:
       - '*'
   pull_request: {}
