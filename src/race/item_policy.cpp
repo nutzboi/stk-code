@@ -256,10 +256,10 @@ void ItemPolicy::fromString(std::string& input) {
         return;
     }
     std::vector<std::string> params = StringUtils::split(input, ' ');
-    // Format can not form a valid policy with less than 10 space-separated parameters:
-    // 1 0 0000000000 0 0 0 0 1 1 0 0
-    // 1 section starting on lap 1 with no rules, all data to 0, fuel and deg to 1, no overridden stop time, and a length-0 item vector
-    if (params.empty() || params.size() < 11) {
+    // Format can not form a valid policy with less than 12 space-separated parameters:
+    // 1 0 0000000000 000000 0 0 0 0 1 1 0 0
+    // 1 section starting on lap 1 with no rules, no forbidden inputs, all data to 0, fuel and deg to 1, no overridden stop time, and a length-0 item vector
+    if (params.empty() || params.size() < 12) {
         fromString(normal_race_preset);
         return;
     }
@@ -333,6 +333,30 @@ void ItemPolicy::fromString(std::string& input) {
     }
 }   // fromString
 //--------------------------------------------------
+
+static std::string toBinary(uint64_t number) {
+    std::string retval = "";
+    if (number == 0) {
+        retval = "0";
+        return retval;
+    }
+    bool found_one = false;
+    for (uint64_t i = 0; i < 64; i++) {
+        bool curr = (uint64_t)((uint64_t)number & (uint64_t)((uint64_t)1 << (uint64_t)((uint64_t)63-(uint64_t)i)));
+        if (found_one || curr) {
+            if (curr) {
+                retval += "1";
+                found_one = true;
+            } else {
+                retval += "0";
+            }
+        } else {
+            ;
+        }
+    }
+    return retval;
+}
+
 std::string ItemPolicy::toString() {
     std::stringstream ss;
     ss << std::setprecision(4);
@@ -344,9 +368,12 @@ std::string ItemPolicy::toString() {
         }
         ss << m_policy_sections[i].m_section_start << " ";
 
-        std::string bs = std::bitset<17>(m_policy_sections[i].m_rules).to_string();
+        //std::string bs = std::bitset<17>(m_policy_sections[i].m_rules).to_string();
+        std::string bs;
+        bs = toBinary(m_policy_sections[i].m_rules);
         ss << bs << " ";
-        bs = std::bitset<17>(m_policy_sections[i].m_forbidden_inputs).to_string();
+        //bs = std::bitset<17>(m_policy_sections[i].m_forbidden_inputs).to_string();
+        bs = toBinary(m_policy_sections[i].m_forbidden_inputs);
         ss << bs << " ";
 
         ss << m_policy_sections[i].m_linear_mult << " ";
