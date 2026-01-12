@@ -1,0 +1,11 @@
+<overlay>
+    <addon_tmuf-coast-e>
+        <tyre-change compound="2" stop-time="12" id="Soft" x="-112.112282" y="28.406446" z="247.188370" />
+        <tyre-change compound="3" stop-time="10" id="Medium" x="-108.502159" y="28.412714" z="243.963565" />
+        <tyre-change compound="4" stop-time="8" id="Hard" x="-104.892036" y="28.418982" z="240.198761" />
+
+        <tyre-change compound="123" stop-time="7" id="fuel" x="-116.901596" y="28.359703" z="251.117615"/>
+    </addon_tmuf-coast-e>
+
+    <!-- More tracks go here -->
+</overlay>

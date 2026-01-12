@@ -1873,6 +1873,42 @@ static void recursiveUpdatePhysics(std::vector<TrackObject*>& tos)
     }
 }   // recursiveUpdatePhysics
 
+static const XMLNode *loadTrackOverlay(std::string track_id) {
+    std::string filename =
+        StringUtils::getPath(
+                file_manager->getFileSystem()
+                ->getAbsolutePath("track_overlay_database.xml").c_str()
+                ) + "/../data/track_overlay_database.xml";
+    /* Format:
+        <overlay>
+            <hacienda>
+                <small-nitro x="-27.07802" y="-6.409512" z="128.547867" />
+                ...
+            </hacienda>
+            <golem-bight>
+                <small-nitro x="-27.07802" y="-6.409512" z="128.547867" />
+                ...
+            </golem-bight>
+        <overlay/>
+    */
+    auto root = file_manager->createXMLTree(filename);
+    if (!root || root->getName() != "overlay") {
+        delete root;
+        Log::info("Track::loadTrackModel",
+                "Could not read track overlay file '%s'. Aborting.", filename.c_str());
+        return NULL;
+    }
+
+    for (unsigned int i=0; i<root->getNumNodes(); i++)
+    {
+        const XMLNode *node = root->getNode(i);
+        const std::string &name = node->getName();
+        if (name == track_id)
+            return node;
+    }
+    return NULL;
+}
+
 // ----------------------------------------------------------------------------
 /** This function load the actual scene, i.e. all parts of the track,
  *  animations, items, ... It  is called from world during initialisation.
@@ -2321,6 +2357,21 @@ void Track::loadTrackModel(bool reverse_track, unsigned int mode_id)
 
     if (!arena_random_item_created)
     {
+        const XMLNode *overlay_nodes = loadTrackOverlay(m_ident);
+        if (overlay_nodes != NULL) {
+            for (unsigned int i=0; i<overlay_nodes->getNumNodes(); i++)
+            {
+                const XMLNode *node = overlay_nodes->getNode(i);
+                const std::string &name = node->getName();
+                if (name=="banana"      || name=="item"      ||
+                    name=="small-nitro" || name=="big-nitro" ||
+                    name=="easter-egg" || name=="tyre-change")
+                {
+                    itemCommand(node);
+                }
+            }   // for i<overlay_nodes->getNumNodes()
+        }
+
         for (unsigned int i=0; i<root->getNumNodes(); i++)
         {
             const XMLNode *node = root->getNode(i);
