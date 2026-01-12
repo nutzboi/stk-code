@@ -6,6 +6,23 @@
 
         <tyre-change compound="123" stop-time="7" id="fuel" x="-116.901596" y="28.359703" z="251.117615"/>
     </addon_tmuf-coast-e>
+    <addon_rv-botanical-garden>
+        <tyre-change compound="4" stop-time="8" id="Empty.056" x="0.01" y="3.47" z="-41.99" />
+        <tyre-change compound="3" stop-time="8" id="Empty.052" x="-2.55" y="3.47" z="-35.47" />
+        <tyre-change compound="2" stop-time="8" id="Empty.054" x="-5.19" y="3.47" z="-28.94" />
+    </addon_rv-botanical-garden>
+    <addon_thanato-1-aware->
+        <tyre-change compound="2" stop-time="10" id="tc0" x="85.093117" y="1.912381" z="-29.005390" h="0.5"/>
+        <tyre-change compound="3" stop-time="10" id="tc1" x="84.339035" y="1.975609" z="-20.853951" h="0.5"/>
+        <tyre-change compound="4" stop-time="10" id="tc2" x="84.314751" y="2.039701" z="-13.389476" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tcf" x="83.946053" y="2.002877" z="-3.821416" h="0.5"/>
+    </addon_thanato-1-aware->
+    <addon_months>
+        <tyre-change compound="2" stop-time="15" id="tc0" x="-16.600027" y="0.105622" z="33.437157" h="0.5"/>
+        <tyre-change compound="3" stop-time="15" id="tc1" x="-10.838052" y="0.105601" z="33.515610" h="0.5"/>
+        <tyre-change compound="4" stop-time="15" id="tc2" x="-5.095721" y="0.105497" z="33.593716" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tcf" x="0.144933" y="0.105482" z="33.665016" h="0.5"/>
+    </addon_months>
 
     <!-- More tracks go here -->
 </overlay>
