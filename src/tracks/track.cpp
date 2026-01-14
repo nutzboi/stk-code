@@ -1874,11 +1874,7 @@ static void recursiveUpdatePhysics(std::vector<TrackObject*>& tos)
 }   // recursiveUpdatePhysics
 
 static const XMLNode *loadTrackOverlay(std::string track_id) {
-    std::string filename =
-        StringUtils::getPath(
-                file_manager->getFileSystem()
-                ->getAbsolutePath("track_overlay_database.xml").c_str()
-                ) + "/../data/track_overlay_database.xml";
+    std::string filename = file_manager->getAsset("track_overlay_database.xml");
     /* Format:
         <overlay>
             <hacienda>
