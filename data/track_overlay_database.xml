@@ -29,6 +29,164 @@
         <tyre-change compound="4" stop-time="6" id="tc2" x="127.841232" y="0.292574" z="-184.699051" h="0.5"/>
         <tyre-change compound="123" stop-time="5" id="tcf" x="122.388260" y="0.292677" z="-190.926987" h="0.5"/>
     </addon_supertux-raceway>
+    <addon_twisted-library-5>
+        <tyre-change compound="2" stop-time="11" id="Soft" x="69" y="-7.6" z="-121" />
+        <tyre-change compound="3" stop-time="10" id="Medium" x="69" y="-7.6" z="-118" />
+        <tyre-change compound="4" stop-time="9" id="Hard" x="69" y="-7.6" z="-115" />
+        <tyre-change compound="123" stop-time="5" id="Fuel" x="50" y="-7.6" z="-131"/>
+        <dt time="11"/>
+    </addon_twisted-library-5>
+    <addon_centup-meshurion>
+        <tyre-change compound="2" stop-time="7" id="Soft" x="309" y="69.5" z="141" />
+        <tyre-change compound="3" stop-time="6" id="Medium" x="309" y="70.5" z="149" />
+        <tyre-change compound="4" stop-time="5" id="Hard" x="309" y="71" z="157" />
+        <tyre-change compound="123" stop-time="5" id="Fuel" x="309" y="72" z="165"/>
+        <dt time="7"/>
+    </addon_centup-meshurion>
+    <addon_altura-geohatia>
+        <tyre-change compound="2" stop-time="10" id="Soft" x="6" y="64.5" z="-132" />
+        <tyre-change compound="3" stop-time="9" id="Medium" x="9" y="64.5" z="-132" />
+        <tyre-change compound="4" stop-time="8" id="Hard" x="12" y="64.5" z="-132" />
+        <tyre-change compound="123" stop-time="5" id="Fuel" x="15" y="64.5" z="-132"/>
+        <dt time="10"/>
+    </addon_altura-geohatia>
+    <addon_pyramid-clock>
+        <tyre-change compound="2" stop-time="7" id="Soft" x="45" y="1" z="-7" />
+        <tyre-change compound="3" stop-time="6" id="Medium" x="57" y="1" z="-7" />
+        <tyre-change compound="4" stop-time="5" id="Hard" x="63" y="1" z="0" />
+        <tyre-change compound="123" stop-time="5" id="Fuel" x="69" y="1" z="8" />
+        <dt time="7"/>
+    </addon_pyramid-clock>
+    <addon_gears-lane>
+        <tyre-change compound="2" stop-time="8" id="Soft" x="77" y="24" z="-147" />
+        <tyre-change compound="3" stop-time="7" id="Medium" x="77" y="24" z="-145" />
+        <tyre-change compound="4" stop-time="6" id="Hard" x="77" y="24" z="-143" />
+        <tyre-change compound="123" stop-time="5" id="Fuel" x="53" y="23.5" z="-143" />
+        <dt time="8"/>
+    </addon_gears-lane>
+    <addon_imminent-cold-effects>
+        <tyre-change compound="2" stop-time="10" id="Soft" x="-226" y="13" z="-11" />
+        <tyre-change compound="3" stop-time="9" id="Medium" x="-218" y="13" z="-10" />
+        <tyre-change compound="4" stop-time="8" id="Hard" x="-212" y="13" z="-9" />
+        <tyre-change compound="123" stop-time="5" id="Fuel" x="-204" y="13" z="-8" />
+        <dt time="10"/>
+    </addon_imminent-cold-effects>
+    <addon_blooming-start>
+        <tyre-change compound="2" stop-time="7" id="Soft" x="-46" y="3" z="-75" />
+        <tyre-change compound="3" stop-time="6" id="Medium" x="-51" y="3" z="-75" />
+        <tyre-change compound="4" stop-time="5" id="Hard" x="-56" y="3" z="-75" />
+        <tyre-change compound="123" stop-time="5" id="Fuel" x="-41" y="3" z="-75" />
+        <dt time="7"/>
+    </addon_blooming-start>
+    <addon_mars-park>
+        <tyre-change compound="2" stop-time="11" id="Soft" x="-154" y="12.5" z="116" />
+        <tyre-change compound="3" stop-time="10" id="Medium" x="-156" y="12.5" z="110" />
+        <tyre-change compound="4" stop-time="9" id="Hard" x="-158" y="12" z="103" />
+        <tyre-change compound="123" stop-time="5" id="Fuel" x="-158" y="11.5" z="96" />
+        <dt time="11"/>
+    </addon_mars-park>
+    <addon_mesa-party>
+        <tyre-change compound="2" stop-time="7" id="Soft" x="199" y="12.5" z="-17" />
+        <tyre-change compound="3" stop-time="6" id="Medium" x="195" y="12.5" z="-13" />
+        <tyre-change compound="4" stop-time="5" id="Hard" x="189" y="12.5" z="-10" />
+        <tyre-change compound="123" stop-time="5" id="Fuel" x="183" y="12.5" z="-7" />
+        <dt time="7"/>
+    </addon_mesa-party>
+    <addon_on-the-beach-x>
+        <tyre-change compound="2" stop-time="10" id="Soft" x="-5" y="0" z="18" />
+        <tyre-change compound="3" stop-time="9" id="Medium" x="-4" y="0" z="26" />
+        <tyre-change compound="4" stop-time="8" id="Hard" x="-3" y="0" z="34" />
+        <tyre-change compound="123" stop-time="5" id="Fuel" x="-2" y="0" z="42" />
+        <dt time="10"/>
+    </addon_on-the-beach-x>
+    <addon_rt5-lime-windland>
+        <tyre-change compound="2" stop-time="8" id="Soft" x="-246" y="0" z="45" />
+        <tyre-change compound="3" stop-time="7" id="Medium" x="-254" y="0" z="46" />
+        <tyre-change compound="4" stop-time="6" id="Hard" x="-261" y="0" z="47" />
+        <tyre-change compound="123" stop-time="5" id="Fuel" x="-275" y="0" z="45" />
+        <dt time="8"/>
+    </addon_rt5-lime-windland>
+    <addon_rt8-waterfall-gardens>
+        <tyre-change compound="2" stop-time="10" id="Soft" x="-45" y="25.5" z="-117" />
+        <tyre-change compound="3" stop-time="9" id="Medium" x="-51" y="25.5" z="-113" />
+        <tyre-change compound="4" stop-time="8" id="Hard" x="-56" y="25.5" z="-107" />
+        <tyre-change compound="123" stop-time="5" id="Fuel" x="15" y="8" z="97" />
+        <dt time="10"/>
+    </addon_rt8-waterfall-gardens>
+    <addon_scary-swamp-x>
+        <tyre-change compound="2" stop-time="7" id="Soft" x="-143" y="0" z="4" />
+        <tyre-change compound="3" stop-time="6" id="Medium" x="-146" y="0" z="-2" />
+        <tyre-change compound="4" stop-time="5" id="Hard" x="-151" y="0" z="-8" />
+        <tyre-change compound="123" stop-time="5" id="Fuel" x="-157" y="0" z="-12" />
+        <dt time="7"/>
+    </addon_scary-swamp-x>
+    <addon_screwscraper>
+        <tyre-change compound="2" stop-time="9" id="Soft" x="-100" y="0.3" z="-26" />
+        <tyre-change compound="3" stop-time="8" id="Medium" x="-92" y="0.3" z="-23" />
+        <tyre-change compound="4" stop-time="7" id="Hard" x="-84" y="0.3" z="-20" />
+        <tyre-change compound="123" stop-time="5" id="Fuel" x="-76" y="0.3" z="-17" />
+        <tyre-change compound="2" stop-time="9" id="Soft" x="-100" y="0.3" z="26" />
+        <tyre-change compound="3" stop-time="8" id="Medium" x="-92" y="0.3" z="23" />
+        <tyre-change compound="4" stop-time="7" id="Hard" x="-84" y="0.3" z="20" />
+        <tyre-change compound="123" stop-time="5" id="Fuel" x="-76" y="0.3" z="17" />
+        <dt time="9"/>
+    </addon_screwscraper>
+    <addon_tactical-powertank>
+        <tyre-change compound="2" stop-time="7" id="Soft" x="-14" y="-11" z="191" />
+        <tyre-change compound="3" stop-time="6" id="Medium" x="-13" y="-11" z="193" />
+        <tyre-change compound="4" stop-time="5" id="Hard" x="-12" y="-11" z="195" />
+        <tyre-change compound="123" stop-time="5" id="Fuel" x="-15" y="-11" z="189" />
+        <dt time="7"/>
+    </addon_tactical-powertank>
+    <addon_dale-tunnel>
+        <tyre-change compound="2" stop-time="7" id="Soft" x="114" y="0.5" z="-40" />
+        <tyre-change compound="3" stop-time="6" id="Medium" x="114" y="0.5" z="-32" />
+        <tyre-change compound="4" stop-time="5" id="Hard" x="114" y="0.5" z="-24" />
+        <tyre-change compound="123" stop-time="5" id="Fuel" x="114" y="0.5" z="-16" />
+        <dt time="7"/>
+    </addon_dale-tunnel>
+    <addon_quiet-breeze>
+        <tyre-change compound="2" stop-time="9" id="Soft" x="-137" y="-15" z="273" />
+        <tyre-change compound="3" stop-time="8" id="Medium" x="-140" y="-15" z="273" />
+        <tyre-change compound="4" stop-time="7" id="Hard" x="-143" y="-15" z="273" />
+        <tyre-change compound="123" stop-time="5" id="Fuel" x="-146" y="-15" z="273" />
+        <dt time="9"/>
+    </addon_quiet-breeze>
+    <addon_zejumio>
+        <tyre-change compound="2" stop-time="9" id="Soft" x="19" y="0.5" z="-9" />
+        <tyre-change compound="3" stop-time="8" id="Medium" x="27" y="0.5" z="-9" />
+        <tyre-change compound="4" stop-time="7" id="Hard" x="35" y="0.5" z="-9" />
+        <tyre-change compound="123" stop-time="5" id="Fuel" x="43" y="0.5" z="-9" />
+        <dt time="9"/>
+    </addon_zejumio>
+    <addon_final-gloom>
+        <tyre-change compound="2" stop-time="9" id="Soft" x="169" y="0.5" z="189" />
+        <tyre-change compound="3" stop-time="8" id="Medium" x="179" y="0.5" z="188" />
+        <tyre-change compound="4" stop-time="7" id="Hard" x="190" y="0.5" z="185" />
+        <tyre-change compound="123" stop-time="5" id="Fuel" x="200" y="0.5" z="181" />
+        <dt time="9"/>
+    </addon_final-gloom>
+    <addon_ancient-summits>
+        <tyre-change compound="2" stop-time="10" id="Soft" x="72" y="0" z="38" />
+        <tyre-change compound="3" stop-time="9" id="Medium" x="74" y="0" z="40" />
+        <tyre-change compound="4" stop-time="8" id="Hard" x="76" y="0" z="42" />
+        <tyre-change compound="123" stop-time="5" id="Fuel" x="78" y="0" z="44" />
+        <dt time="10"/>
+    </addon_ancient-summits>
+    <addon_pinguino-square>
+        <tyre-change compound="2" stop-time="7" id="Soft" x="36" y="0" z="124" />
+        <tyre-change compound="3" stop-time="6" id="Medium" x="34" y="0" z="124" />
+        <tyre-change compound="4" stop-time="5" id="Hard" x="32" y="0" z="124" />
+        <tyre-change compound="123" stop-time="5" id="Fuel" x="30" y="0" z="124" />
+        <dt time="7"/>
+    </addon_pinguino-square>
+    <addon_untested-place>
+        <tyre-change compound="2" stop-time="8" id="Soft" x="56" y="7.5" z="22" />
+        <tyre-change compound="3" stop-time="7" id="Medium" x="56" y="7" z="19" />
+        <tyre-change compound="4" stop-time="6" id="Hard" x="56" y="7" z="16" />
+        <tyre-change compound="123" stop-time="5" id="Fuel" x="56" y="7" z="13" />
+        <dt time="8"/>
+    </addon_untested-place>
 
     <!-- More tracks go here -->
 </overlay>
