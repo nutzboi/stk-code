@@ -23,6 +23,12 @@
         <tyre-change compound="4" stop-time="15" id="tc2" x="-5.095721" y="0.105497" z="33.593716" h="0.5"/>
         <tyre-change compound="123" stop-time="5" id="tcf" x="0.144933" y="0.105482" z="33.665016" h="0.5"/>
     </addon_months>
+    <addon_supertux-raceway>
+        <tyre-change compound="2" stop-time="10" id="tc0" x="130.668594" y="0.292719" z="-175.887421" h="0.5"/>
+        <tyre-change compound="3" stop-time="8" id="tc1" x="129.582123" y="0.292705" z="-181.259918" h="0.5"/>
+        <tyre-change compound="4" stop-time="6" id="tc2" x="127.841232" y="0.292574" z="-184.699051" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tcf" x="122.388260" y="0.292677" z="-190.926987" h="0.5"/>
+    </addon_supertux-raceway>
 
     <!-- More tracks go here -->
 </overlay>
