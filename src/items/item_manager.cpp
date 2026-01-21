@@ -424,7 +424,7 @@ void ItemManager::collectedItem(ItemState *item, Kart *kart)
 
 	bool do_preview = RaceManager::get()->getTyreModRules()->do_item_preview;
     if (do_preview && item->m_type == ItemState::ItemType::ITEM_BONUS_BOX)
-        item->respawnBonusBox(item->getItemId());
+        item->respawnBonusBox();
 }   // collectedItem
 
 //-----------------------------------------------------------------------------

@@ -147,7 +147,7 @@ void ItemState::reset() {
 
 	bool do_preview = RaceManager::get()->getTyreModRules()->do_item_preview;
     if (do_preview && (m_type == ITEM_BONUS_BOX || m_type == ITEM_BANANA)) // bananas also get an initial powerup in case they get switched
-        respawnBonusBox(getItemId());
+        respawnBonusBox();
 }   // reset
 
 
@@ -347,7 +347,7 @@ void ItemState::saveCompleteState(BareNetworkString* buffer) const
         .addUInt32(m_deactive_ticks).addUInt32(m_used_up_counter)
         .add(m_xyz_init).add(m_xyz).add(m_original_rotation)
         .addUInt8(m_previous_owner ? (int8_t)m_previous_owner->getWorldKartId() : (int8_t)-1)
-        .addUInt8(m_compound).addUInt8(m_stop_time)
+        .addUInt8((printf("%s", getType() == ITEM_BONUS_BOX ? (std::string("ADDED ") + std::to_string(m_compound) + std::string("\n")).c_str()  : ""), m_compound)).addUInt8(m_stop_time)
         .encodeString(object_name);
 }   // saveCompleteState
 
@@ -635,9 +635,10 @@ static int simplePRNG(const unsigned seed, const unsigned time, const unsigned i
     return rand;
 } // simplePRNG
 // ------------------------------------------------------------------------
-void ItemState::respawnBonusBox(unsigned itemid)
+void ItemState::respawnBonusBox()
 {
-
+    unsigned itemid = getItemId();
+    
     unsigned int n=1;
     PowerupManager::PowerupType new_powerup;
     World *world = World::getWorld();
@@ -718,7 +719,7 @@ void Item::updateGraphics(float dt)
 	bool do_preview = RaceManager::get()->getTyreModRules()->do_item_preview;
 
     if (do_preview && getType() == ITEM_BONUS_BOX && isAvailable()) {
-        if (m_powerup_node && m_compound == m_graphical_type)
+        if (m_powerup_node && m_compound == m_graphical_powerup)
             m_powerup_node->setVisible(true);
         else { // If the powerup for item preview doesn't exist or is mismatched, redraw
             if (m_powerup_node) {

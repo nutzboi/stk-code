@@ -404,7 +404,7 @@ void NetworkItemManager::restoreState(BareNetworkString *buffer, int count)
 
 			bool do_preview = RaceManager::get()->getTyreModRules()->do_item_preview;
             if (do_preview && m_confirmed_state[index]->getType() == ItemState::ItemType::ITEM_BONUS_BOX) // Respawn it if it's a bonus box
-                m_confirmed_state[index]->respawnBonusBox(m_confirmed_state[index]->getItemId()); // Collect item
+                m_confirmed_state[index]->respawnBonusBox(); // Collect item
             // Reset till ticks return from state (required for eating banana with bomb)
             int ttr = iei.getTicksTillReturn();
             m_confirmed_state[index]->setTicksTillReturn(ttr);

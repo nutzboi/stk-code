@@ -169,7 +169,7 @@ public:
     int m_compound;
     int m_stop_time;
     TrackObject *m_attached;
-    void respawnBonusBox(unsigned itemid);
+    void respawnBonusBox();
 
     /** The text displayed above this itemState*/
     STKTextBillboard *m_tb;
