@@ -291,11 +291,13 @@ void Tyres::reset() {
         }
     }
 
+#ifndef SERVER_ONLY
     bool change_color = UserConfigParams::m_override_kart_color_with_tyre;
     if (change_color && getTyreColor(m_current_compound) > -0.5f) {
         const float tyre_hue = getTyreColor(m_current_compound) / 100.0f;
         m_kart->setKartColor(tyre_hue);
     }
+#endif
 
     // Boilerplate to initialize all the m_c_xxx constants
     #include "karts/tyres_boilerplate.txt"
