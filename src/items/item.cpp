@@ -112,7 +112,7 @@ ItemState::ItemState(const BareNetworkString& buffer)
     } else if (attachedl.size() == 3) { // "a::b" split by ':' ===> "a","","b"
         m_attached = object_manager->getTrackObject(attachedl[0], attachedl[2]);
     }
-
+    reset();
     //printf("Restored for %u: powerup %u\n", m_item_id, m_compound);
 }   // ItemState(const BareNetworkString& buffer)
 
@@ -347,7 +347,7 @@ void ItemState::saveCompleteState(BareNetworkString* buffer) const
         .addUInt32(m_deactive_ticks).addUInt32(m_used_up_counter)
         .add(m_xyz_init).add(m_xyz).add(m_original_rotation)
         .addUInt8(m_previous_owner ? (int8_t)m_previous_owner->getWorldKartId() : (int8_t)-1)
-        .addUInt8((printf("%s", getType() == ITEM_BONUS_BOX ? (std::string("ADDED ") + std::to_string(m_compound) + std::string("\n")).c_str()  : ""), m_compound)).addUInt8(m_stop_time)
+        .addUInt8(m_compound).addUInt8(m_stop_time)
         .encodeString(object_name);
 }   // saveCompleteState
 
@@ -568,6 +568,12 @@ void Item::reset()
         m_node->setVisible(true);
     }
 
+    World *world = World::getWorld();
+    auto& stk_config = STKConfig::get();
+    if (m_powerup_node && world && stk_config->ticks2Time(world->getTicksSinceStart()) < 0.5f && NetworkConfig::get()->isNetworking()) {
+        m_powerup_node->setVisible(false);
+    }
+
 }   // reset
 
 // ----------------------------------------------------------------------------
@@ -642,6 +648,7 @@ void ItemState::respawnBonusBox()
     unsigned int n=1;
     PowerupManager::PowerupType new_powerup;
     World *world = World::getWorld();
+    //printf("TIME, ID: %d %d\n", world->getTicksSinceStart(), itemid);
 
     // Determine a 'random' number based on time, index of the item,
     // and position of the kart ([TME: position fixed to 1]). The idea is that this process is
@@ -776,6 +783,11 @@ void Item::updateGraphics(float dt)
                 m_graphical_powerup = (int)PowerupManager::PowerupType::POWERUP_NOTHING;
             }
         }
+    }
+
+    World *world = World::getWorld();
+    if (m_powerup_node && world && stk_config->ticks2Time(world->getTicksSinceStart()) < 0.5f && NetworkConfig::get()->isNetworking()) {
+        m_powerup_node->setVisible(false);
     }
 
     float time_since_return = stk_config->ticks2Time(

@@ -825,6 +825,10 @@ void ServerLobby::asynchronousUpdate()
         // Reset for next state usage
         resetPeersReady();
         configPeersStartTime();
+        NetworkItemManager* nim = dynamic_cast<NetworkItemManager*>
+            (Track::getCurrentTrack()->getItemManager());
+        assert(nim);
+        nim->reset();
         break;
     }
     case SELECTING:
