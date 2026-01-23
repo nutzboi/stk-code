@@ -187,6 +187,12 @@
         <tyre-change compound="123" stop-time="5" id="Fuel" x="56" y="7" z="13" />
         <dt time="8"/>
     </addon_untested-place>
+    <addon_Cirno-Circuit>
+        <tyre-change compound="2" stop-time="10" id="tc0" x="15.265821" y="0.651006" z="59.229328" h="0.5"/>
+        <tyre-change compound="3" stop-time="10" id="tc1" x="19.476830" y="0.665919" z="59.214485" h="0.5"/>
+        <tyre-change compound="4" stop-time="10" id="tc2" x="23.261864" y="0.665919" z="59.203194" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tcf" x="20.768972" y="0.665919" z="75.960838" h="0.5"/>
+    <addon_Cirno-Circuit/>
 
     <!-- More tracks go here -->
 </overlay>
