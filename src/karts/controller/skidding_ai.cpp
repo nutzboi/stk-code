@@ -47,6 +47,7 @@
 #include "utils/log.hpp"
 #include "utils/vs.hpp"
 #include "utils/tyre_utils.hpp"
+#include "utils/string_utils.hpp"
 
 #include <line2d.h>
 
@@ -2241,12 +2242,14 @@ void SkiddingAI::handleTyreChangeAndRefuel()
     }
 
     // printf("AI: %d / Tyre health %f, minimum %f / Distance %fm of %fm / Penalties %fsec + %fsec\n", m_has_pitted_this_lap, curr_life_traction, min_life_traction, distance, track_length, Track::getCurrentTrack()->getTimePitDrivethrough(), Track::getCurrentTrack()->getTimePitTyrechange());
-    
+
+    // Don't ever swap out cheat tyres
+    unsigned current_compound = m_kart->m_tyres->m_current_compound;
+    bool is_cheat = StringUtils::startsWith(TyreUtils::getStringFromCompound(current_compound, false /*shortver*/), "CHEAT");
 
     // It's almost always worth it to take new tyres if within 10% of the pit threshold AND will already refuel anyways
-    if (curr_life_traction <= min_life_traction
-         || (will_pit
-             && (curr_life_traction-min_life_traction)/min_life_traction <= 0.1)) {
+    bool within_10percent = (curr_life_traction-min_life_traction)/min_life_traction <= 0.1;
+    if (!is_cheat && (curr_life_traction <= min_life_traction || (will_pit && within_10percent))) {
         if (!will_pit) {
             accrued_slowdown += Track::getCurrentTrack()->getTimePitDrivethrough();
             will_pit = true;
