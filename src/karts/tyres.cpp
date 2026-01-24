@@ -215,8 +215,13 @@ void Tyres::computeDegradation(float dt, bool is_on_ground, bool is_skidding, un
 }
 
 void Tyres::applyCrashPenalty(void) {
-    m_current_life_traction -= (m_c_crash_penalty/100.0f)*m_c_max_life_traction;
-    m_current_life_turning -= (m_c_crash_penalty/100.0f)*m_c_max_life_turning;
+    if (m_deg_mult < 1.0f) {
+        m_current_life_traction -= (m_c_crash_penalty/100.0f)*m_c_max_life_traction*m_deg_mult;
+        m_current_life_turning -= (m_c_crash_penalty/100.0f)*m_c_max_life_turning*m_deg_mult;
+    } else {
+        m_current_life_traction -= (m_c_crash_penalty/100.0f)*m_c_max_life_traction;
+        m_current_life_turning -= (m_c_crash_penalty/100.0f)*m_c_max_life_turning;        
+    }
 }
 
 float Tyres::degEngineForce(float initial_force) {
