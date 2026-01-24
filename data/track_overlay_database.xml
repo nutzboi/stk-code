@@ -192,7 +192,62 @@
         <tyre-change compound="3" stop-time="10" id="tc1" x="19.476830" y="0.665919" z="59.214485" h="0.5"/>
         <tyre-change compound="4" stop-time="10" id="tc2" x="23.261864" y="0.665919" z="59.203194" h="0.5"/>
         <tyre-change compound="123" stop-time="5" id="tcf" x="20.768972" y="0.665919" z="75.960838" h="0.5"/>
-    <addon_Cirno-Circuit/>
+    </addon_Cirno-Circuit>
+    <addon_endurancerun>
+        <tyre-change compound="2" stop-time="25" id="tc0" x="34.660500" y="5.314232" z="-74.303772" h="0.5"/>
+        <tyre-change compound="2" stop-time="25" id="tc1" x="30.726416" y="5.308146" z="-73.963501" h="0.5"/>
+        <tyre-change compound="3" stop-time="23" id="tc2" x="26.010286" y="5.314232" z="-74.068054" h="0.5"/>
+        <tyre-change compound="3" stop-time="23" id="tc3" x="18.736086" y="5.314230" z="-74.172409" h="0.5"/>
+        <tyre-change compound="4" stop-time="20" id="tc4" x="14.053638" y="5.314177" z="-74.189476" h="0.5"/>
+        <tyre-change compound="4" stop-time="20" id="tc5" x="9.398273" y="5.314231" z="-74.336029" h="0.5"/>
+        <tyre-change compound="2" stop-time="25" id="tc6" x="5.122007" y="5.314232" z="-74.064308" h="0.5"/>
+        <tyre-change compound="2" stop-time="25" id="tc7" x="0.442043" y="5.314218" z="-74.018150" h="0.5"/>
+        <tyre-change compound="3" stop-time="23" id="tc8" x="-5.832220" y="5.314227" z="-74.011940" h="0.5"/>
+        <tyre-change compound="3" stop-time="23" id="tc9" x="-10.463887" y="5.314225" z="-74.133476" h="0.5"/>
+        <tyre-change compound="4" stop-time="20" id="tc10" x="-14.910105" y="5.314174" z="-74.109161" h="0.5"/>
+        <tyre-change compound="4" stop-time="20" id="tc11" x="-19.257885" y="5.314150" z="-73.867386" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tc12" x="-24.079021" y="5.314229" z="-74.196983" h="0.5"/>
 
+        <tyre-change compound="123" stop-time="5" id="tc13" x="-47.221703" y="5.314232" z="-74.065514" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tc14" x="-51.724754" y="5.314230" z="-74.016632" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tc15" x="-56.526134" y="5.314219" z="-74.242493" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tc16" x="-60.786663" y="5.314232" z="-74.183243" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tc17" x="-65.174828" y="5.314232" z="-74.133751" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tc18" x="-71.877655" y="5.314191" z="-74.003838" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tc19" x="-76.186035" y="5.313998" z="-73.949158" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tc20" x="-80.797394" y="5.314229" z="-74.054855" h="0.5"/>
+    </addon_endurancerun>
+    <addon_peachraceway>
+        <tyre-change compound="2" stop-time="3" id="tc0" x="47.359810" y="1.648901" z="-45.769234" h="0.5"/>
+        <tyre-change compound="2" stop-time="3" id="tc0" x="43.544147" y="1.648902" z="-45.317696" h="0.5"/>
+        <tyre-change compound="3" stop-time="3" id="tc0" x="40.454060" y="1.648898" z="-45.134464" h="0.5"/>
+        <tyre-change compound="3" stop-time="3" id="tc0" x="36.398968" y="1.648774" z="-45.538322" h="0.5"/>
+        <tyre-change compound="4" stop-time="3" id="tc0" x="33.592987" y="1.648902" z="-45.675922" h="0.5"/>
+        <tyre-change compound="4" stop-time="3" id="tc0" x="29.947554" y="1.648871" z="-45.593670" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tc0" x="26.180178" y="1.648821" z="-45.208557" h="0.5"/>
+        <tyre-change compound="2" stop-time="3" id="tc0" x="22.690872" y="1.648882" z="-45.076412" h="0.5"/>
+        <tyre-change compound="2" stop-time="3" id="tc0" x="19.229410" y="1.648885" z="-44.941498" h="0.5"/>
+        <tyre-change compound="3" stop-time="3" id="tc0" x="16.161655" y="1.648788" z="-45.686493" h="0.5"/>
+        <tyre-change compound="3" stop-time="3" id="tc0" x="12.532017" y="1.648877" z="-45.741589" h="0.5"/>
+        <tyre-change compound="4" stop-time="3" id="tc0" x="9.058687" y="1.648898" z="-45.576080" h="0.5"/>
+        <tyre-change compound="4" stop-time="3" id="tc0" x="5.319024" y="1.648566" z="-45.535954" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tc0" x="2.090986" y="1.648864" z="-45.430981" h="0.5"/>
+    </addon_peachraceway>
+    <addon_peachracewayalt>
+        <tyre-change compound="2" stop-time="3" id="tc0" x="47.359810" y="1.648901" z="-45.769234" h="0.5"/>
+        <tyre-change compound="2" stop-time="3" id="tc0" x="43.544147" y="1.648902" z="-45.317696" h="0.5"/>
+        <tyre-change compound="3" stop-time="3" id="tc0" x="40.454060" y="1.648898" z="-45.134464" h="0.5"/>
+        <tyre-change compound="3" stop-time="3" id="tc0" x="36.398968" y="1.648774" z="-45.538322" h="0.5"/>
+        <tyre-change compound="4" stop-time="3" id="tc0" x="33.592987" y="1.648902" z="-45.675922" h="0.5"/>
+        <tyre-change compound="4" stop-time="3" id="tc0" x="29.947554" y="1.648871" z="-45.593670" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tc0" x="26.180178" y="1.648821" z="-45.208557" h="0.5"/>
+        <tyre-change compound="2" stop-time="3" id="tc0" x="22.690872" y="1.648882" z="-45.076412" h="0.5"/>
+        <tyre-change compound="2" stop-time="3" id="tc0" x="19.229410" y="1.648885" z="-44.941498" h="0.5"/>
+        <tyre-change compound="3" stop-time="3" id="tc0" x="16.161655" y="1.648788" z="-45.686493" h="0.5"/>
+        <tyre-change compound="3" stop-time="3" id="tc0" x="12.532017" y="1.648877" z="-45.741589" h="0.5"/>
+        <tyre-change compound="4" stop-time="3" id="tc0" x="9.058687" y="1.648898" z="-45.576080" h="0.5"/>
+        <tyre-change compound="4" stop-time="3" id="tc0" x="5.319024" y="1.648566" z="-45.535954" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tc0" x="2.090986" y="1.648864" z="-45.430981" h="0.5"/>
+    </addon_peachracewayalt>
     <!-- More tracks go here -->
 </overlay>
