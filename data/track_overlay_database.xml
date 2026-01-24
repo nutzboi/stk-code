@@ -249,5 +249,11 @@
         <tyre-change compound="4" stop-time="3" id="tc0" x="5.319024" y="1.648566" z="-45.535954" h="0.5"/>
         <tyre-change compound="123" stop-time="5" id="tc0" x="2.090986" y="1.648864" z="-45.430981" h="0.5"/>
     </addon_peachracewayalt>
+    <addon_rv-crystal-caves>
+        <tyre-change compound="2" stop-time="30" id="tc0" x="-27.017090" y="-1.106274" z="-4.199955" h="0.5"/>
+        <tyre-change compound="3" stop-time="30" id="tc1" x="-32.576218" y="-1.195734" z="-0.500441" h="0.5"/>
+        <tyre-change compound="4" stop-time="30" id="tc2" x="-28.785166" y="-1.229917" z="-3.291692" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tcf" x="-23.903000" y="-0.661684" z="4.102125" h="0.5"/>
+    </addon_rv-crystal-caves>
     <!-- More tracks go here -->
 </overlay>
