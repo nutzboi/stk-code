@@ -139,7 +139,7 @@
                usage-multiplier-turning="0 0 0 0 0 0 0 0 0 0"
                usage-multiplier-traction="0 0 0 0 0 0 0 0 0 0"
                reference-speed-mult="0 0 0 0 0 0 0 0 0 0"
-               crash-penalty="0 0 0 0 0 0 0 0 0 0"
+               crash-penalty="0.5 0.7 0.5 0.2 0.5 0.5 0.5 0.5 0.5 0.5"
                do-grip-based-turning="0 0 0 0 0 0 0 0 0 0"
                do-substractive-turning="0 0 0 0 0 0 0 0 0 0"
                do-substractive-traction="0 0 0 0 0 0 0 0 0 0"
