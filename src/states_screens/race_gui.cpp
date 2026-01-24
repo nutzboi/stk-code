@@ -1409,7 +1409,7 @@ void RaceGUI::drawSpeedEnergyRank(const Kart* kart,
 
     // Draw the actual speed bar (if the speed is >0)
     // ----------------------------------------------
-    float speed_ratio = speed/40.0f; //max displayed speed of 40
+    float speed_ratio = speed/60.0f; //max displayed speed of 60
     if(speed_ratio<0) speed_ratio = -speed_ratio; // display negative speeds too
     if(speed_ratio>1) speed_ratio = 1;
 
