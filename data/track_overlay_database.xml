@@ -342,5 +342,12 @@
         <tyre-change compound="4" stop-time="13" id="tc2" x="-9.150705" y="35.741100" z="-71.279747" h="0.5"/>
         <tyre-change compound="123" stop-time="5" id="tcf" x="-25.727919" y="35.741161" z="-74.066521" h="0.5"/>
     </addon_slicktrack>
+    <addon_golem-bight>
+        <tyre-change compound="2" stop-time="9" id="Soft" x="11" y="1" z="-57" />
+        <tyre-change compound="3" stop-time="8" id="Medium" x="11" y="1" z="-52" />
+        <tyre-change compound="4" stop-time="7" id="Hard" x="11" y="1" z="-47" />
+        <tyre-change compound="123" stop-time="5" id="Fuel" x="11" y="1" z="-42" />
+        <dt time="9"/>
+    </addon_golem-bight>
     <!-- More tracks go here -->
 </overlay>
