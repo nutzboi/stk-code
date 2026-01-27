@@ -255,5 +255,92 @@
         <tyre-change compound="4" stop-time="30" id="tc1" x="-32.576218" y="-1.195734" z="-0.500441" h="0.5"/>
         <tyre-change compound="123" stop-time="5" id="tcf" x="-23.903000" y="-0.661684" z="4.102125" h="0.5"/>
     </addon_rv-crystal-caves>
+    <addon_miner49erraceway>
+        <banana id="bananabobi.1" x="231.274002" y="116.762909" z="61.025906" h="0.5"/>
+        <banana id="bananabobi.2" x="229.084717" y="116.754074" z="56.373497" h="0.5"/>
+        <banana id="bananabobi.3" x="223.673981" y="116.752342" z="47.471062" h="0.5"/>
+        <banana id="bananabobi.4" x="218.829086" y="116.752548" z="40.914650" h="0.5"/>
+        <banana id="bananabobi.5" x="214.057831" y="116.753334" z="35.054413" h="0.5"/>
+        <banana id="bananabobi.6" x="208.565994" y="116.754097" z="28.876993" h="0.5"/>
+        <banana id="bananabobi.7" x="202.736176" y="116.753281" z="22.319469" h="0.5"/>
+        <banana id="bananabobi.8" x="196.885193" y="116.754097" z="16.279282" h="0.5"/>
+        <banana id="bananabobi.9" x="192.546875" y="116.754669" z="11.799238" h="0.5"/>
+        <tyre-change compound="2" stop-time="20" id="tc0" x="211.043594" y="116.762848" z="26.581354" h="0.5"/>
+        <tyre-change compound="3" stop-time="20" id="tc1" x="212.293121" y="116.762909" z="24.677061" h="0.5"/>
+        <tyre-change compound="4" stop-time="20" id="tc2" x="213.850113" y="116.762909" z="22.884203" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tc3" x="206.028595" y="116.762901" z="16.769594" h="0.5"/>
+    </addon_miner49erraceway>
+    <addon_snowmountainraceway>
+    <tyre-change compound="2" stop-time="20" id="tc0" x="3.119897" y="7.037084" z="158.893951" h="0.5"/>
+    <tyre-change compound="3" stop-time="20" id="tc1" x="10.399947" y="7.037059" z="159.502472" h="0.5"/>
+    <tyre-change compound="4" stop-time="20" id="tc2" x="18.443844" y="7.037078" z="160.044388" h="0.5"/>
+    <tyre-change compound="123" stop-time="5" id="tcf" x="34.127773" y="7.037023" z="153.689926" h="0.5"/>
+    </addon_snowmountainraceway>
+    <addon_lavarunraceway>
+        <tyre-change compound="2" stop-time="15" id="tc0" x="-83.487434" y="53.309551" z="-72.898262" h="0.5"/>
+        <tyre-change compound="3" stop-time="15" id="tc1" x="-82.568710" y="53.309551" z="-76.861069" h="0.5"/>
+        <tyre-change compound="4" stop-time="15" id="tc2" x="-81.144745" y="53.309528" z="-82.885597" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tcf" x="-101.815948" y="53.309551" z="-75.888420" h="0.5"/>
+    </addon_lavarunraceway>
+    <addon_nightglowracewy>
+        <tyre-change compound="2" stop-time="10" id="tc0" x="-39.054943" y="4.360703" z="205.213699" h="0.5"/>
+        <tyre-change compound="3" stop-time="10" id="tc1" x="-39.531223" y="4.360667" z="185.187271" h="0.5"/>
+        <tyre-change compound="4" stop-time="10" id="tc2" x="-39.343800" y="4.360696" z="162.498154" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tc3" x="-39.556580" y="4.360631" z="134.370590" h="0.5"/>
+    </addon_nightglowracewy>
+    <addon_sunnybeachraceway>
+        <tyre-change compound="2" stop-time="18" id="tc0" x="-96.800797" y="68.419998" z="233.091843" h="0.5"/>
+        <tyre-change compound="3" stop-time="14" id="tc1" x="-96.317680" y="68.419998" z="229.152267" h="0.5"/>
+        <tyre-change compound="4" stop-time="10" id="tc2" x="-96.270157" y="68.419998" z="225.762680" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tc0" x="-85.453789" y="68.419998" z="227.974731" h="0.5"/>
+    </addon_sunnybeachraceway>
+    <addon_templeraceway>
+        <tyre-change compound="2" stop-time="10" id="tc0" x="16.895639" y="-43.783382" z="-46.961502" h="0.5"/>
+        <tyre-change compound="3" stop-time="10" id="tc1" x="23.814550" y="-43.783401" z="-45.062977" h="0.5"/>
+        <tyre-change compound="4" stop-time="10" id="tc2" x="33.716492" y="-43.783470" z="-42.662258" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tcf" x="41.522240" y="-43.751049" z="-40.838760" h="0.5"/>
+    </addon_templeraceway>
+    <addon_ninjatempleraceway>
+        <tyre-change compound="2" stop-time="15" id="tc0" x="38.032135" y="11.794365" z="-81.799690" h="0.5"/>
+        <tyre-change compound="3" stop-time="15" id="tc1" x="37.717308" y="11.794387" z="-84.783600" h="0.5"/>
+        <tyre-change compound="4" stop-time="15" id="tc2" x="37.878033" y="11.794327" z="-88.194908" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tcf" x="32.065620" y="11.794374" z="-85.037643" h="0.5"/>
+    </addon_ninjatempleraceway>
+    <addon_lagoonraceway>
+        <tyre-change compound="2" stop-time="20" id="tc0" x="-515.722351" y="11.315236" z="455.486359" h="0.5"/>
+        <tyre-change compound="3" stop-time="20" id="tc1" x="-514.265564" y="11.315191" z="451.736145" h="0.5"/>
+        <tyre-change compound="4" stop-time="20" id="tc2" x="-512.968201" y="11.315218" z="447.578735" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tcf" x="-502.750916" y="11.315233" z="452.450714" h="0.5"/>
+    </addon_lagoonraceway>
+    <addon_riverraceway>
+        <tyre-change compound="2" stop-time="25" id="tc0" x="-14.208838" y="8.984694" z="-242.165359" h="0.5"/>
+        <tyre-change compound="3" stop-time="25" id="tc1" x="-14.984730" y="9.294320" z="-247.268707" h="0.5"/>
+        <tyre-change compound="4" stop-time="25" id="tc2" x="-15.966453" y="9.639446" z="-253.119385" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tcf" x="-19.138727" y="10.292036" z="-262.169647" h="0.5"/>
+    </addon_riverraceway>
+    <addon_desertraceway>
+        <tyre-change compound="2" stop-time="8" id="tc0" x="170.642944" y="7.812924" z="81.190720" h="0.5"/>
+        <tyre-change compound="3" stop-time="8" id="tc1" x="175.937454" y="7.872317" z="69.177551" h="0.5"/>
+        <tyre-change compound="4" stop-time="8" id="tc2" x="178.681427" y="8.077335" z="56.360600" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tcf" x="179.809402" y="8.342255" z="41.269970" h="0.5"/>
+    </addon_desertraceway>
+    <addon_tinraceway>
+        <tyre-change compound="2" stop-time="30" id="tc0" x="100.513702" y="95.482193" z="-195.035263" h="0.5"/>
+        <tyre-change compound="3" stop-time="30" id="tc1" x="97.894981" y="95.482185" z="-192.389084" h="0.5"/>
+        <tyre-change compound="4" stop-time="25" id="tc2" x="94.486732" y="95.482185" z="-189.294876" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tcf" x="91.244995" y="95.482170" z="-171.211609" h="0.5"/>
+    </addon_tinraceway>
+    <addon_ovalraceway>
+        <tyre-change compound="2" stop-time="20" id="tc0" x="-2.404466" y="10.707221" z="-87.009041" h="0.5"/>
+        <tyre-change compound="3" stop-time="20" id="tc1" x="-2.935833" y="10.707221" z="-84.554695" h="0.5"/>
+        <tyre-change compound="4" stop-time="20" id="tc2" x="-3.030890" y="10.707157" z="-82.414566" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tcf" x="-15.865562" y="10.707222" z="-85.157501" h="0.5"/>
+    </addon_ovalraceway>
+    <addon_slicktrack>
+        <tyre-change compound="2" stop-time="13" id="tc0" x="-8.679293" y="35.741161" z="-75.926384" h="0.5"/>
+        <tyre-change compound="3" stop-time="13" id="tc1" x="-8.706244" y="35.741161" z="-73.770218" h="0.5"/>
+        <tyre-change compound="4" stop-time="13" id="tc2" x="-9.150705" y="35.741100" z="-71.279747" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tcf" x="-25.727919" y="35.741161" z="-74.066521" h="0.5"/>
+    </addon_slicktrack>
     <!-- More tracks go here -->
 </overlay>
