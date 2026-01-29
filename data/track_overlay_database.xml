@@ -349,5 +349,11 @@
         <tyre-change compound="123" stop-time="5" id="Fuel" x="11" y="1" z="-42" />
         <dt time="9"/>
     </addon_golem-bight>
+    <addon_rv-rc-stadium-1>
+        <tyre-change compound="2" stop-time="20" id="tc0" x="-103.449600" y="7.549071" z="176.487106" h="0.5"/>
+        <tyre-change compound="3" stop-time="20" id="tc1" x="-107.819382" y="0.135953" z="135.533539" h="0.5"/>
+        <tyre-change compound="4" stop-time="20" id="tc2" x="-87.384384" y="-5.916128" z="101.731232" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tcf" x="-66.452538" y="-5.142914" z="80.489166" h="0.5"/>
+    </addon_rv-rc-stadium-1>
     <!-- More tracks go here -->
 </overlay>
