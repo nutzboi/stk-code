@@ -355,5 +355,11 @@
         <tyre-change compound="4" stop-time="20" id="tc2" x="-87.384384" y="-5.916128" z="101.731232" h="0.5"/>
         <tyre-change compound="123" stop-time="5" id="tcf" x="-66.452538" y="-5.142914" z="80.489166" h="0.5"/>
     </addon_rv-rc-stadium-1>
+    <addon_rocky-polygon>
+        <tyre-change compound="2" stop-time="10" id="tc0" x="247.381622" y="5.001863" z="90.173546" h="0.5"/>
+        <tyre-change compound="3" stop-time="10" id="tc1" x="251.472473" y="5.001860" z="83.284668" h="0.5"/>
+        <tyre-change compound="4" stop-time="10" id="tc2" x="242.878601" y="5.001863" z="71.594788" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tcf" x="236.258270" y="5.001863" z="71.567543" h="0.5"/>
+    </addon_rocky-polygon>
     <!-- More tracks go here -->
 </overlay>
