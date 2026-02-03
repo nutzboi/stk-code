@@ -361,5 +361,84 @@
         <tyre-change compound="4" stop-time="10" id="tc2" x="242.878601" y="5.001863" z="71.594788" h="0.5"/>
         <tyre-change compound="123" stop-time="5" id="tcf" x="236.258270" y="5.001863" z="71.567543" h="0.5"/>
     </addon_rocky-polygon>
+    <addon_autodromo-lombaro>
+        <tyre-change compound="123" stop-time="5" id="tc1" x="363.683868" y="1.037981" z="57.207237" h="0.5"/>
+        <tyre-change compound="2" stop-time="20" id="tc2" x="372.524567" y="1.039081" z="57.069393" h="0.5"/>
+        <tyre-change compound="3" stop-time="20" id="tc3" x="384.912445" y="1.040562" z="56.917793" h="0.5"/>
+        <tyre-change compound="4" stop-time="20" id="tc4" x="396.312592" y="1.041865" z="56.905319" h="0.5"/>
+        <tyre-change compound="2" stop-time="20" id="tc5" x="406.034515" y="1.042923" z="57.005653" h="0.5"/>
+        <tyre-change compound="3" stop-time="20" id="tc6" x="416.963593" y="1.041666" z="56.928261" h="0.5"/>
+        <tyre-change compound="4" stop-time="20" id="tc7" x="427.144379" y="1.040443" z="57.151821" h="0.5"/>
+        <tyre-change compound="2" stop-time="20" id="tc8" x="438.532837" y="1.041774" z="56.983665" h="0.5"/>
+        <tyre-change compound="3" stop-time="20" id="tc9" x="447.522583" y="1.042744" z="57.045883" h="0.5"/>
+        <tyre-change compound="4" stop-time="20" id="tc10" x="458.055023" y="1.041597" z="57.118778" h="0.5"/>
+        <tyre-change compound="2" stop-time="20" id="tc11" x="468.746002" y="1.040518" z="57.077389" h="0.5"/>
+        <tyre-change compound="3" stop-time="20" id="tc12" x="479.003204" y="1.039601" z="56.920616" h="0.5"/>
+        <tyre-change compound="4" stop-time="20" id="tc13" x="489.682434" y="1.039246" z="56.821796" h="0.5"/>
+        <tyre-change compound="2" stop-time="20" id="tc14" x="500.682312" y="1.037425" z="57.017189" h="0.5"/>
+        <tyre-change compound="3" stop-time="20" id="tc15" x="511.481415" y="1.036893" z="57.209106" h="0.5"/>
+        <tyre-change compound="4" stop-time="20" id="tc16" x="522.013611" y="1.038257" z="57.006760" h="0.5"/>
+        <tyre-change compound="2" stop-time="20" id="tc17" x="532.374878" y="1.039538" z="56.850376" h="0.5"/>
+        <tyre-change compound="3" stop-time="20" id="tc18" x="542.417725" y="1.038917" z="56.832973" h="0.5"/>
+        <tyre-change compound="4" stop-time="20" id="tc19" x="551.920349" y="1.038682" z="56.816505" h="0.5"/>
+
+        <big-nitro id="bignitro.2" x="365.683868" y="1.037981" z="57.207237" h="0.5"/>
+        <big-nitro id="bignitro.3" x="374.524567" y="1.039081" z="57.069393" h="0.5"/>
+        <big-nitro id="bignitro.4" x="386.912445" y="1.040562" z="56.917793" h="0.5"/>
+        <big-nitro id="bignitro.5" x="398.312592" y="1.041865" z="56.905319" h="0.5"/>
+        <big-nitro id="bignitro.6" x="408.034515" y="1.042923" z="57.005653" h="0.5"/>
+        <big-nitro id="bignitro.7" x="418.963593" y="1.041666" z="56.928261" h="0.5"/>
+        <big-nitro id="bignitro.8" x="429.144379" y="1.040443" z="57.151821" h="0.5"/>
+        <big-nitro id="bignitro.9" x="440.532837" y="1.041774" z="56.983665" h="0.5"/>
+        <big-nitro id="bignitro.10" x="449.522583" y="1.042744" z="57.045883" h="0.5"/>
+        <big-nitro id="bignitro.11" x="460.055023" y="1.041597" z="57.118778" h="0.5"/>
+        <big-nitro id="bignitro.12" x="470.746002" y="1.040518" z="57.077389" h="0.5"/>
+        <big-nitro id="bignitro.13" x="481.003204" y="1.039601" z="56.920616" h="0.5"/>
+        <big-nitro id="bignitro.14" x="491.682434" y="1.039246" z="56.821796" h="0.5"/>
+        <big-nitro id="bignitro.15" x="502.682312" y="1.037425" z="57.017189" h="0.5"/>
+        <big-nitro id="bignitro.16" x="513.481415" y="1.036893" z="57.209106" h="0.5"/>
+        <big-nitro id="bignitro.17" x="525.013611" y="1.038257" z="57.006760" h="0.5"/>
+        <big-nitro id="bignitro.18" x="534.374878" y="1.039538" z="56.850376" h="0.5"/>
+        <big-nitro id="bignitro.19" x="544.417725" y="1.038917" z="56.832973" h="0.5"/>
+        <big-nitro id="bignitro.20" x="553.920349" y="1.038682" z="56.816505" h="0.5"/>
+
+        <banana id="banana.2" x="365.683868" y="1.037981" z="57.207237" h="0.5"/>
+        <banana id="banana.3" x="374.524567" y="1.039081" z="57.069393" h="0.5"/>
+        <banana id="banana.4" x="386.912445" y="1.040562" z="56.917793" h="0.5"/>
+        <banana id="banana.5" x="398.312592" y="1.041865" z="56.905319" h="0.5"/>
+        <banana id="banana.6" x="408.034515" y="1.042923" z="57.005653" h="0.5"/>
+        <banana id="banana.7" x="418.963593" y="1.041666" z="56.928261" h="0.5"/>
+        <banana id="banana.8" x="429.144379" y="1.040443" z="57.151821" h="0.5"/>
+        <banana id="banana.9" x="440.532837" y="1.041774" z="56.983665" h="0.5"/>
+        <banana id="banana.10" x="449.522583" y="1.042744" z="57.045883" h="0.5"/>
+        <banana id="banana.11" x="460.055023" y="1.041597" z="57.118778" h="0.5"/>
+        <banana id="banana.12" x="470.746002" y="1.040518" z="57.077389" h="0.5"/>
+        <banana id="banana.13" x="481.003204" y="1.039601" z="56.920616" h="0.5"/>
+        <banana id="banana.14" x="491.682434" y="1.039246" z="56.821796" h="0.5"/>
+        <banana id="banana.15" x="502.682312" y="1.037425" z="57.017189" h="0.5"/>
+        <banana id="banana.16" x="513.481415" y="1.036893" z="57.209106" h="0.5"/>
+        <banana id="banana.17" x="525.013611" y="1.038257" z="57.006760" h="0.5"/>
+        <banana id="banana.18" x="534.374878" y="1.039538" z="56.850376" h="0.5"/>
+        <banana id="banana.19" x="544.417725" y="1.038917" z="56.832973" h="0.5"/>
+        <banana id="banana.20" x="553.920349" y="1.038682" z="56.816505" h="0.5"/>
+    </addon_autodromo-lombaro>
+    <addon_brondehach>
+        <tyre-change compound="123" stop-time="5" id="tc1" x="-162.608551" y="10.348354" z="706.592773" h="0.5"/>
+        <tyre-change compound="2" stop-time="25" id="tc2" x="-154.732666" y="10.224287" z="710.044312" h="0.5"/>
+        <tyre-change compound="3" stop-time="25" id="tc3" x="-147.181976" y="10.034146" z="713.586914" h="0.5"/>
+        <tyre-change compound="4" stop-time="25" id="tc4" x="-139.844360" y="9.807234" z="717.136047" h="0.5"/>
+        <tyre-change compound="2" stop-time="25" id="tc5" x="-132.367203" y="9.561150" z="720.636841" h="0.5"/>
+        <tyre-change compound="3" stop-time="25" id="tc6" x="-125.039825" y="9.328886" z="724.033142" h="0.5"/>
+        <tyre-change compound="4" stop-time="25" id="tc7" x="-117.514626" y="9.125256" z="727.383240" h="0.5"/>
+        <tyre-change compound="2" stop-time="25" id="tc8" x="-109.890579" y="8.978488" z="730.924927" h="0.5"/>
+        <tyre-change compound="3" stop-time="25" id="tc9" x="-102.918213" y="8.921120" z="734.164551" h="0.5"/>
+        <tyre-change compound="4" stop-time="25" id="tc10" x="-95.151077" y="8.899049" z="737.773499" h="0.5"/>
+        <tyre-change compound="2" stop-time="25" id="tc11" x="-88.006096" y="8.845280" z="741.092773" h="0.5"/>
+        <tyre-change compound="3" stop-time="25" id="tc12" x="-80.509293" y="8.765091" z="744.576050" h="0.5"/>
+        <tyre-change compound="4" stop-time="25" id="tc13" x="-73.017616" y="8.675056" z="748.056885" h="0.5"/>
+        <tyre-change compound="2" stop-time="25" id="tc14" x="-65.534332" y="8.589698" z="751.533691" h="0.5"/>
+        <tyre-change compound="3" stop-time="25" id="tc15" x="-58.217289" y="8.524367" z="755.029846" h="0.5"/>
+        <tyre-change compound="4" stop-time="25" id="tc16" x="-51.132648" y="8.490197" z="758.408997" h="0.5"/>
+    </addon_brondehach>
     <!-- More tracks go here -->
 </overlay>
