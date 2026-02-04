@@ -39,6 +39,23 @@
 
 #include <memory>
 #include <string.h>
+#include <cctype>
+
+// Minimal safety check for names used by the external team balancer.
+static bool is_name_valid_for_autoteams(const std::string& raw_name)
+{
+    auto l = raw_name.begin();
+    auto r = raw_name.end();
+    while (l != r && std::isspace((unsigned char)*l)) ++l;
+    while (r != l && std::isspace((unsigned char)*(r - 1))) --r;
+    if (l == r)
+        return false;
+
+    if (*l == '-')
+        return false;
+
+    return true;
+}
 
 /** Constructor for an empty peer.
  */
@@ -220,6 +237,23 @@ PeerEligibility STKPeer::testEligibility()
     {
         m_last_eligibility.store(PELG_OTHER);
         return PELG_OTHER;
+    }
+
+    // Reject names that are incompatible with the external team
+    // balancer.
+    if (hasPlayerProfiles())
+    {
+        std::string primary_name = StringUtils::wideToUtf8(
+            getPlayerProfiles()[0]->getName());
+        if (!is_name_valid_for_autoteams(primary_name))
+        {
+            Log::warn("ServerLobby",
+                "Marking player '%s' as ineligible due to incompatible "
+                "name for autoteams.",
+                primary_name.c_str());
+            m_last_eligibility.store(PELG_ACCESS_DENIED);
+            return PELG_ACCESS_DENIED;
+        }
     }
 
     // if a permission level is not enough or restricted
