@@ -1873,7 +1873,7 @@ static void recursiveUpdatePhysics(std::vector<TrackObject*>& tos)
     }
 }   // recursiveUpdatePhysics
 
-static const XMLNode *loadTrackOverlay(std::string track_id) {
+static const XMLNode *loadTrackOverlay() {
     std::string filename = file_manager->getAsset("track_overlay_database.xml");
     /* Format:
         <overlay>
@@ -1895,14 +1895,7 @@ static const XMLNode *loadTrackOverlay(std::string track_id) {
         return NULL;
     }
 
-    for (unsigned int i=0; i<root->getNumNodes(); i++)
-    {
-        const XMLNode *node = root->getNode(i);
-        const std::string &name = node->getName();
-        if (name == track_id)
-            return node;
-    }
-    return NULL;
+    return root;
 }
 
 // ----------------------------------------------------------------------------
@@ -2353,10 +2346,20 @@ void Track::loadTrackModel(bool reverse_track, unsigned int mode_id)
 
     if (!arena_random_item_created)
     {
-        const XMLNode *overlay_nodes = loadTrackOverlay(m_ident);
+        const XMLNode *overlay_root = loadTrackOverlay();
+        const XMLNode *overlay_nodes = NULL;
+        if (overlay_root != NULL) {
+            for (unsigned int i=0; i<overlay_root->getNumNodes(); i++) {
+                const XMLNode *node = overlay_root->getNode(i);
+                const std::string &name = node->getName();
+                const std::string &track_id = m_ident;
+                if (name == track_id)
+                    overlay_nodes = node;
+            }
+        }
+
         if (overlay_nodes != NULL) {
-            for (unsigned int i=0; i<overlay_nodes->getNumNodes(); i++)
-            {
+            for (unsigned int i=0; i<overlay_nodes->getNumNodes(); i++) {
                 const XMLNode *node = overlay_nodes->getNode(i);
                 const std::string &name = node->getName();
                 if (name=="banana"      || name=="item"      ||
@@ -2367,6 +2370,9 @@ void Track::loadTrackModel(bool reverse_track, unsigned int mode_id)
                 }
             }   // for i<overlay_nodes->getNumNodes()
         }
+        delete overlay_root;
+        overlay_root = NULL;
+        overlay_nodes = NULL;
 
         for (unsigned int i=0; i<root->getNumNodes(); i++)
         {
