@@ -496,5 +496,47 @@
         <tyre-change compound="4" stop-time="20" id="tc0" x="-76.233543" y="27.125879" z="-466.039764" h="0.5"/>
         <tyre-change compound="123" stop-time="10" id="tcf" x="-83.136726" y="27.116884" z="-473.013977" h="0.5"/>
     </addon_migrants>
+    <addon_prenzlau-road>
+        <tyre-change compound="2" stop-time="15" id="tc0" x="408.186401" y="13.167269" z="68.636894" h="0.5"/>
+        <tyre-change compound="3" stop-time="15" id="tc1" x="398.434814" y="13.159486" z="68.514458" h="0.5"/>
+        <tyre-change compound="4" stop-time="15" id="tc2" x="387.183472" y="13.160485" z="68.711090" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tcf" x="377.019470" y="13.162930" z="68.156693" h="0.5"/>
+    </addon_prenzlau-road>
+    <addon_salzfelden>
+        <tyre-change compound="2" stop-time="20" id="tc0" x="-1.551775" y="4.431194" z="-515.390259" h="0.5"/>
+        <tyre-change compound="3" stop-time="20" id="tc1" x="-4.913446" y="4.323883" z="-523.221130" h="0.5"/>
+        <tyre-change compound="4" stop-time="20" id="tc2" x="-8.099962" y="4.234273" z="-530.644653" h="0.5"/>
+        <tyre-change compound="123" stop-time="10" id="tcf" x="-11.481544" y="4.148730" z="-538.522522" h="0.5"/>
+    </addon_salzfelden>
+    <addon_x-kart-1>
+        <tyre-change compound="123" stop-time="5" id="tcf" x="-20.679888" y="0.486275" z="-7.124028" h="0.5"/>
+        <tyre-change compound="2" stop-time="15" id="tc0" x="-12.753250" y="0.479226" z="-6.799388" h="0.5"/>
+        <tyre-change compound="3" stop-time="15" id="tc1" x="-4.543299" y="0.479877" z="-6.463143" h="0.5"/>
+        <tyre-change compound="4" stop-time="15" id="tc2" x="3.505874" y="0.486166" z="-6.133486" h="0.5"/>
+    </addon_x-kart-1>
+    <addon_pinabashi-park>
+        <tyre-change compound="2" stop-time="20" id="tc0" x="23.732576" y="4.261914" z="107.519089" h="0.5"/>
+        <tyre-change compound="3" stop-time="20" id="tc1" x="5.541429" y="3.723768" z="81.053711" h="0.5"/>
+        <tyre-change compound="4" stop-time="20" id="tc2" x="5.030293" y="2.859211" z="44.088379" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tcf" x="36.869053" y="2.069992" z="6.626626" h="0.5"/>
+    </addon_pinabashi-park>
+    <addon_sao-paulo>
+        <tyre-change compound="2" stop-time="20" id="tc0" x="492.779755" y="2.070572" z="403.270844" h="0.5"/>
+        <tyre-change compound="3" stop-time="20" id="tc1" x="504.047668" y="2.068931" z="410.028748" h="0.5"/>
+        <tyre-change compound="4" stop-time="20" id="tc2" x="515.862732" y="2.070498" z="416.292328" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tcf" x="527.576660" y="2.071965" z="422.803711" h="0.5"/>
+    </addon_sao-paulo>
+    <addon_sunshine-speedway>
+        <tyre-change compound="2" stop-time="15" id="tc0" x="580.974182" y="0.281612" z="21.619061" h="0.5"/>
+        <tyre-change compound="3" stop-time="15" id="tc1" x="594.006226" y="0.283039" z="21.856821" h="0.5"/>
+        <tyre-change compound="4" stop-time="15" id="tc2" x="605.689148" y="0.284232" z="22.805664" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tcf" x="617.630920" y="0.283305" z="23.775520" h="0.5"/>
+    </addon_sunshine-speedway>
+    <addon_forza>
+        <tyre-change compound="2" stop-time="25" id="tc0" x="-291.296997" y="2.737706" z="-799.009888" h="0.5"/>
+        <tyre-change compound="3" stop-time="25" id="tc1" x="-299.721222" y="2.738751" z="-799.426453" h="0.5"/>
+        <tyre-change compound="4" stop-time="25" id="tc2" x="-308.826965" y="2.739842" z="-799.876709" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tcf" x="-318.324402" y="2.740937" z="-800.346436" h="0.5"/>
+    </addon_forza>
     <!-- More tracks go here -->
 </overlay>
