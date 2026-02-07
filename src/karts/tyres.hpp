@@ -80,6 +80,7 @@ private:
     float m_c_topspeed_constant;
 
     float m_c_offroad_factor;
+    float m_c_rolling_resistance;
     float m_c_skid_factor_partial;
     float m_c_skid_factor_full;
     float m_c_brake_threshold;
@@ -93,10 +94,12 @@ public:
     float m_current_life_traction;
     float m_c_max_life_traction;
     float m_c_min_life_traction;
+    float m_c_min_life_traction_gui;
 
     float m_current_life_turning;
     float m_c_max_life_turning;
     float m_c_min_life_turning;
+    float m_c_min_life_turning_gui;
 
     float m_c_fuel;
     float m_c_fuel_rate_base;

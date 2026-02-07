@@ -1257,7 +1257,7 @@ void Kart::finishedRace(float time, bool from_server)
 
     m_finish_time   = time;
 
-    printf("%s %u %f %f %f\n", getIdent().c_str(), m_tyres->m_current_compound, m_tyres->m_current_life_traction/getKartProperties()->getTyresMaxLifeTraction()[m_tyres->m_current_compound-1], m_tyres->m_current_life_turning/getKartProperties()->getTyresMaxLifeTurning()[m_tyres->m_current_compound-1], time);
+    printf("%s %u %f %f %f\n", getIdent().c_str(), m_tyres->m_current_compound, m_tyres->m_current_life_traction/m_tyres->m_c_max_life_traction, m_tyres->m_current_life_turning/m_tyres->m_c_max_life_turning, time);
 
 
     m_controller->finishedRace(time);

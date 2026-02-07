@@ -6,6 +6,8 @@
     m_c_max_life_turning = m_kart->getKartProperties()->getTyresMaxLifeTurning()[m_current_compound-1];
     m_c_min_life_traction = m_kart->getKartProperties()->getTyresMinLifeTraction()[m_current_compound-1];
     m_c_min_life_turning = m_kart->getKartProperties()->getTyresMinLifeTurning()[m_current_compound-1];
+    m_c_min_life_traction_gui = m_kart->getKartProperties()->getTyresMinLifeTractionGui()[m_current_compound-1];
+    m_c_min_life_turning_gui = m_kart->getKartProperties()->getTyresMinLifeTurningGui()[m_current_compound-1];
     m_c_limiting_transfer_traction = m_kart->getKartProperties()->getTyresLimitingTransferTraction()[m_current_compound-1];
     m_c_regular_transfer_traction = m_kart->getKartProperties()->getTyresRegularTransferTraction()[m_current_compound-1];
     m_c_limiting_transfer_turning = m_kart->getKartProperties()->getTyresLimitingTransferTurning()[m_current_compound-1];
@@ -30,6 +32,7 @@
     m_c_topspeed_constant = m_kart->getKartProperties()->getTyresTopspeedConstant()[m_current_compound-1];
 
     m_c_offroad_factor = m_kart->getKartProperties()->getTyresOffroadFactor()[m_current_compound-1];
+    m_c_rolling_resistance = m_kart->getKartProperties()->getTyresRollingResistance()[m_current_compound-1];
     m_c_skid_factor_partial = m_kart->getKartProperties()->getTyresSkidFactorPartial()[m_current_compound-1];
     m_c_skid_factor_full = m_kart->getKartProperties()->getTyresSkidFactorFull()[m_current_compound-1];
     m_c_brake_threshold = m_kart->getKartProperties()->getTyresBrakeThreshold()[m_current_compound-1];

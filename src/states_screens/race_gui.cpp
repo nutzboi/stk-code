@@ -469,8 +469,8 @@ void RaceGUI::drawCompoundData(const Kart* kart,
 
     video::SColor color_base = video::SColor(80, 100, 100, 100);
 
-    float maxLives[2] = {kart->getKartProperties()->getTyresMaxLifeTraction()[kart->m_tyres->m_current_compound-1], kart->getKartProperties()->getTyresMaxLifeTurning()[kart->m_tyres->m_current_compound-1]};
-    float minLives[2] = {kart->getKartProperties()->getTyresMinLifeTractionGui()[kart->m_tyres->m_current_compound-1], kart->getKartProperties()->getTyresMinLifeTurningGui()[kart->m_tyres->m_current_compound-1]};
+    float maxLives[2] = {kart->m_tyres->m_c_max_life_traction, kart->m_tyres->m_c_max_life_turning};
+    float minLives[2] = {kart->m_tyres->m_c_min_life_traction_gui, kart->m_tyres->m_c_min_life_turning_gui};
     float tankCapacity = kart->getKartProperties()->getFuelCapacity();
     float currlives[2] = {kart->m_tyres->m_current_life_traction, kart->m_tyres->m_current_life_turning};
     float currfuel = ((kart->m_is_refueling) ? (kart->m_target_refuel) : (kart->m_tyres->m_current_fuel));

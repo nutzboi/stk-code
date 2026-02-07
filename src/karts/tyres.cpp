@@ -103,7 +103,7 @@ void Tyres::computeDegradation(float dt, bool is_on_ground, bool is_skidding, un
     float deg_tra_percent = 0.0f;
 
     // Rolling resistance in l.u./meter (life units per meter travelled)
-    float rolling_resistance = m_kart->getKartProperties()->getTyresRollingResistance()[m_current_compound-1];
+    float rolling_resistance = m_c_rolling_resistance;
 
     // The weight used to compute degradation, which will be different from the real one
 
@@ -341,8 +341,8 @@ void Tyres::reset() {
 
     m_lap_count = 0;
 
-    m_current_life_traction = m_kart->getKartProperties()->getTyresMaxLifeTraction()[m_current_compound-1];
-    m_current_life_turning = m_kart->getKartProperties()->getTyresMaxLifeTurning()[m_current_compound-1];
+    m_current_life_traction = m_c_max_life_traction;
+    m_current_life_turning = m_c_max_life_turning;
     m_force_x = 0.0f;
     m_force_y = 0.0f;
     m_previous_speeds.clear();
@@ -460,7 +460,6 @@ void Tyres::commandChange(int compound, int time) {
         std::wstring namew(m_kart->getController()->getName().c_str());
         std::string name( namew.begin(), namew.end() );
         Log::fatal("[Tyres]", "Forbidden tyre ID '0' for kart %s %s", name.c_str(), m_kart->getIdent().c_str());
-        //m_current_compound = rand() % (int)m_kart->getKartProperties()->getTyresCompoundNumber();
     }
 
     auto& stk_config = STKConfig::get();
