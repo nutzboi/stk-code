@@ -448,6 +448,8 @@ public:
     float getParachuteMaxSpeed() const;
 
     float getFrictionKartFriction() const;
+    float getFrictionSlowdownFactor() const;
+    float getFrictionDragCoefficient() const;
 
     float getBubblegumDuration() const;
     float getBubblegumSpeedFraction() const;

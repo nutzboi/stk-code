@@ -2116,10 +2116,14 @@ void Kart::update(int ticks)
             //if (m_max_speed->isSpeedIncreaseActive(MaxSpeed::MS_INCREASE_ZIPPER) > 0)
             //    terrain_speed_fraction += (1.0f - terrain_speed_fraction)*0.5f;
             // This feature was disabled for STK: Tyre Mod Edition
-            
-            m_max_speed->setSlowdown(MaxSpeed::MS_DECREASE_TERRAIN,
-                                     terrain_speed_fraction,
-                                     material->getSlowDownTicks()    );
+            if (terrain_speed_fraction >= 1.01f || terrain_speed_fraction <= 0.99f) {
+                m_max_speed->setSlowdown(MaxSpeed::MS_DECREASE_TERRAIN,
+                                         terrain_speed_fraction,
+                                         material->getSlowDownTicks()    );
+            } else { // terrain speed fraction is practically 1, don't do anything
+                m_max_speed->setSlowdown(MaxSpeed::MS_DECREASE_TERRAIN,
+                                         terrain_speed_fraction, material->getSlowDownTicks(), 0);
+            }
 #ifdef DEBUG
             if(UserConfigParams::m_material_debug)
             {
@@ -3626,6 +3630,8 @@ void Kart::updateEnginePowerAndBrakes(int ticks)
     updateWeight();
     updateNitro(ticks);
     float engine_power = m_tyres->degEngineForce(getActualWheelForce());
+    float drag_area = getKartProperties()->getFrictionDragCoefficient();
+    float air_resistance = 0.5*drag_area*fabsf(getSpeed())*fabsf(getSpeed());
 
     // apply nitro boost if relevant
     if(getSpeedIncreaseTicksLeft(MaxSpeed::MS_INCREASE_NITRO) > 0)
@@ -3647,6 +3653,7 @@ void Kart::updateEnginePowerAndBrakes(int ticks)
             m_kart_properties->getBubblegumTorque() *
             (m_bubblegum_torque_sign ? 1.0f : -1.0f), 0.0));
     }
+
 
     // Acceleration and braking can happen simultaneously
     float base_engine_power = engine_power;
@@ -3734,6 +3741,12 @@ void Kart::updateEnginePowerAndBrakes(int ticks)
     // An engine power of 0 keeps the kart speed constant
     // after correcting for the linear slowdown.
     engine_power = compensateLinearSlowdown(engine_power);
+
+    if (air_resistance >= engine_power) {
+        engine_power = 0.0f;
+    } else {
+        engine_power -= air_resistance;
+    }
 
 
     applyEngineForce(engine_power);

@@ -151,6 +151,8 @@ public:
 
         // Friction
         FRICTION_KART_FRICTION,
+        FRICTION_SLOWDOWN_FACTOR,
+        FRICTION_DRAG_COEFFICIENT,
 
         // Bubblegum
         BUBBLEGUM_DURATION,
@@ -415,6 +417,8 @@ public:
     float getParachuteMaxSpeed() const;
 
     float getFrictionKartFriction() const;
+    float getFrictionSlowdownFactor() const;
+    float getFrictionDragCoefficient() const;
 
     float getBubblegumDuration() const;
     float getBubblegumSpeedFraction() const;

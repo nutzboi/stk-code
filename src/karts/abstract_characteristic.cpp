@@ -155,6 +155,10 @@ AbstractCharacteristic::ValueType AbstractCharacteristic::getType(
         return TYPE_FLOAT;
     case FRICTION_KART_FRICTION:
         return TYPE_FLOAT;
+    case FRICTION_SLOWDOWN_FACTOR:
+        return TYPE_FLOAT;
+    case FRICTION_DRAG_COEFFICIENT:
+        return TYPE_FLOAT;
     case BUBBLEGUM_DURATION:
         return TYPE_FLOAT;
     case BUBBLEGUM_SPEED_FRACTION:
@@ -547,6 +551,10 @@ std::string AbstractCharacteristic::getName(CharacteristicType type)
         return "PARACHUTE_MAX_SPEED";
     case FRICTION_KART_FRICTION:
         return "FRICTION_KART_FRICTION";
+    case FRICTION_SLOWDOWN_FACTOR:
+        return "FRICTION_SLOWDOWN_FACTOR";
+    case FRICTION_DRAG_COEFFICIENT:
+        return "FRICTION_DRAG_COEFFICIENT";
     case BUBBLEGUM_DURATION:
         return "BUBBLEGUM_DURATION";
     case BUBBLEGUM_SPEED_FRACTION:
@@ -1430,6 +1438,30 @@ float AbstractCharacteristic::getFrictionKartFriction() const
                     getName(FRICTION_KART_FRICTION).c_str());
     return result;
 }  // getFrictionKartFriction
+
+// ----------------------------------------------------------------------------
+float AbstractCharacteristic::getFrictionSlowdownFactor() const
+{
+    float result;
+    bool is_set = false;
+    process(FRICTION_SLOWDOWN_FACTOR, &result, &is_set);
+    if (!is_set)
+        Log::fatal("AbstractCharacteristic", "Can't get characteristic %s",
+                    getName(FRICTION_SLOWDOWN_FACTOR).c_str());
+    return result;
+}  // getFrictionSlowdownFactor
+
+// ----------------------------------------------------------------------------
+float AbstractCharacteristic::getFrictionDragCoefficient() const
+{
+    float result;
+    bool is_set = false;
+    process(FRICTION_DRAG_COEFFICIENT, &result, &is_set);
+    if (!is_set)
+        Log::fatal("AbstractCharacteristic", "Can't get characteristic %s",
+                    getName(FRICTION_DRAG_COEFFICIENT).c_str());
+    return result;
+}  // getFrictionDragCoefficient
 
 // ----------------------------------------------------------------------------
 float AbstractCharacteristic::getBubblegumDuration() const

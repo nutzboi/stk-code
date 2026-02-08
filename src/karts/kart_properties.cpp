@@ -1056,6 +1056,18 @@ float KartProperties::getFrictionKartFriction() const
 }  // getFrictionKartFriction
 
 // ----------------------------------------------------------------------------
+float KartProperties::getFrictionSlowdownFactor() const
+{
+    return m_cached_characteristic->getFrictionSlowdownFactor();
+}  // getFrictionSlowdownFactor
+
+// ----------------------------------------------------------------------------
+float KartProperties::getFrictionDragCoefficient() const
+{
+    return m_cached_characteristic->getFrictionDragCoefficient();
+}  // getFrictionDragCoefficient
+
+// ----------------------------------------------------------------------------
 float KartProperties::getBubblegumDuration() const
 {
     return m_cached_characteristic->getBubblegumDuration();

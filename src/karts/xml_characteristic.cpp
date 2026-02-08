@@ -483,6 +483,10 @@ void XmlCharacteristic::load(const XMLNode *node)
     {
         sub_node->get("kart-friction",
             &m_values[FRICTION_KART_FRICTION]);
+        sub_node->get("slowdown-factor",
+            &m_values[FRICTION_SLOWDOWN_FACTOR]);
+        sub_node->get("drag-coefficient",
+            &m_values[FRICTION_DRAG_COEFFICIENT]);
     }
 
     if (const XMLNode *sub_node = node->getNode("bubblegum"))

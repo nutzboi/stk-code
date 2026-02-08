@@ -267,6 +267,8 @@ void MaxSpeed::SpeedIncrease::rewindTo(BareNetworkString *buffer,
 void MaxSpeed::setSlowdown(unsigned int category, float max_speed_fraction,
                            int fade_in_ticks, int duration)
 {
+    max_speed_fraction /= m_kart->getKartProperties()->getFrictionSlowdownFactor();
+
     assert(category>=MS_DECREASE_MIN && category <MS_DECREASE_MAX);
     if (max_speed_fraction < 0.0f)
     {

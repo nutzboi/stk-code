@@ -280,7 +280,12 @@
         </wheels>
 
         <!-- Friction of a kart when e.g. sliding along a wall. -->
-        <friction kart-friction="0.0" />
+        <!-- All speed decreases will be multiplied by this slowdown-factor -->
+        <!--
+            The formula used for drag if non-zero will be:
+            true_engine_force = engine_force * 0.5 * drag_coefficient * current_speed^2
+            -->
+        <friction kart-friction="0.0" slowdown-factor="1.0" drag-coefficient="0.0"/>
 
         <!-- ********** Visuals ********** -->
 
