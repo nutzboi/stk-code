@@ -135,7 +135,6 @@ public:
 
     bool getGripBasedTurning(void) { return m_c_do_grip_based_turning; };
 
-    float correct(float);
     void computeDegradation(float dt, bool is_on_ground, bool is_skidding, unsigned skid_level, bool is_using_zipper, float slowdown, float brake_force, float steer_amount, float throttle_amount);
 
     void applyCrashPenalty(void);

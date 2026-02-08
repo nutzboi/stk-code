@@ -18,9 +18,13 @@
     m_c_do_substractive_turning  = m_kart->getKartProperties()->getTyresDoSubstractiveTurning()[m_current_compound-1] > 0.5f;
     m_c_do_substractive_topspeed  = m_kart->getKartProperties()->getTyresDoSubstractiveTopspeed()[m_current_compound-1] > 0.5f;
 
-    XMLNode::read(m_kart->getKartProperties()->getTyresResponseCurveTraction(), &m_c_response_curve_traction);
-    XMLNode::read(m_kart->getKartProperties()->getTyresResponseCurveTurning(), &m_c_response_curve_turning);
-    XMLNode::read(m_kart->getKartProperties()->getTyresResponseCurveTopspeed(), &m_c_response_curve_topspeed);
+    m_c_response_curve_traction = InterpolationArray();
+    m_c_response_curve_turning = InterpolationArray();
+    m_c_response_curve_topspeed = InterpolationArray();
+    XMLNode::read(fetchCompoundCurve(m_kart->getKartProperties()->getTyresResponseCurveTraction(), m_current_compound), &m_c_response_curve_traction);
+    XMLNode::read(fetchCompoundCurve(m_kart->getKartProperties()->getTyresResponseCurveTurning(), m_current_compound), &m_c_response_curve_turning);
+    XMLNode::read(fetchCompoundCurve(m_kart->getKartProperties()->getTyresResponseCurveTopspeed(), m_current_compound), &m_c_response_curve_topspeed);
+
     m_c_initial_bonus_mult_traction = m_kart->getKartProperties()->getTyresInitialBonusMultTraction()[m_current_compound-1];
     m_c_initial_bonus_add_traction = m_kart->getKartProperties()->getTyresInitialBonusAddTraction()[m_current_compound-1];
     m_c_initial_bonus_mult_turning = m_kart->getKartProperties()->getTyresInitialBonusMultTurning()[m_current_compound-1];

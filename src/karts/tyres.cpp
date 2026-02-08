@@ -32,9 +32,81 @@
 #include "config/stk_config.hpp"
 #include "network/network_config.hpp"
 #include "race/race_manager.hpp"
+#include "utils/string_utils.hpp"
 #include "utils/tyre_utils.hpp"
 #include <iostream>
 #include <algorithm>
+
+/*
+The format of a compound curve list:
+SOFT, 0:0 50:0.5 100:1.0;
+3   , 0:0  50:0.6    100:1.5;
+
+First, tabs and newlines are replaced with spaces
+Then, all spaces are compressed
+Then, it's split by ';'
+Then, each item is split by ','
+Then, a match for the compound's long name is searched
+If that fails, a match for the compound's index is searched
+The second part of the pair is the InterpolatedArray and is returned
+
+If both matches fail, an error is thrown
+*/
+
+static bool BothAreSpaces(char lhs, char rhs) { return (lhs == rhs) && (lhs == ' '); }
+static inline std::string& ltrim(std::string& s, const char* t = " \t\n\r\f\v") { s.erase(0, s.find_first_not_of(t)); return s; }
+static inline std::string& rtrim(std::string& s, const char* t = " \t\n\r\f\v") { s.erase(s.find_last_not_of(t) + 1); return s; }
+static inline std::string& trim(std::string& s, const char* t = " \t\n\r\f\v") { return ltrim(rtrim(s, t), t); }
+
+static std::string fetchCompoundCurve(std::string curve_list, unsigned compound) {
+    if (compound == 0) {
+        Log::fatal("Tyres", "Request for illegal compound 0");
+        return "ERROR";
+    }
+
+    for (unsigned i = 0; i < curve_list.size(); i++)
+        if (curve_list[i] == '\t' || curve_list[i] == '\n')
+            curve_list[i] = ' ';
+
+    std::string::iterator new_end = std::unique(curve_list.begin(), curve_list.end(), BothAreSpaces);
+    curve_list.erase(new_end, curve_list.end());
+
+    std::vector<std::string> compound_plus_curve = StringUtils::split(curve_list, ';');
+    std::vector<std::pair<std::string,std::string>> mapping;
+    for (unsigned i = 0; i < compound_plus_curve.size(); i++) {
+        if (compound_plus_curve[i].size() == 0)
+            continue;
+        std::vector<std::string> mapping = StringUtils::split(compound_plus_curve[i], ',');
+        if (mapping.size() == 0) {
+            continue;
+            // Log::fatal("Tyres", "Bad format in response curve list: [EMPTY]");
+            // return "ERROR";
+        } else if (mapping.size() == 1) {
+            continue;
+            // Log::fatal("Tyres", "Bad format in response curve list:\n%s\nnot pair but:\n'%s'", curve_list.c_str(), mapping[0].c_str());
+            // return "ERROR";
+        }
+        trim(mapping[0]);
+        trim(mapping[1]);
+        // printf("BABA_%s_%s\n", mapping[0].c_str(), mapping[1].c_str());
+
+        if (TyreUtils::getStringFromCompound(compound, /*shortver*/ false) == mapping[0]) {
+            // printf("SUCCESS %s %d\n", mapping[0].c_str(), compound);
+            return mapping[1];
+        }
+
+        unsigned index;
+        try { index = stoi(mapping[0]); }
+        catch (std::invalid_argument const& ex) { continue; }
+
+        if (index == compound) {
+            // printf("SUCCESS %s %d\n", mapping[0].c_str(), compound);
+            return mapping[1];
+        }
+    }
+    Log::fatal("Tyres", "Compound not found in response curve list: %d", compound);
+    return "ERROR";
+}
 
 // Despite being declared in base section of the config, it's NOT intended
 // to be overridden or edited by difficulty or kart class.
@@ -64,10 +136,6 @@ Tyres::Tyres(Kart *kart) {
     m_c_fuel_weight_virtual = m_kart->getKartProperties()->getFuelMassVirtual();
 
     m_current_fuel = m_c_fuel;
-}
-
-float Tyres::correct(float f) {
-    return (100.0f*(float)(m_current_compound-1)+(float)(m_current_compound-1))+f;
 }
 
 void Tyres::computeDegradation(float dt, bool is_on_ground, bool is_skidding, unsigned skid_level, bool is_using_zipper, float slowdown, float brake_amount, float steer_amount, float throttle_amount) {
@@ -225,8 +293,8 @@ void Tyres::applyCrashPenalty(void) {
 }
 
 float Tyres::degEngineForce(float initial_force) {
-    float percent = m_current_life_traction/m_c_max_life_traction;
-    float factor = m_c_response_curve_traction.get(correct(percent*100.0f))*m_c_traction_constant;
+    float percent = m_current_life_traction/m_c_max_life_traction * 100.0f;
+    float factor = m_c_response_curve_traction.get(percent)*m_c_traction_constant;
     float bonus_traction = (initial_force+m_c_initial_bonus_add_traction)*m_c_initial_bonus_mult_traction;
     if (m_c_do_substractive_traction) {
         return bonus_traction - factor;
@@ -236,8 +304,8 @@ float Tyres::degEngineForce(float initial_force) {
 }
 
 float Tyres::degTurnRadius(float initial_radius) {
-    float percent = m_current_life_turning/m_c_max_life_turning;
-    float factor = m_c_response_curve_turning.get(correct(percent*100.0f))*m_c_turning_constant;
+    float percent = m_current_life_turning/m_c_max_life_turning * 100.0f;
+    float factor = m_c_response_curve_turning.get(percent)*m_c_turning_constant;
     float bonus_turning = (initial_radius+m_c_initial_bonus_add_turning)*m_c_initial_bonus_mult_turning;
     if (m_c_do_substractive_turning) {
         return bonus_turning - factor;
@@ -250,8 +318,8 @@ float Tyres::degTopSpeed(float initial_topspeed) {
     float decrease_per_liter = m_kart->getKartProperties()->getFuelMaxSpeedDecrease();
     if (m_c_fuel_weight_virtual < 0.001f && m_c_fuel_weight_real < 0.001f)
         decrease_per_liter = 0.0f; //no fuel or electric mode, fuel does not affect speed
-    float percent = m_current_life_traction/m_c_max_life_traction;
-    float factor = m_c_response_curve_topspeed.get(correct(percent*100.0f))*m_c_topspeed_constant;
+    float percent = m_current_life_traction/m_c_max_life_traction * 100.0f;
+    float factor = m_c_response_curve_topspeed.get(percent)*m_c_topspeed_constant;
     float bonus_topspeed = (initial_topspeed+m_c_initial_bonus_add_topspeed)*m_c_initial_bonus_mult_topspeed;
     if (m_c_do_substractive_topspeed && m_current_fuel > 0.1f) {
         return bonus_topspeed - factor - decrease_per_liter*m_current_fuel;
