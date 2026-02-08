@@ -121,6 +121,8 @@ AbstractCharacteristic::ValueType AbstractCharacteristic::getType(
         return TYPE_FLOAT;
     case FUEL_MAX_SPEED_DECREASE:
         return TYPE_FLOAT;
+    case FUEL_TURN_RADIUS_INCREASE:
+        return TYPE_FLOAT;
     case WHEELS_DAMPING_RELAXATION:
         return TYPE_FLOAT;
     case WHEELS_DAMPING_COMPRESSION:
@@ -517,6 +519,8 @@ std::string AbstractCharacteristic::getName(CharacteristicType type)
         return "FUEL_STOP_RATE";
     case FUEL_MAX_SPEED_DECREASE:
         return "FUEL_MAX_SPEED_DECREASE";
+    case FUEL_TURN_RADIUS_INCREASE:
+        return "FUEL_TURN_RADIUS_INCREASE";
     case WHEELS_DAMPING_RELAXATION:
         return "WHEELS_DAMPING_RELAXATION";
     case WHEELS_DAMPING_COMPRESSION:
@@ -1234,6 +1238,18 @@ float AbstractCharacteristic::getFuelMaxSpeedDecrease() const
                     getName(FUEL_MAX_SPEED_DECREASE).c_str());
     return result;
 }  // getFuelMaxSpeedDecrease
+
+// ----------------------------------------------------------------------------
+float AbstractCharacteristic::getFuelTurnRadiusIncrease() const
+{
+    float result;
+    bool is_set = false;
+    process(FUEL_TURN_RADIUS_INCREASE, &result, &is_set);
+    if (!is_set)
+        Log::fatal("AbstractCharacteristic", "Can't get characteristic %s",
+                    getName(FUEL_TURN_RADIUS_INCREASE).c_str());
+    return result;
+}  // getFuelTurnRadiusIncrease
 
 // ----------------------------------------------------------------------------
 float AbstractCharacteristic::getWheelsDampingRelaxation() const

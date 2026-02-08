@@ -425,6 +425,7 @@ public:
     float getFuelCapacity() const;
     float getFuelStopRate() const;
     float getFuelMaxSpeedDecrease() const;
+    float getFuelTurnRadiusIncrease() const;
 
     float getWheelsDampingRelaxation() const;
     float getWheelsDampingCompression() const;

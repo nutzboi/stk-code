@@ -35,7 +35,7 @@ Engine: power, maxSpeed, genericMaxSpeed, brakeFactor, timeFullBrake, maxSpeedRe
 Gear: switchRatio(std::vector<float>/floatVector), powerIncrease(std::vector<float>/floatVector)
 Mass
 VirtualMass
-Fuel: massReal, massVirtual, consumption, capacity, stopRate, maxSpeedDecrease
+Fuel: massReal, massVirtual, consumption, capacity, stopRate, maxSpeedDecrease, turnRadiusIncrease
 Wheels: dampingRelaxation, dampingCompression
 Jump: animationTime
 Lean: max, speed
