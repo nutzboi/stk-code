@@ -3683,7 +3683,7 @@ void Kart::updateEnginePowerAndBrakes(int ticks)
     {
         engine_power = 0;
     }
-
+    float brake_impulse = 0;
     if(m_controls.getBrake())   // braking
     {
         // check if the player is currently only slowing down
@@ -3704,7 +3704,7 @@ void Kart::updateEnginePowerAndBrakes(int ticks)
 
             float brake_factor = m_kart_properties->getEngineBrakeFactor() * f;
             // Setting 
-            m_vehicle->setAllBrakes(brake_factor);
+            brake_impulse = brake_factor;
         } // m_speed > 0
         // If not going forward and acceleration is pressed, ignore the brake input
         // If acceleration is not set, interpret the brake input as a request
@@ -3742,14 +3742,19 @@ void Kart::updateEnginePowerAndBrakes(int ticks)
     // after correcting for the linear slowdown.
     engine_power = compensateLinearSlowdown(engine_power);
 
-    if (air_resistance >= engine_power) {
+    if (air_resistance > engine_power) {
         engine_power = 0.0f;
+        brake_impulse += (air_resistance - engine_power) / STKConfig::get()->ticks2Time(ticks);
     } else {
         engine_power -= air_resistance;
     }
 
+    if (brake_impulse != 0) {
+        m_vehicle->setAllBrakes(brake_impulse);
+    }
 
     applyEngineForce(engine_power);
+
 }   // updateEnginePowerAndBrakes
 
 // ----------------------------------------------------------------------------
