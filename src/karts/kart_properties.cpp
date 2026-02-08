@@ -1410,19 +1410,19 @@ std::vector<float> KartProperties::getTyresInitialBonusMultTopspeed() const
 }  // getTyresInitialBonusMultTopspeed
 
 // ----------------------------------------------------------------------------
-InterpolationArray KartProperties::getTyresResponseCurveTurning() const
+std::string KartProperties::getTyresResponseCurveTurning() const
 {
     return m_cached_characteristic->getTyresResponseCurveTurning();
 }  // getTyresResponseCurveTurning
 
 // ----------------------------------------------------------------------------
-InterpolationArray KartProperties::getTyresResponseCurveTraction() const
+std::string KartProperties::getTyresResponseCurveTraction() const
 {
     return m_cached_characteristic->getTyresResponseCurveTraction();
 }  // getTyresResponseCurveTraction
 
 // ----------------------------------------------------------------------------
-InterpolationArray KartProperties::getTyresResponseCurveTopspeed() const
+std::string KartProperties::getTyresResponseCurveTopspeed() const
 {
     return m_cached_characteristic->getTyresResponseCurveTopspeed();
 }  // getTyresResponseCurveTopspeed

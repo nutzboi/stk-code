@@ -514,9 +514,9 @@ public:
     std::vector<float> getTyresInitialBonusMultTraction() const;
     std::vector<float> getTyresInitialBonusAddTopspeed() const;
     std::vector<float> getTyresInitialBonusMultTopspeed() const;
-    InterpolationArray getTyresResponseCurveTurning() const;
-    InterpolationArray getTyresResponseCurveTraction() const;
-    InterpolationArray getTyresResponseCurveTopspeed() const;
+    std::string getTyresResponseCurveTurning() const;
+    std::string getTyresResponseCurveTraction() const;
+    std::string getTyresResponseCurveTopspeed() const;
     std::vector<float> getTyresDoGripBasedTurning() const;
     std::vector<float> getTyresDoSubstractiveTurning() const;
     std::vector<float> getTyresDoSubstractiveTraction() const;

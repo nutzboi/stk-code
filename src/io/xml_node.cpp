@@ -562,6 +562,50 @@ int XMLNode::get(const std::string &attribute, InterpolationArray *value) const
 }   // get(InterpolationArray)
 
 // ----------------------------------------------------------------------------
+/** Reads an InterpolatioARray. The values must be specified as:
+ *  x0:y0 x1:y1 x2:y2 ...
+ *  and the X values must be sorted. The function will abort (exit) with
+ *  an error message in case of incorrectly formed x:y pairs.
+ *  \param string The interpolationarray representation.
+ *  \param value The InterpolationArray.
+ *  \returns 0 in case of an error, !=0 otherwise
+ */
+int XMLNode::read(const std::string &s, InterpolationArray *value)
+{
+    std::vector<std::string> pairs = StringUtils::split(s, ' ');
+    for(unsigned int i=0; i<pairs.size(); i++)
+    {
+        std::vector<std::string> pair = StringUtils::split(pairs[i],':');
+        if(pair.size()!=2)
+        {
+            Log::fatal("XMLNode::read", "Incorrect interpolation pair '%s' in '%s'.",
+                        pairs[i].c_str(), s.c_str());
+            Log::fatal("XMLNode::read", "Must be x:y.");
+            exit(-1);
+        }
+        float x;
+        if(!StringUtils::fromString(pair[0], x))
+        {
+            Log::fatal("XMLNode::read", "Incorrect x in pair '%s' of '%s'.",
+                   pairs[i].c_str(), s.c_str());
+            exit(-1);
+        }
+        float y;
+        if(!StringUtils::fromString(pair[1], y))
+        {
+            Log::fatal("XMLNode::read", "Incorrect y in pair '%s' in '%s'.",
+                  pair[1].c_str(), s.c_str());
+            exit(-1);
+        }
+        if(!value->push_back(x, y))
+        {
+            return 0;
+        }
+    }   // for i
+    return 1;
+}   // get(InterpolationArray)
+
+// ----------------------------------------------------------------------------
 /** Interprets the attributes 'x', 'y', 'z'  or 'h', 'p', 'r' as a 3d vector
  *  and set the corresponding elements of value. Not all values need to be
  *  defined as attributes (and the correspnding elements of the vector will

@@ -274,11 +274,11 @@ AbstractCharacteristic::ValueType AbstractCharacteristic::getType(
     case TYRES_INITIAL_BONUS_MULT_TOPSPEED:
         return TYPE_FLOAT_VECTOR;
     case TYRES_RESPONSE_CURVE_TURNING:
-        return TYPE_INTERPOLATION_ARRAY;
+        return TYPE_STRING;
     case TYRES_RESPONSE_CURVE_TRACTION:
-        return TYPE_INTERPOLATION_ARRAY;
+        return TYPE_STRING;
     case TYRES_RESPONSE_CURVE_TOPSPEED:
-        return TYPE_INTERPOLATION_ARRAY;
+        return TYPE_STRING;
     case TYRES_DO_GRIP_BASED_TURNING:
         return TYPE_FLOAT_VECTOR;
     case TYRES_DO_SUBSTRACTIVE_TURNING:
@@ -2140,9 +2140,9 @@ std::vector<float> AbstractCharacteristic::getTyresInitialBonusMultTopspeed() co
 }  // getTyresInitialBonusMultTopspeed
 
 // ----------------------------------------------------------------------------
-InterpolationArray AbstractCharacteristic::getTyresResponseCurveTurning() const
+std::string AbstractCharacteristic::getTyresResponseCurveTurning() const
 {
-    InterpolationArray result;
+    std::string result;
     bool is_set = false;
     process(TYRES_RESPONSE_CURVE_TURNING, &result, &is_set);
     if (!is_set)
@@ -2152,9 +2152,9 @@ InterpolationArray AbstractCharacteristic::getTyresResponseCurveTurning() const
 }  // getTyresResponseCurveTurning
 
 // ----------------------------------------------------------------------------
-InterpolationArray AbstractCharacteristic::getTyresResponseCurveTraction() const
+std::string AbstractCharacteristic::getTyresResponseCurveTraction() const
 {
-    InterpolationArray result;
+    std::string result;
     bool is_set = false;
     process(TYRES_RESPONSE_CURVE_TRACTION, &result, &is_set);
     if (!is_set)
@@ -2164,9 +2164,9 @@ InterpolationArray AbstractCharacteristic::getTyresResponseCurveTraction() const
 }  // getTyresResponseCurveTraction
 
 // ----------------------------------------------------------------------------
-InterpolationArray AbstractCharacteristic::getTyresResponseCurveTopspeed() const
+std::string AbstractCharacteristic::getTyresResponseCurveTopspeed() const
 {
-    InterpolationArray result;
+    std::string result;
     bool is_set = false;
     process(TYRES_RESPONSE_CURVE_TOPSPEED, &result, &is_set);
     if (!is_set)
