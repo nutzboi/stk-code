@@ -954,6 +954,12 @@ float KartProperties::getFuelMaxSpeedDecrease() const
 }  // getFuelMaxSpeedDecrease
 
 // ----------------------------------------------------------------------------
+float KartProperties::getFuelTurnRadiusIncrease() const
+{
+    return m_cached_characteristic->getFuelTurnRadiusIncrease();
+}  // getFuelTurnRadiusIncrease
+
+// ----------------------------------------------------------------------------
 float KartProperties::getWheelsDampingRelaxation() const
 {
     return m_cached_characteristic->getWheelsDampingRelaxation();

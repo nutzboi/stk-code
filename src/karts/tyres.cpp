@@ -304,13 +304,17 @@ float Tyres::degEngineForce(float initial_force) {
 }
 
 float Tyres::degTurnRadius(float initial_radius) {
+    float increase_per_liter = m_kart->getKartProperties()->getFuelTurnRadiusIncrease();
+    if (m_c_fuel_weight_virtual < 0.001f && m_c_fuel_weight_real < 0.001f)
+        increase_per_liter = 0.0f; //no fuel or electric mode, fuel does not affect turning
+
     float percent = m_current_life_turning/m_c_max_life_turning * 100.0f;
     float factor = m_c_response_curve_turning.get(percent)*m_c_turning_constant;
     float bonus_turning = (initial_radius+m_c_initial_bonus_add_turning)*m_c_initial_bonus_mult_turning;
     if (m_c_do_substractive_turning) {
-        return bonus_turning - factor;
+        return (bonus_turning - factor)/(1.0 + increase_per_liter*m_current_fuel);
     } else {
-        return bonus_turning*factor;
+        return bonus_turning*factor/(1.0 + increase_per_liter*m_current_fuel);
     }
 }
 

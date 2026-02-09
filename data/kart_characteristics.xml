@@ -261,8 +261,9 @@
             capacity:        How many liters the tank fits, also the starting amount
             stop-rate:       How many seconds per liter the refueling takes
             max-speed-decrease: How much is the topspeed reduced for each liter in the tank, in m/s
+            turn-radius-increase: [turn_radius] = [old_turn_radius]*(1.0 + [fuel_liters]*turn-radius-increase)
         -->
-        <fuel mass-real="1" mass-virtual="0.5" consumption="14" capacity="100" stop-rate="0.1" max-speed-decrease="0.020" />
+        <fuel mass-real="1" mass-virtual="0.5" consumption="14" capacity="100" stop-rate="0.1" max-speed-decrease="0.020" turn-radius-increase="0.005" />
 
         <!-- Wheels
             damping-relaxation/compression: for bullet
