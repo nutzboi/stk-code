@@ -284,9 +284,10 @@
         <!-- All speed decreases will be multiplied by this slowdown-factor -->
         <!--
             The formula used for drag if non-zero will be:
-            true_engine_force = engine_force * 0.5 * drag_coefficient * current_speed^drag_exponent
+            true_engine_force = engine_force - drag_coefficient * current_speed^drag_exponent
             -->
-        <friction kart-friction="0.0" slowdown-factor="1.0" drag-coefficient="0.0" drag-exponent="2.0" game-engine-speed-uncap="false"/>
+        <!-- game-engine-speed-uncap: if true, the kart will have no max speed from boosts (it'll still have limited max speed from slowdowns) -->
+        <friction kart-friction="0.0" slowdown-factor="1.0" drag-coefficient="5.0" drag-exponent="1.5" game-engine-speed-uncap="false"/>
 
         <!-- ********** Visuals ********** -->
 

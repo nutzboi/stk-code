@@ -3597,10 +3597,9 @@ float Kart::compensateLinearSlowdown(float engine_power)
 float Kart::applyAirFriction(float engine_power)
 {
     // The result will always be a positive number
-    float friction_intensity = fabsf(getSpeed());
-
-    // Not a pure quadratic evolution as it would be too brutal
-    friction_intensity *= sqrt(friction_intensity)*5.0f;
+    float friction_intensity = pow(fabsf(getSpeed()), getKartProperties()->getFrictionDragExponent());
+    friction_intensity *= getKartProperties()->getFrictionDragCoefficient();
+    
 
     // Apply parachute physics
     // Currently, all karts have the same base friction
@@ -3630,9 +3629,7 @@ void Kart::updateEnginePowerAndBrakes(int ticks)
     updateWeight();
     updateNitro(ticks);
     float engine_power = m_tyres->degEngineForce(getActualWheelForce());
-    float drag_area = getKartProperties()->getFrictionDragCoefficient();
-    float drag_exp = getKartProperties()->getFrictionDragExponent();
-    float air_resistance = 0.5*drag_area*pow(fabsf(getSpeed()), drag_exp);
+
 
     // apply nitro boost if relevant
     if(getSpeedIncreaseTicksLeft(MaxSpeed::MS_INCREASE_NITRO) > 0)
@@ -3684,7 +3681,7 @@ void Kart::updateEnginePowerAndBrakes(int ticks)
     {
         engine_power = 0;
     }
-    float brake_impulse = 0;
+
     if(m_controls.getBrake())   // braking
     {
         // check if the player is currently only slowing down
@@ -3705,7 +3702,7 @@ void Kart::updateEnginePowerAndBrakes(int ticks)
 
             float brake_factor = m_kart_properties->getEngineBrakeFactor() * f;
             // Setting 
-            brake_impulse = brake_factor;
+            m_vehicle->setAllBrakes(brake_factor);
         } // m_speed > 0
         // If not going forward and acceleration is pressed, ignore the brake input
         // If acceleration is not set, interpret the brake input as a request
@@ -3737,25 +3734,13 @@ void Kart::updateEnginePowerAndBrakes(int ticks)
             m_vehicle->setAllBrakes(0);        
     }
 
-    // This also applies parachute physics if relevant
     engine_power = applyAirFriction(engine_power);
+
     // An engine power of 0 keeps the kart speed constant
     // after correcting for the linear slowdown.
     engine_power = compensateLinearSlowdown(engine_power);
 
-    if (air_resistance > engine_power) {
-        engine_power = 0.0f;
-        brake_impulse += (air_resistance - engine_power) / STKConfig::get()->ticks2Time(ticks);
-    } else {
-        engine_power -= air_resistance;
-    }
-
-    if (brake_impulse != 0) {
-        m_vehicle->setAllBrakes(brake_impulse);
-    }
-
     applyEngineForce(engine_power);
-
 }   // updateEnginePowerAndBrakes
 
 // ----------------------------------------------------------------------------
