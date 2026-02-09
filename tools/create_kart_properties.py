@@ -41,7 +41,7 @@ Jump: animationTime
 Lean: max, speed
 Anvil: duration, weight, speedFactor
 Parachute: friction, duration, durationOther, durationRankMult, durationSpeedMult, lboundFraction, uboundFraction, maxSpeed
-Friction: kartFriction, slowdownFactor, dragCoefficient
+Friction: kartFriction, slowdownFactor, dragCoefficient, dragExponent, gameEngineSpeedUncap(bool)
 Bubblegum: duration, speedFraction, torque, fadeInTime, shieldDuration, miniBoostEngineForce, miniBoostAddedSpeed, miniFadeOutTime, miniBoostMaxSpeed, miniBoostDuration, miniBoostFadeOutTime, miniCollectionDurationMultiplier, boostEngineForce, boostAddedSpeed, boostMaxSpeed, boostDuration, boostFadeOutTime, collectionDurationMultiplier
 Zipper: duration, force, speedGain, maxSpeedIncrease, fadeOutTime
 Swatter: duration, distance, squashDuration, squashSlowdown

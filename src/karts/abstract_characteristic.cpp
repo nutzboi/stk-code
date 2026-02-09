@@ -159,6 +159,10 @@ AbstractCharacteristic::ValueType AbstractCharacteristic::getType(
         return TYPE_FLOAT;
     case FRICTION_DRAG_COEFFICIENT:
         return TYPE_FLOAT;
+    case FRICTION_DRAG_EXPONENT:
+        return TYPE_FLOAT;
+    case FRICTION_GAME_ENGINE_SPEED_UNCAP:
+        return TYPE_BOOL;
     case BUBBLEGUM_DURATION:
         return TYPE_FLOAT;
     case BUBBLEGUM_SPEED_FRACTION:
@@ -555,6 +559,10 @@ std::string AbstractCharacteristic::getName(CharacteristicType type)
         return "FRICTION_SLOWDOWN_FACTOR";
     case FRICTION_DRAG_COEFFICIENT:
         return "FRICTION_DRAG_COEFFICIENT";
+    case FRICTION_DRAG_EXPONENT:
+        return "FRICTION_DRAG_EXPONENT";
+    case FRICTION_GAME_ENGINE_SPEED_UNCAP:
+        return "FRICTION_GAME_ENGINE_SPEED_UNCAP";
     case BUBBLEGUM_DURATION:
         return "BUBBLEGUM_DURATION";
     case BUBBLEGUM_SPEED_FRACTION:
@@ -1462,6 +1470,30 @@ float AbstractCharacteristic::getFrictionDragCoefficient() const
                     getName(FRICTION_DRAG_COEFFICIENT).c_str());
     return result;
 }  // getFrictionDragCoefficient
+
+// ----------------------------------------------------------------------------
+float AbstractCharacteristic::getFrictionDragExponent() const
+{
+    float result;
+    bool is_set = false;
+    process(FRICTION_DRAG_EXPONENT, &result, &is_set);
+    if (!is_set)
+        Log::fatal("AbstractCharacteristic", "Can't get characteristic %s",
+                    getName(FRICTION_DRAG_EXPONENT).c_str());
+    return result;
+}  // getFrictionDragExponent
+
+// ----------------------------------------------------------------------------
+bool AbstractCharacteristic::getFrictionGameEngineSpeedUncap() const
+{
+    bool result;
+    bool is_set = false;
+    process(FRICTION_GAME_ENGINE_SPEED_UNCAP, &result, &is_set);
+    if (!is_set)
+        Log::fatal("AbstractCharacteristic", "Can't get characteristic %s",
+                    getName(FRICTION_GAME_ENGINE_SPEED_UNCAP).c_str());
+    return result;
+}  // getFrictionGameEngineSpeedUncap
 
 // ----------------------------------------------------------------------------
 float AbstractCharacteristic::getBubblegumDuration() const

@@ -153,6 +153,8 @@ public:
         FRICTION_KART_FRICTION,
         FRICTION_SLOWDOWN_FACTOR,
         FRICTION_DRAG_COEFFICIENT,
+        FRICTION_DRAG_EXPONENT,
+        FRICTION_GAME_ENGINE_SPEED_UNCAP,
 
         // Bubblegum
         BUBBLEGUM_DURATION,
@@ -419,6 +421,8 @@ public:
     float getFrictionKartFriction() const;
     float getFrictionSlowdownFactor() const;
     float getFrictionDragCoefficient() const;
+    float getFrictionDragExponent() const;
+    bool getFrictionGameEngineSpeedUncap() const;
 
     float getBubblegumDuration() const;
     float getBubblegumSpeedFraction() const;

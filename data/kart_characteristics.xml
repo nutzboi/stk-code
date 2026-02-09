@@ -283,9 +283,9 @@
         <!-- All speed decreases will be multiplied by this slowdown-factor -->
         <!--
             The formula used for drag if non-zero will be:
-            true_engine_force = engine_force * 0.5 * drag_coefficient * current_speed^2
+            true_engine_force = engine_force * 0.5 * drag_coefficient * current_speed^drag_exponent
             -->
-        <friction kart-friction="0.0" slowdown-factor="1.0" drag-coefficient="0.0"/>
+        <friction kart-friction="0.0" slowdown-factor="1.0" drag-coefficient="0.0" drag-exponent="2.0" game-engine-speed-uncap="false"/>
 
         <!-- ********** Visuals ********** -->
 

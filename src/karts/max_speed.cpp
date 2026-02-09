@@ -518,7 +518,7 @@ void MaxSpeed::update(int ticks)
         m_add_engine_force = 0.0f;
     }
 
-    if (m_kart->isOnGround())
+    if (m_kart->isOnGround() && (slowdown_factor < 0.98f || !m_kart->getKartProperties()->getFrictionGameEngineSpeedUncap()))
         m_kart->getVehicle()->setMaxSpeed(m_current_max_speed);
     else
         m_kart->getVehicle()->setMaxSpeed(9999.9f);

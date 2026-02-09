@@ -450,6 +450,8 @@ public:
     float getFrictionKartFriction() const;
     float getFrictionSlowdownFactor() const;
     float getFrictionDragCoefficient() const;
+    float getFrictionDragExponent() const;
+    bool getFrictionGameEngineSpeedUncap() const;
 
     float getBubblegumDuration() const;
     float getBubblegumSpeedFraction() const;

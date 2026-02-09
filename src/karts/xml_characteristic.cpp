@@ -487,6 +487,10 @@ void XmlCharacteristic::load(const XMLNode *node)
             &m_values[FRICTION_SLOWDOWN_FACTOR]);
         sub_node->get("drag-coefficient",
             &m_values[FRICTION_DRAG_COEFFICIENT]);
+        sub_node->get("drag-exponent",
+            &m_values[FRICTION_DRAG_EXPONENT]);
+        sub_node->get("game-engine-speed-uncap",
+            &m_values[FRICTION_GAME_ENGINE_SPEED_UNCAP]);
     }
 
     if (const XMLNode *sub_node = node->getNode("bubblegum"))

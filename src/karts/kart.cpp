@@ -3631,7 +3631,8 @@ void Kart::updateEnginePowerAndBrakes(int ticks)
     updateNitro(ticks);
     float engine_power = m_tyres->degEngineForce(getActualWheelForce());
     float drag_area = getKartProperties()->getFrictionDragCoefficient();
-    float air_resistance = 0.5*drag_area*fabsf(getSpeed())*fabsf(getSpeed());
+    float drag_exp = getKartProperties()->getFrictionDragExponent();
+    float air_resistance = 0.5*drag_area*pow(fabsf(getSpeed()), drag_exp);
 
     // apply nitro boost if relevant
     if(getSpeedIncreaseTicksLeft(MaxSpeed::MS_INCREASE_NITRO) > 0)
