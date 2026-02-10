@@ -328,7 +328,7 @@ void XmlCharacteristic::load(const XMLNode *node)
     // Please don't change the following tag. It will be automatically detected
     // by the script and replace the contained content.
     // To update the code, use tools/update_characteristics.py
-    /* <characteristics-start loadXml/> */
+    /* <characteristics-start loadXml> */
     if (const XMLNode *sub_node = node->getNode("suspension"))
     {
         sub_node->get("stiffness",
@@ -824,5 +824,5 @@ void XmlCharacteristic::load(const XMLNode *node)
     }
 
 
-    /* <characteristics-end loadXml/> */
+    /* <characteristics-end loadXml> */
 }   // load
