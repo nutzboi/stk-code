@@ -54,8 +54,13 @@ const core::stringc& COSOperator::getOperatingSystemVersion() const
 }
 
 
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_) 
+void COSOperator::copyToClipboard(const char* text) const{
+	SDL_SetClipboardText(text);
+	return;
+}
 //! copies text to the clipboard
-#if defined(_IRR_COMPILE_WITH_WINDOWS_DEVICE_)
+#elif defined(_IRR_COMPILE_WITH_WINDOWS_DEVICE_)
 void COSOperator::copyToClipboard(const wchar_t* text) const
 {
 	if (wcslen(text)==0)
@@ -134,7 +139,13 @@ void COSOperator::copyToClipboard(const c8* text) const
 
 //! gets text from the clipboard
 //! \return Returns 0 if no string is in there.
-#if defined(_IRR_COMPILE_WITH_WINDOWS_DEVICE_)
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+const char* COSOperator::getTextFromClipboard() const
+{
+	return SDL_GetClipboardText();
+}
+//! copies text to the clipboard
+#elif defined(_IRR_COMPILE_WITH_WINDOWS_DEVICE_)
 const wchar_t* COSOperator::getTextFromClipboard() const
 {
 #if defined(_IRR_XBOX_PLATFORM_)
