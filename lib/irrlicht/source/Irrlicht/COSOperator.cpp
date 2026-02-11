@@ -100,15 +100,24 @@ void COSOperator::copyToClipboard(const c8* text) const
 	EmptyClipboard();
 
 	HGLOBAL clipbuffer;
-	char * buffer;
 
-	clipbuffer = GlobalAlloc(GMEM_DDESHARE, strlen(text)+1);
-	buffer = (char*)GlobalLock(clipbuffer);
-
-	strcpy(buffer, text);
+	int widelen = MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED, text, -1, nullptr, 0);
+	if(widelen > 0)
+	{
+		clipbuffer = GlobalAlloc(GMEM_DDESHARE, widelen*sizeof(wchar_t));
+		wchar_t* buffer = (wchar_t*)GlobalLock(clipbuffer);
+		MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED, text, -1, buffer, widelen);
+		SetClipboardData(CF_UNICODETEXT, clipbuffer);
+	}
+	else
+	{	// if MultiByteToWideChar fails, fallback to the old behaviour.
+		clipbuffer = GlobalAlloc(GMEM_DDESHARE, strlen(text)+1);
+		char* buffer = (char*)GlobalLock(clipbuffer);
+		strcpy(buffer, text);
+		SetClipboardData(CF_TEXT, clipbuffer);
+	}
 
 	GlobalUnlock(clipbuffer);
-	SetClipboardData(CF_TEXT, clipbuffer);
 	CloseClipboard();
 
 // MacOSX version
@@ -134,13 +143,24 @@ const wchar_t* COSOperator::getTextFromClipboard() const
 	if (!OpenClipboard(NULL))
 		return 0;
 
-	wchar_t * buffer = 0;
+	wchar_t * widebuffer = 0;
+	char buffer[1401];
 
 	HANDLE hData = GetClipboardData( CF_UNICODETEXT ); //Windwos converts between CF_UNICODETEXT and CF_TEXT automatically.
-	buffer = (wchar_t*)GlobalLock( hData );
+	widebuffer = (wchar_t*)GlobalLock( hData );
+	
+	int widelen = WideCharToMultiByte(CP_UTF8, WC_DEFAULTCHAR, widebuffer, -1, nullptr, 0, NULL, NULL);
+	if(widelen > 0)
+	{
+		widelen = (widelen < 360 ? widelen : 360); // limit to max user message size.
+		WideCharToMultiByte(CP_UTF8, WC_DEFAULTCHAR, widebuffer, -1, buffer, widelen, NULL, NULL);
+		buffer[1400] = '\0';
+	}
+	char * result = buffer;
+
 	GlobalUnlock( hData );
 	CloseClipboard();
-	return buffer;
+	return result;
 
 #else
 
@@ -156,13 +176,24 @@ const c8* COSOperator::getTextFromClipboard() const
 	if (!OpenClipboard(NULL))
 		return 0;
 
-	char * buffer = 0;
+	wchar_t * widebuffer = 0;
+	char buffer[1401];
 
-	HANDLE hData = GetClipboardData( CF_TEXT );
-	buffer = (char*)GlobalLock( hData );
+	HANDLE hData = GetClipboardData( CF_UNICODETEXT );
+	widebuffer = (wchar_t*)GlobalLock( hData );
+	
+	int widelen = WideCharToMultiByte(CP_UTF8, WC_DEFAULTCHAR, widebuffer, -1, nullptr, 0, NULL, NULL);
+	if(widelen > 0)
+	{
+		widelen = (widelen < 360 ? widelen : 360);
+		WideCharToMultiByte(CP_UTF8, WC_DEFAULTCHAR, widebuffer, -1, &buffer[0], widelen, NULL, NULL);
+		buffer[1400] = '\0';
+	}
+	char * result = buffer;
+
 	GlobalUnlock( hData );
 	CloseClipboard();
-	return buffer;
+	return result;
 
 #elif defined(_IRR_COMPILE_WITH_OSX_DEVICE_)
 	return (OSXCopyFromClipboard());
