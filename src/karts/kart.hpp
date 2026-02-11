@@ -710,8 +710,16 @@ public:
     KartModel* getKartModel() const { return m_kart_model.get();      }
 
     /** Returns this kart's kart model. */
-    void setKartColor(float f) { return m_kart_model.get()->getRenderInfo()->setHue(f) ;      }
-    float getKartColor() { return m_kart_model.get()->getRenderInfo()->getHue() ;      }
+    void setKartColor(float f) {
+        if (m_kart_model.get()->getRenderInfo())
+            m_kart_model.get()->getRenderInfo()->setHue(f);
+    }
+    float getKartColor() {
+        if (m_kart_model.get()->getRenderInfo())
+            return m_kart_model.get()->getRenderInfo()->getHue();
+        else
+            return 0.0f;
+    }
 
     // ------------------------------------------------------------------------
     /** Returns the length of the kart. */

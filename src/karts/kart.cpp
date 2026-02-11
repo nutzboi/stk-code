@@ -4194,9 +4194,11 @@ void Kart::updateGraphics(float dt)
 
 	// Ghosts are transparent
 	if (!ghost_override && (getBody()->getTag() == NO_COLLISION_KART_TAG || getBody()->getTag() == GHOST_NO_COLLECTIBLE_KART_TAG)) {
-		m_kart_model->getRenderInfo()->setTransparent(true);
+		if (m_kart_model->getRenderInfo())
+		    m_kart_model->getRenderInfo()->setTransparent(true);
 	} else {
-		m_kart_model->getRenderInfo()->setTransparent(false);
+		if (m_kart_model->getRenderInfo())
+		    m_kart_model->getRenderInfo()->setTransparent(false);
 	}
 
 
