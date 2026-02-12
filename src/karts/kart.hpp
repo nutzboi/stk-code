@@ -473,7 +473,7 @@ public:
     // Access to the kart properties.
     // ------------------------------------------------------------------------
     /** Returns the kart properties of this kart. */
-    const KartProperties* getKartProperties() const { return m_kart_properties.get(); }
+    KartProperties* getKartProperties() const { return m_kart_properties.get(); }
     // ========================================================================
     /** Change to new kart instancely (used in network live join). */
     virtual void changeKart(const std::string& new_ident,

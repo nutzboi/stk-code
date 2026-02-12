@@ -20,6 +20,7 @@
 #define HEADER_CACHED_CHARACTERISTICS_HPP
 
 #include "karts/abstract_characteristic.hpp"
+#include "network/network_string.hpp"
 
 #include <assert.h>
 
@@ -50,6 +51,9 @@ public:
     void updateSource();
     virtual void copyFrom(const AbstractCharacteristic *other) { assert(false); }
     virtual void process(CharacteristicType type, Value value, bool *is_set) const;
+
+    void saveState(BareNetworkString *buffer) const;
+    void restoreState(BareNetworkString *buffer);
 };
 
 #endif

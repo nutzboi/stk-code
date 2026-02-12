@@ -1116,6 +1116,15 @@ void ClientLobby::startGame(Event* event)
     assert(nim);
     nim->restoreCompleteState(event->data());
 
+    World* w = World::getWorld();
+    for (unsigned i = 0; i < w->getNumKarts(); i++)
+    {
+        Kart* k = w->getKart(i);
+        k->getKartProperties()->restoreCachedState(&event->data());
+    }
+    printf("Restoring STATE\n");
+
+
     core::stringw err_msg = _("Failed to start the network game.");
     // Different stk process thread may have different stk host
     STKHost* stk_host = STKHost::get();

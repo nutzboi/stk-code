@@ -30,7 +30,7 @@ import sys
 
 characteristics = """Suspension: stiffness, rest, travel, expSpringResponse(bool), maxForce
 Stability: rollInfluence, chassisLinearDamping, chassisAngularDamping, downwardImpulseFactor, trackConnectionAccel, angularFactor(std::vector<float>/floatVector), smoothFlyingImpulse
-Turn: radius(InterpolationArray), timeResetSteer, timeFullSteer(InterpolationArray), brakeMultiplier
+Turn: radius(InterpolationArray), timeFullSteer(InterpolationArray), brakeMultiplier
 Engine: power, maxSpeed, genericMaxSpeed, brakeFactor, timeFullBrake, maxSpeedReverseRatio, rearForceFraction
 Gear: switchRatio(std::vector<float>/floatVector), powerIncrease(std::vector<float>/floatVector)
 Mass
@@ -42,10 +42,10 @@ Lean: max, speed
 Anvil: duration, weight, speedFactor
 Parachute: friction, duration, durationOther, durationRankMult, durationSpeedMult, lboundFraction, uboundFraction, maxSpeed
 Friction: kartFriction, slowdownFactor, dragCoefficient, dragExponent, gameEngineSpeedUncap(bool)
-Bubblegum: duration, speedFraction, torque, fadeInTime, shieldDuration, miniBoostEngineForce, miniBoostAddedSpeed, miniFadeOutTime, miniBoostMaxSpeed, miniBoostDuration, miniBoostFadeOutTime, miniCollectionDurationMultiplier, boostEngineForce, boostAddedSpeed, boostMaxSpeed, boostDuration, boostFadeOutTime, collectionDurationMultiplier
+Bubblegum: duration, speedFraction, torque, fadeInTime, shieldDuration, miniBoostEngineForce, miniBoostAddedSpeed, miniBoostMaxSpeed, miniBoostDuration, miniBoostFadeOutTime, miniCollectionDurationMultiplier, boostEngineForce, boostAddedSpeed, boostMaxSpeed, boostDuration, boostFadeOutTime, collectionDurationMultiplier
 Zipper: duration, force, speedGain, maxSpeedIncrease, fadeOutTime
 Swatter: duration, distance, squashDuration, squashSlowdown
-Plunger: bandMaxLength, bandForce, bandDuration, bandSpeedIncrease, bandFadeOutTime, inFaceTime
+Plunger: bandMaxLength, bandForce, bandDuration, bandSpeedIncrease, bandFadeOutTime
 NitroHack: duration, factor
 Electro: duration, engineMult, maxSpeedIncrease, fadeOutTime
 Tyres: pitSpeedFraction, changeKartMap(std::string/string), namesLong(std::string/string), namesShort(std::string/string), maxLifeTurning(std::vector<float>/floatVector), maxLifeTraction(std::vector<float>/floatVector), minLifeTurning(std::vector<float>/floatVector), minLifeTraction(std::vector<float>/floatVector), minLifeTurningGui(std::vector<float>/floatVector), minLifeTractionGui(std::vector<float>/floatVector), regularTransferTurning(std::vector<float>/floatVector), regularTransferTraction(std::vector<float>/floatVector), limitingTransferTurning(std::vector<float>/floatVector), limitingTransferTraction(std::vector<float>/floatVector), initialBonusAddTurning(std::vector<float>/floatVector), initialBonusMultTurning(std::vector<float>/floatVector), initialBonusAddTraction(std::vector<float>/floatVector), initialBonusMultTraction(std::vector<float>/floatVector), initialBonusAddTopspeed(std::vector<float>/floatVector), initialBonusMultTopspeed(std::vector<float>/floatVector), responseCurveTurning(std::string/string), responseCurveTraction(std::string/string), responseCurveTopspeed(std::string/string), doGripBasedTurning(std::vector<float>/floatVector), doSubstractiveTurning(std::vector<float>/floatVector), doSubstractiveTraction(std::vector<float>/floatVector), doSubstractiveTopspeed(std::vector<float>/floatVector), tractionConstant(std::vector<float>/floatVector), turningConstant(std::vector<float>/floatVector), topspeedConstant(std::vector<float>/floatVector), compoundNumber, offroadFactor(std::vector<float>/floatVector), rollingResistance(std::vector<float>/floatVector), skidFactorPartial(std::vector<float>/floatVector), skidFactorFull(std::vector<float>/floatVector), usageMultiplierTurning(std::vector<float>/floatVector), usageMultiplierTraction(std::vector<float>/floatVector), referenceSpeedMult(std::vector<float>/floatVector), brakeThreshold(std::vector<float>/floatVector), crashPenalty(std::vector<float>/floatVector), defaultColor(std::vector<float>/floatVector)
@@ -242,6 +242,83 @@ def createLoadXml(groups):
                 format(nameMinus, nameUnderscore.upper()))
         print("    }\n")
 
+def createCCSave(groups):
+    i = 0
+    for g in groups:
+        for m in g.members:
+            nameTitle = joinSubName(g, m, True)
+            nameUnderscore = joinSubName(g, m, False)
+            nameMinus = "-".join(toList(m.name))
+            typeC = m.typeC # type expression in C
+
+            custom_encode = False
+            encoder = None
+            if typeC == "bool":
+                encoder = "addUInt8"
+            elif typeC == "float":
+                encoder = "addFloat"
+            elif typeC == "std::vector<float>":
+                custom_encode = True
+                encoder = """buffer->addUInt32((static_cast<{0} *>(m_values[{1}].content))->size());
+    for (unsigned i = 0; i < (static_cast<{0} *>(m_values[{1}].content))->size(); i++) {{
+        buffer->addFloat((*static_cast<{0} *>(m_values[{1}].content))[i]); // {2}
+    }}""".format(typeC, i, nameTitle)
+            elif typeC == "std::string":
+                encoder = "encodeString32L"
+            elif typeC == "InterpolationArray":
+                encoder = "encodeInterpolationArray"
+            else:
+                raise ValueError("ERROR: NetworkString doesn't support the characteristic type of {0}: {1}".format(nameTitle, typeC))
+
+            if (custom_encode == False):
+                print("    buffer->{2}(*(static_cast<{0} *>(m_values[{1}].content))); // {3}".format(typeC, i, encoder, nameTitle))
+            else:
+                print(encoder)
+                
+
+            i += 1
+
+def createCCRestore(groups):
+    i = 0
+    print("    uint32_t size;")
+    for g in groups:
+        for m in g.members:
+            nameTitle = joinSubName(g, m, True)
+            nameUnderscore = joinSubName(g, m, False)
+            nameMinus = "-".join(toList(m.name))
+            typeC = m.typeC # type expression in C
+
+            custom_decode = False
+            decoder = None
+            if typeC == "bool":
+                decoder = "getUInt8"
+            elif typeC == "float":
+                decoder = "getFloat"
+            elif typeC == "std::vector<float>":
+                custom_decode = True
+                decoder = """
+    size = buffer->getUInt32();
+    (static_cast<{0} *>(m_values[{1}].content))->clear();
+    for (unsigned i = 0; i < size; i++) {{
+        (static_cast<{0} *>(m_values[{1}].content))->push_back(buffer->getFloat()); // {2}
+    }}""".format(typeC, i, nameTitle)
+            elif typeC == "std::string":
+                custom_decode = True
+                decoder = "    buffer->decodeString32L((static_cast<{0} *>(m_values[{1}].content))); // {2}".format(typeC, i, nameTitle)
+            elif typeC == "InterpolationArray":
+                custom_decode = True
+                decoder = "    buffer->decodeInterpolationArray((static_cast<{0} *>(m_values[{1}].content))); // {2}".format(typeC, i, nameTitle)
+            else:
+                raise ValueError("ERROR: NetworkString doesn't support the characteristic type of {0}: {1}".format(nameTitle, typeC))
+
+            if (custom_decode == False):
+                print("    *(static_cast<{0} *>(m_values[{1}].content)) = buffer->{2}(); // {3}".format(typeC, i, decoder, nameTitle))
+            else:
+                print(decoder)
+                
+
+            i += 1
+
 # Dicionary that maps an argument string to a tupel of
 # a generator function, a help string and a filename
 functions = {
@@ -253,6 +330,8 @@ functions = {
     "kpdefs":   (createKpDefs,   "Create the header function definitions for the getters", "karts/kart_properties.hpp"),
     "kpgetter": (createKpGetter, "Implement the getters",                                  "karts/kart_properties.cpp"),
     "loadXml":  (createLoadXml,  "Code to load the characteristics from an xml file",      "karts/xml_characteristic.cpp"),
+    "ccnetworksave":  (createCCSave,  "Code to save cached characteristics to a NetworkString", "karts/cached_characteristic.cpp"),
+    "ccnetworkrestore":  (createCCRestore,  "Code to restore cached characteristics from a NetworkString", "karts/cached_characteristic.cpp"),
 }
 
 def main():

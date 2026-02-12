@@ -3419,6 +3419,15 @@ void ServerLobby::configPeersStartTime()
     const uint8_t cc = (uint8_t)Track::getCurrentTrack()->getCheckManager()->getCheckStructureCount();
     ns->addUInt8(cc);
     *ns += *m_items_complete_state;
+
+    World* w = World::getWorld();
+    printf("Saving STATE\n");
+    for (unsigned i = 0; i < w->getNumKarts(); i++)
+    {
+        Kart* k = w->getKart(i);
+        k->getKartProperties()->saveCachedState(ns);
+    }
+
     m_client_starting_time = start_time;
     Comm::sendMessageToPeers(ns, PRM_RELIABLE);
 

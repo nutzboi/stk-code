@@ -27,6 +27,7 @@
 #include "utils/leak_check.hpp"
 #include "utils/types.hpp"
 #include "utils/vec3.hpp"
+#include "utils/interpolation_array.hpp"
 
 #include "LinearMath/btQuaternion.h"
 
@@ -153,10 +154,16 @@ public:
                        uint16_t max_len = 65535);
     // ------------------------------------------------------------------------
     BareNetworkString& encodeString(const std::string &value);
+    BareNetworkString& encodeString32L(const std::string &value);
     BareNetworkString& encodeString(const irr::core::stringw &value);
     int decodeString(std::string *out) const;
+    int decodeString32L(std::string *out) const;
     int decodeStringW(irr::core::stringw *out) const;
     std::string getLogMessage(const std::string &indent="") const;
+    // ------------------------------------------------------------------------
+    BareNetworkString& encodeInterpolationArray(InterpolationArray &value);
+    int decodeInterpolationArray(InterpolationArray *out);
+
     // ------------------------------------------------------------------------
     /** Returns the internal buffer of the network string. */
     std::vector<uint8_t>& getBuffer() { return m_buffer; }

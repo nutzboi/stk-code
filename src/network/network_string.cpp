@@ -19,6 +19,7 @@
 
 #include "utils/string_utils.hpp"
 #include "utils/utf8/core.h"
+#include "utils/interpolation_array.hpp"
 
 #include <algorithm>   // for std::min
 #include <iomanip>
@@ -84,6 +85,14 @@ BareNetworkString& BareNetworkString::encodeString(const std::string &value)
     else
         return addUInt8(255).addString(value.substr(0, 255));
 }   // encodeString
+// ----------------------------------------------------------------------------
+/** Adds four bytes for the length of the string, and then (up to 2^32-1 of)
+ *  the characters of the given string. */
+BareNetworkString& BareNetworkString::encodeString32L(const std::string &value)
+{
+    uint32_t len = (uint32_t)value.size();
+    return this->addUInt32(len).addString(value);
+}   // encodeString
 
 // ----------------------------------------------------------------------------
  /** Adds one byte for the length of the string, and then (up to 255 of)
@@ -106,6 +115,19 @@ int BareNetworkString::decodeString(std::string *out) const
     uint8_t len = get<uint8_t>();
     *out = getString(len);
     return len+1;
+}    // decodeString
+// ----------------------------------------------------------------------------
+/** Returns a string at the given position. The first four bytes indicate the
+ *  length, followed by the actual string (not 0 terminated).
+ *  \param[in] pos Buffer position where the encoded string starts.
+ *  \param[out] out The decoded string.
+ *  \return number of bytes read = 1+length of string
+ */
+int BareNetworkString::decodeString32L(std::string *out) const
+{
+    uint32_t len = getUInt32();
+    *out = getString(len);
+    return len+4;
 }    // decodeString
 
 // ----------------------------------------------------------------------------
@@ -242,6 +264,26 @@ std::string BareNetworkString::getLogMessage(const std::string &indent) const
     return oss.str();
 }   // getLogMessage
 //-----------------------------------------------------------------------------
+BareNetworkString& BareNetworkString::encodeInterpolationArray(InterpolationArray &value) {
+    unsigned size = value.size();
+    addUInt16(size);
+    for (unsigned i = 0; i < size; i++) {
+        addFloat(value.getX(i));
+        addFloat(value.getY(i));
+    }
+    return *this;
+}
+int BareNetworkString::decodeInterpolationArray(InterpolationArray *out) {
+    uint16_t length = getUInt16();
+    out->clear();
+    for (unsigned i = 0; i < length; i++) {
+        float x = getFloat();
+        float y = getFloat();
+        out->push_back(x, y);
+    }
+    return 2+length*2*4;
+}
+
 
 //=============================================================================
 // Generic encoders/decoders

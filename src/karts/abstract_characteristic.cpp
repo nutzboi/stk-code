@@ -81,8 +81,6 @@ AbstractCharacteristic::ValueType AbstractCharacteristic::getType(
         return TYPE_FLOAT;
     case TURN_RADIUS:
         return TYPE_INTERPOLATION_ARRAY;
-    case TURN_TIME_RESET_STEER:
-        return TYPE_FLOAT;
     case TURN_TIME_FULL_STEER:
         return TYPE_INTERPOLATION_ARRAY;
     case TURN_BRAKE_MULTIPLIER:
@@ -179,8 +177,6 @@ AbstractCharacteristic::ValueType AbstractCharacteristic::getType(
         return TYPE_FLOAT;
     case BUBBLEGUM_MINI_BOOST_ADDED_SPEED:
         return TYPE_FLOAT;
-    case BUBBLEGUM_MINI_FADE_OUT_TIME:
-        return TYPE_FLOAT;
     case BUBBLEGUM_MINI_BOOST_MAX_SPEED:
         return TYPE_FLOAT;
     case BUBBLEGUM_MINI_BOOST_DURATION:
@@ -228,8 +224,6 @@ AbstractCharacteristic::ValueType AbstractCharacteristic::getType(
     case PLUNGER_BAND_SPEED_INCREASE:
         return TYPE_FLOAT;
     case PLUNGER_BAND_FADE_OUT_TIME:
-        return TYPE_FLOAT;
-    case PLUNGER_IN_FACE_TIME:
         return TYPE_FLOAT;
     case NITRO_HACK_DURATION:
         return TYPE_FLOAT;
@@ -483,8 +477,6 @@ std::string AbstractCharacteristic::getName(CharacteristicType type)
         return "STABILITY_SMOOTH_FLYING_IMPULSE";
     case TURN_RADIUS:
         return "TURN_RADIUS";
-    case TURN_TIME_RESET_STEER:
-        return "TURN_TIME_RESET_STEER";
     case TURN_TIME_FULL_STEER:
         return "TURN_TIME_FULL_STEER";
     case TURN_BRAKE_MULTIPLIER:
@@ -581,8 +573,6 @@ std::string AbstractCharacteristic::getName(CharacteristicType type)
         return "BUBBLEGUM_MINI_BOOST_ENGINE_FORCE";
     case BUBBLEGUM_MINI_BOOST_ADDED_SPEED:
         return "BUBBLEGUM_MINI_BOOST_ADDED_SPEED";
-    case BUBBLEGUM_MINI_FADE_OUT_TIME:
-        return "BUBBLEGUM_MINI_FADE_OUT_TIME";
     case BUBBLEGUM_MINI_BOOST_MAX_SPEED:
         return "BUBBLEGUM_MINI_BOOST_MAX_SPEED";
     case BUBBLEGUM_MINI_BOOST_DURATION:
@@ -631,8 +621,6 @@ std::string AbstractCharacteristic::getName(CharacteristicType type)
         return "PLUNGER_BAND_SPEED_INCREASE";
     case PLUNGER_BAND_FADE_OUT_TIME:
         return "PLUNGER_BAND_FADE_OUT_TIME";
-    case PLUNGER_IN_FACE_TIME:
-        return "PLUNGER_IN_FACE_TIME";
     case NITRO_HACK_DURATION:
         return "NITRO_HACK_DURATION";
     case NITRO_HACK_FACTOR:
@@ -1006,18 +994,6 @@ InterpolationArray AbstractCharacteristic::getTurnRadius() const
                     getName(TURN_RADIUS).c_str());
     return result;
 }  // getTurnRadius
-
-// ----------------------------------------------------------------------------
-float AbstractCharacteristic::getTurnTimeResetSteer() const
-{
-    float result;
-    bool is_set = false;
-    process(TURN_TIME_RESET_STEER, &result, &is_set);
-    if (!is_set)
-        Log::fatal("AbstractCharacteristic", "Can't get characteristic %s",
-                    getName(TURN_TIME_RESET_STEER).c_str());
-    return result;
-}  // getTurnTimeResetSteer
 
 // ----------------------------------------------------------------------------
 InterpolationArray AbstractCharacteristic::getTurnTimeFullSteer() const
@@ -1596,18 +1572,6 @@ float AbstractCharacteristic::getBubblegumMiniBoostAddedSpeed() const
 }  // getBubblegumMiniBoostAddedSpeed
 
 // ----------------------------------------------------------------------------
-float AbstractCharacteristic::getBubblegumMiniFadeOutTime() const
-{
-    float result;
-    bool is_set = false;
-    process(BUBBLEGUM_MINI_FADE_OUT_TIME, &result, &is_set);
-    if (!is_set)
-        Log::fatal("AbstractCharacteristic", "Can't get characteristic %s",
-                    getName(BUBBLEGUM_MINI_FADE_OUT_TIME).c_str());
-    return result;
-}  // getBubblegumMiniFadeOutTime
-
-// ----------------------------------------------------------------------------
 float AbstractCharacteristic::getBubblegumMiniBoostMaxSpeed() const
 {
     float result;
@@ -1894,18 +1858,6 @@ float AbstractCharacteristic::getPlungerBandFadeOutTime() const
                     getName(PLUNGER_BAND_FADE_OUT_TIME).c_str());
     return result;
 }  // getPlungerBandFadeOutTime
-
-// ----------------------------------------------------------------------------
-float AbstractCharacteristic::getPlungerInFaceTime() const
-{
-    float result;
-    bool is_set = false;
-    process(PLUNGER_IN_FACE_TIME, &result, &is_set);
-    if (!is_set)
-        Log::fatal("AbstractCharacteristic", "Can't get characteristic %s",
-                    getName(PLUNGER_IN_FACE_TIME).c_str());
-    return result;
-}  // getPlungerInFaceTime
 
 // ----------------------------------------------------------------------------
 float AbstractCharacteristic::getNitroHackDuration() const

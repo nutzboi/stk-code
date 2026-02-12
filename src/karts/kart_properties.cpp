@@ -834,12 +834,6 @@ InterpolationArray KartProperties::getTurnRadius() const
 }  // getTurnRadius
 
 // ----------------------------------------------------------------------------
-float KartProperties::getTurnTimeResetSteer() const
-{
-    return m_cached_characteristic->getTurnTimeResetSteer();
-}  // getTurnTimeResetSteer
-
-// ----------------------------------------------------------------------------
 InterpolationArray KartProperties::getTurnTimeFullSteer() const
 {
     return m_cached_characteristic->getTurnTimeFullSteer();
@@ -1128,12 +1122,6 @@ float KartProperties::getBubblegumMiniBoostAddedSpeed() const
 }  // getBubblegumMiniBoostAddedSpeed
 
 // ----------------------------------------------------------------------------
-float KartProperties::getBubblegumMiniFadeOutTime() const
-{
-    return m_cached_characteristic->getBubblegumMiniFadeOutTime();
-}  // getBubblegumMiniFadeOutTime
-
-// ----------------------------------------------------------------------------
 float KartProperties::getBubblegumMiniBoostMaxSpeed() const
 {
     return m_cached_characteristic->getBubblegumMiniBoostMaxSpeed();
@@ -1276,12 +1264,6 @@ float KartProperties::getPlungerBandFadeOutTime() const
 {
     return m_cached_characteristic->getPlungerBandFadeOutTime();
 }  // getPlungerBandFadeOutTime
-
-// ----------------------------------------------------------------------------
-float KartProperties::getPlungerInFaceTime() const
-{
-    return m_cached_characteristic->getPlungerInFaceTime();
-}  // getPlungerInFaceTime
 
 // ----------------------------------------------------------------------------
 float KartProperties::getNitroHackDuration() const

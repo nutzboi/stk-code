@@ -92,7 +92,6 @@ public:
 
         // Turn
         TURN_RADIUS,
-        TURN_TIME_RESET_STEER,
         TURN_TIME_FULL_STEER,
         TURN_BRAKE_MULTIPLIER,
 
@@ -165,7 +164,6 @@ public:
         BUBBLEGUM_SHIELD_DURATION,
         BUBBLEGUM_MINI_BOOST_ENGINE_FORCE,
         BUBBLEGUM_MINI_BOOST_ADDED_SPEED,
-        BUBBLEGUM_MINI_FADE_OUT_TIME,
         BUBBLEGUM_MINI_BOOST_MAX_SPEED,
         BUBBLEGUM_MINI_BOOST_DURATION,
         BUBBLEGUM_MINI_BOOST_FADE_OUT_TIME,
@@ -196,7 +194,6 @@ public:
         PLUNGER_BAND_DURATION,
         PLUNGER_BAND_SPEED_INCREASE,
         PLUNGER_BAND_FADE_OUT_TIME,
-        PLUNGER_IN_FACE_TIME,
 
         // Nitrohack
         NITRO_HACK_DURATION,
@@ -372,7 +369,6 @@ public:
     float getStabilitySmoothFlyingImpulse() const;
 
     InterpolationArray getTurnRadius() const;
-    float getTurnTimeResetSteer() const;
     InterpolationArray getTurnTimeFullSteer() const;
     float getTurnBrakeMultiplier() const;
 
@@ -433,7 +429,6 @@ public:
     float getBubblegumShieldDuration() const;
     float getBubblegumMiniBoostEngineForce() const;
     float getBubblegumMiniBoostAddedSpeed() const;
-    float getBubblegumMiniFadeOutTime() const;
     float getBubblegumMiniBoostMaxSpeed() const;
     float getBubblegumMiniBoostDuration() const;
     float getBubblegumMiniBoostFadeOutTime() const;
@@ -461,7 +456,6 @@ public:
     float getPlungerBandDuration() const;
     float getPlungerBandSpeedIncrease() const;
     float getPlungerBandFadeOutTime() const;
-    float getPlungerInFaceTime() const;
 
     float getNitroHackDuration() const;
     float getNitroHackFactor() const;

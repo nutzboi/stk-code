@@ -365,8 +365,6 @@ void XmlCharacteristic::load(const XMLNode *node)
     {
         sub_node->get("radius",
             &m_values[TURN_RADIUS]);
-        sub_node->get("time-reset-steer",
-            &m_values[TURN_TIME_RESET_STEER]);
         sub_node->get("time-full-steer",
             &m_values[TURN_TIME_FULL_STEER]);
         sub_node->get("brake-multiplier",
@@ -511,8 +509,6 @@ void XmlCharacteristic::load(const XMLNode *node)
             &m_values[BUBBLEGUM_MINI_BOOST_ENGINE_FORCE]);
         sub_node->get("mini-boost-added-speed",
             &m_values[BUBBLEGUM_MINI_BOOST_ADDED_SPEED]);
-        sub_node->get("mini-fade-out-time",
-            &m_values[BUBBLEGUM_MINI_FADE_OUT_TIME]);
         sub_node->get("mini-boost-max-speed",
             &m_values[BUBBLEGUM_MINI_BOOST_MAX_SPEED]);
         sub_node->get("mini-boost-duration",
@@ -573,8 +569,6 @@ void XmlCharacteristic::load(const XMLNode *node)
             &m_values[PLUNGER_BAND_SPEED_INCREASE]);
         sub_node->get("band-fade-out-time",
             &m_values[PLUNGER_BAND_FADE_OUT_TIME]);
-        sub_node->get("in-face-time",
-            &m_values[PLUNGER_IN_FACE_TIME]);
     }
 
     if (const XMLNode *sub_node = node->getNode("nitrohack"))
