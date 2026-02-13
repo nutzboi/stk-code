@@ -906,6 +906,12 @@ float KartProperties::getMass() const
 }  // getMass
 
 // ----------------------------------------------------------------------------
+float KartProperties::getTrackZipperFactor() const
+{
+    return m_cached_characteristic->getTrackZipperFactor();
+}  // getTrackZipperFactor
+
+// ----------------------------------------------------------------------------
 float KartProperties::getVirtualMass() const
 {
     return m_cached_characteristic->getVirtualMass();

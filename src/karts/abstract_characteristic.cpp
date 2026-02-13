@@ -105,6 +105,8 @@ AbstractCharacteristic::ValueType AbstractCharacteristic::getType(
         return TYPE_FLOAT_VECTOR;
     case MASS:
         return TYPE_FLOAT;
+    case TRACK_ZIPPER_FACTOR:
+        return TYPE_FLOAT;
     case VIRTUAL_MASS:
         return TYPE_FLOAT;
     case FUEL_MASS_REAL:
@@ -501,6 +503,8 @@ std::string AbstractCharacteristic::getName(CharacteristicType type)
         return "GEAR_POWER_INCREASE";
     case MASS:
         return "MASS";
+    case TRACK_ZIPPER_FACTOR:
+        return "TRACK_ZIPPER_FACTOR";
     case VIRTUAL_MASS:
         return "VIRTUAL_MASS";
     case FUEL_MASS_REAL:
@@ -1138,6 +1142,18 @@ float AbstractCharacteristic::getMass() const
                     getName(MASS).c_str());
     return result;
 }  // getMass
+
+// ----------------------------------------------------------------------------
+float AbstractCharacteristic::getTrackZipperFactor() const
+{
+    float result;
+    bool is_set = false;
+    process(TRACK_ZIPPER_FACTOR, &result, &is_set);
+    if (!is_set)
+        Log::fatal("AbstractCharacteristic", "Can't get characteristic %s",
+                    getName(TRACK_ZIPPER_FACTOR).c_str());
+    return result;
+}  // getTrackZipperFactor
 
 // ----------------------------------------------------------------------------
 float AbstractCharacteristic::getVirtualMass() const

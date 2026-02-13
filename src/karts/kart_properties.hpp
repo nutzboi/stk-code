@@ -420,6 +420,8 @@ public:
 
     float getMass() const;
 
+    float getTrackZipperFactor() const;
+
     float getVirtualMass() const;
 
     float getFuelMassReal() const;

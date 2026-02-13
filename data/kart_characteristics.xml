@@ -248,6 +248,9 @@
         <gear switch-ratio="0.2 0.45 0.7 1 1.25"
               power-increase="2.5 2.1 1.7 1.4 1.2" />
 
+        <!-- The effects of all track zippers will have their top speed & accel values multiplied by this factor -->
+        <trackzipperfactor value="1.0" />
+
         <!-- Mass of a kart -->
         <mass value="350" />
 

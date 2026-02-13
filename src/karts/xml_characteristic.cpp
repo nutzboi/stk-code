@@ -403,6 +403,12 @@ void XmlCharacteristic::load(const XMLNode *node)
             &m_values[MASS]);
     }
 
+    if (const XMLNode *sub_node = node->getNode("trackzipperfactor"))
+    {
+        sub_node->get("value",
+            &m_values[TRACK_ZIPPER_FACTOR]);
+    }
+
     if (const XMLNode *sub_node = node->getNode("virtualmass"))
     {
         sub_node->get("value",

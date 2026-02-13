@@ -2104,8 +2104,11 @@ void Kart::update(int ticks)
         }
         else if(material->isZipper()     && isOnGround())
         {
-            handleZipper(material);
-            showZipperFire();
+            // printf("FACTOR %f\n", getKartProperties()->getTrackZipperFactor());
+            if (getKartProperties()->getTrackZipperFactor() > 0.01f) {
+                handleZipper(material);
+                showZipperFire();
+            }
         }
         else
         {
@@ -2669,6 +2672,14 @@ void Kart::handleZipper(const Material *material, bool play_sound, bool mini_zip
             fade_out_time      = m_kart_properties->getZipperFadeOutTime();
         if(engine_force<0)
             engine_force       = m_kart_properties->getZipperForce();
+
+        max_speed_increase *= m_kart_properties->getTrackZipperFactor();
+        speed_gain *= m_kart_properties->getTrackZipperFactor();
+        // The engine force can be increased to account for extra zipper strength, but not reduced zipper strength
+        // this is an empirical measure taken because of air resistance curves being quadratic
+        if (m_kart_properties->getTrackZipperFactor() > 1.0f)
+            engine_force *= m_kart_properties->getTrackZipperFactor();
+        
         boost_category = MaxSpeed::MS_INCREASE_GROUND_ZIPPER;
     }
     else
@@ -2693,6 +2704,9 @@ void Kart::handleZipper(const Material *material, bool play_sound, bool mini_zip
     }
     // Ignore a zipper that's activated while braking
     if(m_controls.getBrake() || m_speed<0) return;
+
+    if (boost_category == MaxSpeed::MS_INCREASE_GROUND_ZIPPER && m_kart_properties->getTrackZipperFactor() <= 0.01f)
+        return;
 
     auto& stk_config = STKConfig::get();
 

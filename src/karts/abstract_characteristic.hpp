@@ -111,6 +111,9 @@ public:
         // Mass
         MASS,
 
+        // Trackzipperfactor
+        TRACK_ZIPPER_FACTOR,
+
         // Virtualmass
         VIRTUAL_MASS,
 
@@ -384,6 +387,8 @@ public:
     std::vector<float> getGearPowerIncrease() const;
 
     float getMass() const;
+
+    float getTrackZipperFactor() const;
 
     float getVirtualMass() const;
 
