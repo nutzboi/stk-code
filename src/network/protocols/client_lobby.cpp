@@ -1111,6 +1111,8 @@ void ClientLobby::startGame(Event* event)
     if (lw)
         lw->handleServerCheckStructureCount(check_structure_count);
 
+    // DECODE POWERUPS
+
     NetworkItemManager* nim = dynamic_cast<NetworkItemManager*>
         (Track::getCurrentTrack()->getItemManager());
     assert(nim);
@@ -1122,7 +1124,7 @@ void ClientLobby::startGame(Event* event)
         Kart* k = w->getKart(i);
         k->getKartProperties()->restoreCachedState(&event->data());
     }
-    printf("Restoring STATE\n");
+    // printf("Restoring STATE\n");
 
 
     core::stringw err_msg = _("Failed to start the network game.");
@@ -1404,6 +1406,8 @@ void ClientLobby::liveJoinAcknowledged(Event* event)
     if (lw)
         lw->handleServerCheckStructureCount(check_structure_count);
 
+    // DECODE POWERUPS
+
     m_start_live_game_time = data.getUInt64();
     m_last_live_join_util_ticks = data.getUInt32();
     for (unsigned i = 0; i < w->getNumKarts(); i++)
@@ -1417,7 +1421,15 @@ void ClientLobby::liveJoinAcknowledged(Event* event)
         (Track::getCurrentTrack()->getItemManager());
     assert(nim);
     nim->restoreCompleteState(data);
+
     w->restoreCompleteState(data);
+
+    for (unsigned i = 0; i < w->getNumKarts(); i++)
+    {
+        Kart* k = w->getKart(i);
+        k->getKartProperties()->restoreCachedState(&event->data());
+    }
+    // printf("Restoring STATE\n");
 
     if (RaceManager::get()->supportsLiveJoining() && data.size() > 0)
     {

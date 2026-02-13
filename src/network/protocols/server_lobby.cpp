@@ -1328,6 +1328,8 @@ void ServerLobby::finishedLoadingLiveJoinClient(Event* event)
         .addUInt8(cc).addUInt64(live_join_start_time)
         .addUInt32(m_last_live_join_util_ticks);
 
+    // ENCODE POWERUPS
+
     NetworkItemManager* nim = dynamic_cast<NetworkItemManager*>
         (Track::getCurrentTrack()->getItemManager());
     assert(nim);
@@ -1335,6 +1337,14 @@ void ServerLobby::finishedLoadingLiveJoinClient(Event* event)
     nim->addLiveJoinPeer(peer);
 
     w->saveCompleteState(ns, peer);
+
+    // printf("Saving STATE\n");
+    for (unsigned i = 0; i < w->getNumKarts(); i++)
+    {
+        Kart* k = w->getKart(i);
+        k->getKartProperties()->saveCachedState(ns);
+    }
+
     if (RaceManager::get()->supportsLiveJoining())
     {
         // Only needed in non-racing mode as no need players can added after
@@ -3418,10 +3428,13 @@ void ServerLobby::configPeersStartTime()
     ns->addUInt8(LE_START_RACE).addUInt64(start_time);
     const uint8_t cc = (uint8_t)Track::getCurrentTrack()->getCheckManager()->getCheckStructureCount();
     ns->addUInt8(cc);
+
+    // ENCODE POWERUPS
+
     *ns += *m_items_complete_state;
 
     World* w = World::getWorld();
-    printf("Saving STATE\n");
+    // printf("Saving STATE\n");
     for (unsigned i = 0; i < w->getNumKarts(); i++)
     {
         Kart* k = w->getKart(i);
