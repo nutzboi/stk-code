@@ -830,17 +830,6 @@ void PowerupManager::saveWeights(BareNetworkString *ns) {
             ns->addUInt16(m_current_item_weights.m_weights_for_section.at(i).at(j));
         }
     }
-
-    printf(" bubble    cake    bowl  zipper plunger  switch  swattr  rubber    para    sudo electro    mini   anvil\n");
-    for (unsigned i = 0; i < m_current_item_weights.m_weights_for_section.size(); i++) {
-        printf("pos %d\n", i);
-        for (unsigned j = 0; j < m_current_item_weights.m_weights_for_section.at(i).size(); j++) {
-            printf("  %02d ", m_current_item_weights.m_weights_for_section.at(i).at(j));
-            if ((j+1) % m_current_item_weights.m_weights_for_section.at(i).size() == 0)
-                printf("\n");
-        }
-        printf("\n");
-    }
 }
 
 
@@ -867,19 +856,11 @@ void PowerupManager::computeWeightsForRace(int num_karts, BareNetworkString *ns)
                 weights.at(i).push_back(ns->getUInt16());
         }
 
-        printf(" bubble    cake    bowl  zipper plunger  switch  swattr  rubber    para    sudo electro    mini   anvil\n");
-        for (int i = 0; i < num_karts; i++) {
-            printf("pos %d\n", i);
-            for (int j = 0; j < 3*(int)POWERUP_LAST; j++) {
-                printf("     %02d ", weights.at(i).at(j));
-                if ((j+1) % (int)POWERUP_LAST == 0)
-                    printf("\n");
-            }
-        }
-
 		m_current_item_weights.setData(1, weights);
         m_current_item_weights.setNumKarts(num_karts);
 		m_current_item_weights.precomputeWeights();
+
+		m_current_item_weights.sortWeights();
 
         m_current_item_weights_server = m_current_item_weights;
         return;
@@ -928,13 +909,13 @@ void PowerupManager::computeWeightsForRace(int num_karts, BareNetworkString *ns)
     // If we're in a networked game and the server
     // synced custom weights, use these instead of the
     // ones in the powerup.xml files
-    // if (NetworkConfig::get()->isNetworking()
-    //     && !NetworkConfig::get()->isServer()
-    //     && m_current_item_weights_server.m_weights_for_section.size() > 0) {
-    //     m_current_item_weights = m_current_item_weights_server;
-    //     m_current_item_weights.precomputeWeights();
-    //     return;
-    // }
+    if (NetworkConfig::get()->isNetworking()
+        && !NetworkConfig::get()->isServer()
+        && m_current_item_weights_server.m_weights_for_section.size() > 0) {
+        m_current_item_weights = m_current_item_weights_server;
+        m_current_item_weights.precomputeWeights();
+        return;
+    }
 
     // If control reached here, the powerup.xml file
     // should be read for the weights data
