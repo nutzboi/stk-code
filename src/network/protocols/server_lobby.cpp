@@ -1328,7 +1328,7 @@ void ServerLobby::finishedLoadingLiveJoinClient(Event* event)
         .addUInt8(cc).addUInt64(live_join_start_time)
         .addUInt32(m_last_live_join_util_ticks);
 
-    // ENCODE POWERUPS
+    powerup_manager->saveWeights(ns);
 
     NetworkItemManager* nim = dynamic_cast<NetworkItemManager*>
         (Track::getCurrentTrack()->getItemManager());
@@ -3429,7 +3429,7 @@ void ServerLobby::configPeersStartTime()
     const uint8_t cc = (uint8_t)Track::getCurrentTrack()->getCheckManager()->getCheckStructureCount();
     ns->addUInt8(cc);
 
-    // ENCODE POWERUPS
+    powerup_manager->saveWeights(ns);
 
     *ns += *m_items_complete_state;
 

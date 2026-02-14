@@ -1111,7 +1111,7 @@ void ClientLobby::startGame(Event* event)
     if (lw)
         lw->handleServerCheckStructureCount(check_structure_count);
 
-    // DECODE POWERUPS
+    powerup_manager->computeWeightsForRace(0, &event->data());
 
     NetworkItemManager* nim = dynamic_cast<NetworkItemManager*>
         (Track::getCurrentTrack()->getItemManager());
@@ -1406,7 +1406,7 @@ void ClientLobby::liveJoinAcknowledged(Event* event)
     if (lw)
         lw->handleServerCheckStructureCount(check_structure_count);
 
-    // DECODE POWERUPS
+    powerup_manager->computeWeightsForRace(0, &event->data());
 
     m_start_live_game_time = data.getUInt64();
     m_last_live_join_util_ticks = data.getUInt32();

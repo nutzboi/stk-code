@@ -34,8 +34,10 @@
 #include "race/race_manager.hpp"
 #include "utils/constants.hpp"
 #include "utils/string_utils.hpp"
+#include "network/network_config.hpp"
 
 #include <IMesh.h>
+#include <iostream>
 
 PowerupManager* powerup_manager = nullptr;
 
@@ -818,36 +820,75 @@ void PowerupManager::loadMiniIconsHalf(const XMLNode &node, bool wide)
     }
 }   // loadMiniIconsHalf
 
+
+// ----------------------------------------------------------------------------
+void PowerupManager::saveWeights(BareNetworkString *ns) {
+
+    ns->addUInt16(m_current_item_weights.m_num_karts);
+    for (unsigned i = 0; i < m_current_item_weights.m_num_karts; i++) {
+        for (int j = 0; j < 3*(int)POWERUP_LAST; j++) {
+            ns->addUInt16(m_current_item_weights.m_weights_for_section.at(i).at(j));
+        }
+    }
+
+    printf(" bubble    cake    bowl  zipper plunger  switch  swattr  rubber    para    sudo electro    mini   anvil\n");
+    for (unsigned i = 0; i < m_current_item_weights.m_weights_for_section.size(); i++) {
+        printf("pos %d\n", i);
+        for (unsigned j = 0; j < m_current_item_weights.m_weights_for_section.at(i).size(); j++) {
+            printf("  %02d ", m_current_item_weights.m_weights_for_section.at(i).at(j));
+            if ((j+1) % m_current_item_weights.m_weights_for_section.at(i).size() == 0)
+                printf("\n");
+        }
+        printf("\n");
+    }
+}
+
+
 // ----------------------------------------------------------------------------
 /** Create a (potentially interpolated) WeightsData objects for the current
  *  race based on the number of karts.
  *  \param num_karts Number of karts in the current race.
  */
-void PowerupManager::computeWeightsForRace(int num_karts)
+void PowerupManager::computeWeightsForRace(int num_karts, BareNetworkString *ns)
 {
+    // If there's a networkstring to read, set from here and store it in
+    // a "server items" vector as well as the regular items vector
+    if (ns != NULL) {
+		m_current_item_weights.reset();
+		WeightsData *newweight = new WeightsData();
+		m_current_item_weights = *newweight;
+		m_current_item_weights.m_powerup_order = m_sorted_race_weights;
+
+        num_karts = ns->getUInt16();
+		std::vector<std::vector<int>> weights;
+        for (int i = 0; i < num_karts; i++) {
+    		weights.emplace_back();
+            for (int j = 0; j < 3*(int)POWERUP_LAST; j++)
+                weights.at(i).push_back(ns->getUInt16());
+        }
+
+        printf(" bubble    cake    bowl  zipper plunger  switch  swattr  rubber    para    sudo electro    mini   anvil\n");
+        for (int i = 0; i < num_karts; i++) {
+            printf("pos %d\n", i);
+            for (int j = 0; j < 3*(int)POWERUP_LAST; j++) {
+                printf("     %02d ", weights.at(i).at(j));
+                if ((j+1) % (int)POWERUP_LAST == 0)
+                    printf("\n");
+            }
+        }
+
+		m_current_item_weights.setData(1, weights);
+        m_current_item_weights.setNumKarts(num_karts);
+		m_current_item_weights.precomputeWeights();
+
+        m_current_item_weights_server = m_current_item_weights;
+        return;
+    }
+
     if (num_karts == 0) return;
 
-    std::string class_name="";
-    switch (RaceManager::get()->getMinorMode())
-    {
-    case RaceManager::MINOR_MODE_TIME_TRIAL:       /* fall through */
-    case RaceManager::MINOR_MODE_LAP_TRIAL:       /* fall through */
-    case RaceManager::MINOR_MODE_NORMAL_RACE:      class_name="race";     break;
-    case RaceManager::MINOR_MODE_FOLLOW_LEADER:    class_name="ftl";      break;
-    case RaceManager::MINOR_MODE_3_STRIKES:        class_name="battle";   break;
-    case RaceManager::MINOR_MODE_FREE_FOR_ALL:     class_name="battle";   break;
-    case RaceManager::MINOR_MODE_CAPTURE_THE_FLAG: class_name="battle";   break;
-    case RaceManager::MINOR_MODE_TUTORIAL:         class_name="tutorial"; break;
-    case RaceManager::MINOR_MODE_EASTER_EGG:       /* fall through */
-    case RaceManager::MINOR_MODE_OVERWORLD:
-    case RaceManager::MINOR_MODE_CUTSCENE:
-    case RaceManager::MINOR_MODE_SOCCER:           class_name="soccer";   break;
-    default:
-        Log::fatal("PowerupManager", "Invalid minor mode %d - aborting.",
-                    RaceManager::get()->getMinorMode());
-    }
-    class_name +="-weight-list";
-
+    // If ItemPolicy for overriding powerup weights is active,
+    // override any
 	ItemPolicy *item_policy = RaceManager::get()->getItemPolicy();
 	int leader_section = item_policy->m_leader_section;
 	if (leader_section == -1) leader_section = 0;
@@ -869,7 +910,7 @@ void PowerupManager::computeWeightsForRace(int num_karts)
 		}
 		int powerup_amount = (int)POWERUP_LAST;
 	
-		for (int j = 0; j < curr_sec->m_possible_types.size(); j++) {
+		for (unsigned j = 0; j < curr_sec->m_possible_types.size(); j++) {
 				PowerupType currtype = curr_sec->m_possible_types[j];
 
 				if (currtype == POWERUP_NOTHING) continue;
@@ -884,6 +925,39 @@ void PowerupManager::computeWeightsForRace(int num_karts)
 		return;
 	}
 
+    // If we're in a networked game and the server
+    // synced custom weights, use these instead of the
+    // ones in the powerup.xml files
+    // if (NetworkConfig::get()->isNetworking()
+    //     && !NetworkConfig::get()->isServer()
+    //     && m_current_item_weights_server.m_weights_for_section.size() > 0) {
+    //     m_current_item_weights = m_current_item_weights_server;
+    //     m_current_item_weights.precomputeWeights();
+    //     return;
+    // }
+
+    // If control reached here, the powerup.xml file
+    // should be read for the weights data
+    std::string class_name="";
+    switch (RaceManager::get()->getMinorMode())
+    {
+    case RaceManager::MINOR_MODE_TIME_TRIAL:       /* fall through */
+    case RaceManager::MINOR_MODE_LAP_TRIAL:       /* fall through */
+    case RaceManager::MINOR_MODE_NORMAL_RACE:      class_name="race";     break;
+    case RaceManager::MINOR_MODE_FOLLOW_LEADER:    class_name="ftl";      break;
+    case RaceManager::MINOR_MODE_3_STRIKES:        class_name="battle";   break;
+    case RaceManager::MINOR_MODE_FREE_FOR_ALL:     class_name="battle";   break;
+    case RaceManager::MINOR_MODE_CAPTURE_THE_FLAG: class_name="battle";   break;
+    case RaceManager::MINOR_MODE_TUTORIAL:         class_name="tutorial"; break;
+    case RaceManager::MINOR_MODE_EASTER_EGG:       /* fall through */
+    case RaceManager::MINOR_MODE_OVERWORLD:
+    case RaceManager::MINOR_MODE_CUTSCENE:
+    case RaceManager::MINOR_MODE_SOCCER:           class_name="soccer";   break;
+    default:
+        Log::fatal("PowerupManager", "Invalid minor mode %d - aborting.",
+                    RaceManager::get()->getMinorMode());
+    }
+    class_name +="-weight-list";
     std::vector<WeightsData*> wd = m_all_weights[class_name];
 
     // Find the two indices closest to the current number of karts

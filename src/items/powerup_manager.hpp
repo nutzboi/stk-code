@@ -31,6 +31,7 @@
 #include "utils/leak_check.hpp"
 #include "utils/no_copy.hpp"
 #include "utils/types.hpp"
+#include "network/network_string.hpp"
 
 #include "btBulletDynamicsCommon.h"
 
@@ -177,6 +178,9 @@ private:
     /** The weight distribution to be used for the current race. */
     WeightsData m_current_item_weights;
 
+    /** The weight distribution that was synced from the server. */
+    WeightsData m_current_item_weights_server;
+
     /** Seed for random powerup, for local game it will use a random number,
      *  for network games it will use the start time from server. */
     std::atomic<uint64_t> m_random_seed;
@@ -211,10 +215,11 @@ public:
     void          sortRaceWeights(const XMLNode *powerup_node, const std::string &node_name,
                                      std::vector<int> &values);
     void          unloadPowerups  ();
-    void          computeWeightsForRace(int num_karts);
+    void          computeWeightsForRace(int num_karts, BareNetworkString *ns = NULL);
     void          loadPowerup     (PowerupType type, const XMLNode &node);
     void          loadNitroHack   (const XMLNode &node);
     void          loadMiniIcons   (const XMLNode &node);
+    void saveWeights(BareNetworkString *ns);
     PowerupManager::PowerupType
         getRandomPowerup(unsigned int pos, unsigned int *n,
                          uint64_t random_number);
