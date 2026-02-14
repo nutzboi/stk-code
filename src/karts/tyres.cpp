@@ -185,14 +185,14 @@ void Tyres::computeDegradation(float dt, bool is_on_ground, bool is_skidding, un
     // Centripetal force
     m_force_y = ((speed*speed)/turn_radius)*effective_mass;
 
-    // If throttle is below 20% usage, user is "lift and coasting" and fuel consumption is reduced by 12%
+    // If throttle is below 20% usage, user is "lift and coasting" and fuel consumption is reduced by X%
     float lift_and_coast_factor = 0;
     if (throttle_amount > 0.20f) {
         m_high_fuel_demand = true;
         lift_and_coast_factor = 1.0f;
     } else {
         m_high_fuel_demand = false;
-        lift_and_coast_factor = 0.88f;
+        lift_and_coast_factor = m_kart->getKartProperties()->getFuelLiftAndCoastFactor();
     }
     /*The fuel rate factor is in L/km*/
     /*The base rate is immutable, while the regular rate can be modified on the fly by item policy*/

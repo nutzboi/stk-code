@@ -960,6 +960,12 @@ float KartProperties::getFuelTurnRadiusIncrease() const
 }  // getFuelTurnRadiusIncrease
 
 // ----------------------------------------------------------------------------
+float KartProperties::getFuelLiftAndCoastFactor() const
+{
+    return m_cached_characteristic->getFuelLiftAndCoastFactor();
+}  // getFuelLiftAndCoastFactor
+
+// ----------------------------------------------------------------------------
 float KartProperties::getWheelsDampingRelaxation() const
 {
     return m_cached_characteristic->getWheelsDampingRelaxation();

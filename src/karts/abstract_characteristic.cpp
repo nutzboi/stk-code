@@ -123,6 +123,8 @@ AbstractCharacteristic::ValueType AbstractCharacteristic::getType(
         return TYPE_FLOAT;
     case FUEL_TURN_RADIUS_INCREASE:
         return TYPE_FLOAT;
+    case FUEL_LIFT_AND_COAST_FACTOR:
+        return TYPE_FLOAT;
     case WHEELS_DAMPING_RELAXATION:
         return TYPE_FLOAT;
     case WHEELS_DAMPING_COMPRESSION:
@@ -521,6 +523,8 @@ std::string AbstractCharacteristic::getName(CharacteristicType type)
         return "FUEL_MAX_SPEED_DECREASE";
     case FUEL_TURN_RADIUS_INCREASE:
         return "FUEL_TURN_RADIUS_INCREASE";
+    case FUEL_LIFT_AND_COAST_FACTOR:
+        return "FUEL_LIFT_AND_COAST_FACTOR";
     case WHEELS_DAMPING_RELAXATION:
         return "WHEELS_DAMPING_RELAXATION";
     case WHEELS_DAMPING_COMPRESSION:
@@ -1250,6 +1254,18 @@ float AbstractCharacteristic::getFuelTurnRadiusIncrease() const
                     getName(FUEL_TURN_RADIUS_INCREASE).c_str());
     return result;
 }  // getFuelTurnRadiusIncrease
+
+// ----------------------------------------------------------------------------
+float AbstractCharacteristic::getFuelLiftAndCoastFactor() const
+{
+    float result;
+    bool is_set = false;
+    process(FUEL_LIFT_AND_COAST_FACTOR, &result, &is_set);
+    if (!is_set)
+        Log::fatal("AbstractCharacteristic", "Can't get characteristic %s",
+                    getName(FUEL_LIFT_AND_COAST_FACTOR).c_str());
+    return result;
+}  // getFuelLiftAndCoastFactor
 
 // ----------------------------------------------------------------------------
 float AbstractCharacteristic::getWheelsDampingRelaxation() const

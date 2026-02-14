@@ -36,7 +36,7 @@ Gear: switchRatio(std::vector<float>/floatVector), powerIncrease(std::vector<flo
 Mass
 TrackZipperFactor
 VirtualMass
-Fuel: massReal, massVirtual, consumption, capacity, stopRate, maxSpeedDecrease, turnRadiusIncrease
+Fuel: massReal, massVirtual, consumption, capacity, stopRate, maxSpeedDecrease, turnRadiusIncrease, liftAndCoastFactor
 Wheels: dampingRelaxation, dampingCompression
 Jump: animationTime
 Lean: max, speed

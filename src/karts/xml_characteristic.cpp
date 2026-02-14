@@ -431,6 +431,8 @@ void XmlCharacteristic::load(const XMLNode *node)
             &m_values[FUEL_MAX_SPEED_DECREASE]);
         sub_node->get("turn-radius-increase",
             &m_values[FUEL_TURN_RADIUS_INCREASE]);
+        sub_node->get("lift-and-coast-factor",
+            &m_values[FUEL_LIFT_AND_COAST_FACTOR]);
     }
 
     if (const XMLNode *sub_node = node->getNode("wheels"))

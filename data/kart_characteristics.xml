@@ -265,8 +265,9 @@
             stop-rate:       How many seconds per liter the refueling takes
             max-speed-decrease: How much is the topspeed reduced for each liter in the tank, in m/s
             turn-radius-increase: [turn_radius] = [old_turn_radius]*(1.0 + [fuel_liters]*turn-radius-increase)
+            lift-and-coast-factor: when throttle is pressed below 20% on controller (or not pressed on keyboard), consumption will be multiplied by this factor
         -->
-        <fuel mass-real="1" mass-virtual="0.5" consumption="14" capacity="100" stop-rate="0.1" max-speed-decrease="0.020" turn-radius-increase="0.005" />
+        <fuel mass-real="1" mass-virtual="0.5" consumption="14" capacity="100" stop-rate="0.1" max-speed-decrease="0.020" turn-radius-increase="0.005" lift-and-coast-factor="0.88" />
 
         <!-- Wheels
             damping-relaxation/compression: for bullet

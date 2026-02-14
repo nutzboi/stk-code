@@ -125,6 +125,7 @@ public:
         FUEL_STOP_RATE,
         FUEL_MAX_SPEED_DECREASE,
         FUEL_TURN_RADIUS_INCREASE,
+        FUEL_LIFT_AND_COAST_FACTOR,
 
         // Wheels
         WHEELS_DAMPING_RELAXATION,
@@ -399,6 +400,7 @@ public:
     float getFuelStopRate() const;
     float getFuelMaxSpeedDecrease() const;
     float getFuelTurnRadiusIncrease() const;
+    float getFuelLiftAndCoastFactor() const;
 
     float getWheelsDampingRelaxation() const;
     float getWheelsDampingCompression() const;

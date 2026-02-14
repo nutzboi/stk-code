@@ -431,6 +431,7 @@ public:
     float getFuelStopRate() const;
     float getFuelMaxSpeedDecrease() const;
     float getFuelTurnRadiusIncrease() const;
+    float getFuelLiftAndCoastFactor() const;
 
     float getWheelsDampingRelaxation() const;
     float getWheelsDampingCompression() const;
