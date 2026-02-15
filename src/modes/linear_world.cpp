@@ -565,7 +565,7 @@ void LinearWorld::newLap(unsigned int kart_index)
 
     if (raceHasLaps())
     {
-        if (kart_info.m_finished_laps == 0)
+        if (kart_info.m_finished_laps == 1)
             kart_info.m_start_time = ticks_per_lap;
         else if (kart_info.m_finished_laps > 0 && ticks_per_lap < kart_info.m_fastest_lap_ticks)
             kart_info.m_fastest_lap_ticks = ticks_per_lap;
@@ -585,13 +585,39 @@ void LinearWorld::newLap(unsigned int kart_index)
         return;
     }
 
+    irr::core::stringw fuel_message;
+    bool has_fuel =  (std::abs(kart->m_tyres->m_c_fuel_rate_base) > 0.00099f);
+
 
     Kart *receiver = NULL;
     if (is_local) {
         m_last_local_lap = stk_config->ticks2Time(ticks_per_lap);
         m_last_local_position = kart->getPosition();
         m_last_local_index = kart_index;
+
+        if (has_fuel) {
+            float curr_liters = kart->m_tyres->m_current_fuel;
+            float fuel_per_lap;
+            if (kart_info.m_finished_laps == 1)
+                fuel_per_lap = kart->m_tyres->m_c_fuel - curr_liters;
+            else
+                fuel_per_lap = kart_info.m_fuel_start_liters - curr_liters;
+            printf("FUEL PER LAP: %f\n", fuel_per_lap);
+
+            kart_info.m_fuel_start_liters = curr_liters;
+            int big_digits = fuel_per_lap;
+            fuel_per_lap = std::abs(fuel_per_lap);
+            unsigned dec = (fuel_per_lap - (unsigned)fuel_per_lap) * 10;
+            unsigned cent = (fuel_per_lap - (unsigned)fuel_per_lap) * 100;
+            cent = cent % 10;
+            unsigned thou = (fuel_per_lap - (unsigned)fuel_per_lap) * 1000;
+            thou = thou % 10;
+            fuel_message = _C("last_fuel", "Fuel: %i.%d%d%d L", big_digits, dec, cent, thou);
+
+        }
+
         lap_message = _C("fastest_lap", "Last lap: %s by %s", s.c_str(), kart_name);
+
         color = video::SColor(255, 255, 255, 255);
         receiver = kart;
     }
@@ -605,7 +631,12 @@ void LinearWorld::newLap(unsigned int kart_index)
         lap_message = _C("fastest_lap", "New FL: %s by %s", s.c_str(), kart_name);
         color = video::SColor(255, 255, 255, 255);
     }
-     if (m_race_gui) m_race_gui->addMessage(lap_message, receiver, 4.0f, color, false);
+     if (m_race_gui) {
+        if (has_fuel)
+            m_race_gui->addMessage(fuel_message, receiver, 4.0f, video::SColor(255, 100, 255, 100), false);
+
+        m_race_gui->addMessage(lap_message, receiver, 4.0f, color, false);
+     }
 
     kart_info.m_lap_start_ticks = getTimeTicks();
     kart->getController()->newLap(kart_info.m_finished_laps);
@@ -1349,6 +1380,7 @@ void LinearWorld::KartInfo::saveCompleteState(BareNetworkString* bns)
     bns->addUInt32(m_finished_laps);
     bns->addUInt32(m_ticks_at_last_lap);
     bns->addUInt32(m_lap_start_ticks);
+    bns->addFloat(m_fuel_start_liters);
     bns->addFloat(m_estimated_finish);
     bns->addFloat(m_overall_distance);
     bns->addFloat(m_wrong_way_timer);
@@ -1360,6 +1392,7 @@ void LinearWorld::KartInfo::restoreCompleteState(const BareNetworkString& b)
     m_finished_laps = b.getUInt32();
     m_ticks_at_last_lap = b.getUInt32();
     m_lap_start_ticks = b.getUInt32();
+    m_fuel_start_liters = b.getFloat();
     m_estimated_finish = b.getFloat();
     m_overall_distance = b.getFloat();
     m_wrong_way_timer = b.getFloat();

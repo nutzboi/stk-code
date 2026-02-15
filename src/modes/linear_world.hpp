@@ -105,6 +105,9 @@ private:
         /** Time at start of a new lap. */
         int         m_lap_start_ticks;
 
+        /** Fuel at start of a new lap. */
+        float         m_fuel_start_liters;
+
         /** Ticks for the fastest lap. */
         int         m_fastest_lap_ticks;
 
@@ -134,6 +137,7 @@ private:
         {
             m_finished_laps     = -1;
             m_lap_start_ticks   = 0;
+            m_fuel_start_liters = 0.0f;
             m_ticks_at_last_lap = INT_MAX;
             m_fastest_lap_ticks = INT_MAX;
             m_start_time        = INT_MAX;

@@ -2221,7 +2221,7 @@ void SkiddingAI::handleTyreChangeAndRefuel()
     float min_life_traction = m_kart->m_tyres->m_c_min_life_traction;
     float curr_life_traction = m_kart->m_tyres->m_current_life_traction;
     float current_fuel = m_kart->m_tyres->m_current_fuel;
-    float capacity = m_kart->m_tyres->m_c_max_fuel;
+    float capacity = m_kart->m_tyres->m_c_fuel;
 
     bool is_fuel_on = RaceManager::get()->getTyreModRules()->fuel_mode != 0;
 
