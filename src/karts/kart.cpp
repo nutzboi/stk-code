@@ -3484,7 +3484,8 @@ void Kart::updatePhysics(int ticks)
     item_policy->enforceVirtualPaceCarRulesForKart(this);
  
 
-    float min_speed =  m && m->isZipper() ? m->getZipperMinSpeed() : -1.0f;
+    float track_factor = getKartProperties()->getTrackZipperFactor() < 1.0f ? getKartProperties()->getTrackZipperFactor() : 1.0f; 
+    float min_speed =  m && m->isZipper() ? (m->getZipperMinSpeed()*track_factor) : -1.0f;
     m_max_speed->setMinSpeed(min_speed);
     m_max_speed->update(ticks);
 
