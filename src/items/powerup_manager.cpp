@@ -825,11 +825,10 @@ void PowerupManager::loadMiniIconsHalf(const XMLNode &node, bool wide)
 void PowerupManager::saveWeights(BareNetworkString *ns) {
 
     ns->addUInt16(m_current_item_weights.m_num_karts);
-    for (unsigned i = 0; i < m_current_item_weights.m_num_karts; i++) {
-        for (int j = 0; j < 3*(int)POWERUP_LAST; j++) {
+    ns->addUInt16(m_current_item_weights.m_weights_for_section.size());
+    for (unsigned i = 0; i < m_current_item_weights.m_weights_for_section.size(); i++)
+        for (int j = 0; j < 3*(int)POWERUP_LAST; j++)
             ns->addUInt16(m_current_item_weights.m_weights_for_section.at(i).at(j));
-        }
-    }
 }
 
 
@@ -849,8 +848,9 @@ void PowerupManager::computeWeightsForRace(int num_karts, BareNetworkString *ns)
 		m_current_item_weights.m_powerup_order = m_sorted_race_weights;
 
         num_karts = ns->getUInt16();
+        unsigned num_sections = ns->getUInt16();
 		std::vector<std::vector<int>> weights;
-        for (int i = 0; i < num_karts; i++) {
+        for (unsigned i = 0; i < num_sections; i++) {
     		weights.emplace_back();
             for (int j = 0; j < 3*(int)POWERUP_LAST; j++)
                 weights.at(i).push_back(ns->getUInt16());
