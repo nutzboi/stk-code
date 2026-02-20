@@ -204,13 +204,15 @@ bool PlayerController::action(PlayerAction action, int value, bool dry_run)
         else
         {
             SET_OR_TEST_GETTER(Brake, false);
-            SET_OR_TEST_GETTER(Nitro, m_prev_nitro);
+            // Nitro still depends on whether we're accelerating
+            SET_OR_TEST_GETTER(Nitro, m_prev_nitro && m_prev_accel);
         }
         break;
     case PA_NITRO:
         // This basically keeps track whether the button still is being pressed
         SET_OR_TEST(m_prev_nitro, value != 0 );
-        SET_OR_TEST_GETTER(Nitro, value != 0);
+        // Enable nitro only when also accelerating
+        SET_OR_TEST_GETTER(Nitro, ((value!=0) && m_controls->getAccel()) );
         break;
     case PA_RESCUE:
         SET_OR_TEST_GETTER(Rescue, value!=0);
