@@ -179,7 +179,7 @@ bool PlayerController::action(PlayerAction action, int value, bool dry_run)
         if (v16)
         {
             SET_OR_TEST_GETTER(Accel, v16 / 32768.0f);
-            SET_OR_TEST_GETTER(Brake, false);
+            SET_OR_TEST_GETTER(Brake, m_prev_brake);
             SET_OR_TEST_GETTER(Nitro, m_prev_nitro);
         }
         else
