@@ -19,6 +19,7 @@
 #define HEADER_EASTER_EGG_SCREEN_HPP
 
 #include "guiengine/screen.hpp"
+#include "guiengine/widgets/text_box_widget.hpp"
 #include <deque>
 
 namespace GUIEngine { class Widget; }
@@ -27,11 +28,13 @@ namespace GUIEngine { class Widget; }
   * \brief screen where the user can select a track
   * \ingroup states_screens
   */
-class EasterEggScreen : public GUIEngine::Screen, public GUIEngine::ScreenSingleton<EasterEggScreen>
+class EasterEggScreen : public GUIEngine::Screen, public GUIEngine::ScreenSingleton<EasterEggScreen>,
+                        public GUIEngine::ITextBoxWidgetListener
 {
     friend class GUIEngine::ScreenSingleton<EasterEggScreen>;
 
     EasterEggScreen();
+    GUIEngine::TextBoxWidget* m_search_box;
 
     /** adds the tracks from the current track group into the tracks ribbon */
     void buildTrackList();
@@ -52,7 +55,12 @@ public:
 
     /** \brief implement callback from parent class GUIEngine::Screen */
     virtual void beforeAddingWidget() OVERRIDE;
-
+    
+    virtual void onTextUpdated() OVERRIDE
+    {
+        buildTrackList();
+        m_search_box->focused(0);
+    }
 
     void setFocusOnTrack(const std::string& trackName);
 

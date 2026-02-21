@@ -22,6 +22,7 @@
 #include "config/user_config.hpp"
 #include "graphics/stk_tex_manager.hpp"
 #include "guiengine/widget.hpp"
+#include "guiengine/widgets/check_box_widget.hpp"
 #include "guiengine/widgets/dynamic_ribbon_widget.hpp"
 #include "guiengine/widgets/icon_button_widget.hpp"
 #include "io/file_manager.hpp"
@@ -98,8 +99,20 @@ void EasterEggScreen::eventCallback(Widget* widget, const std::string& name, con
                 Track* clicked_track = track_manager->getTrack(selection);
                 if (clicked_track != NULL)
                 {
-                    TrackInfoScreen::getInstance()->setTrack(clicked_track);
-                    TrackInfoScreen::getInstance()->push();
+                    if (getWidget<CheckBoxWidget>("favorite")->getState())
+                    {
+                        if(PlayerManager::getCurrentPlayer()->isFavoriteTrack(clicked_track->getIdent()))
+                            PlayerManager::getCurrentPlayer()->removeFavoriteTrack(clicked_track->getIdent());
+                        else
+                            PlayerManager::getCurrentPlayer()->addFavoriteTrack(clicked_track->getIdent());
+
+                        buildTrackList();
+                    }
+                    else
+                    {
+                        TrackInfoScreen::getInstance()->setTrack(clicked_track);
+                        TrackInfoScreen::getInstance()->push();
+                    }
                 }
             }
         }
@@ -123,6 +136,10 @@ void EasterEggScreen::beforeAddingWidget()
 {
     // Add user-defined group to track groups
     track_manager->setFavoriteTrackStatus(PlayerManager::getCurrentPlayer()->getFavoriteTrackStatus());
+
+    CheckBoxWidget* favorite_cb = getWidget<CheckBoxWidget>("favorite");
+    assert( favorite_cb != NULL );
+    favorite_cb->setState(false);
 
     Screen::init();
     // Dynamically add tabs
@@ -185,6 +202,9 @@ void EasterEggScreen::init()
     assert( tabs != NULL );
     tabs->select(UserConfigParams::m_last_used_track_group, PLAYER_ID_GAME_MASTER);
 
+    m_search_box = getWidget<TextBoxWidget>("search");
+    m_search_box->clearListeners();
+    m_search_box->addListener(this);
 
     buildTrackList();
 
@@ -232,6 +252,11 @@ void EasterEggScreen::buildTrackList()
             if(RaceManager::get()->getMinorMode()==RaceManager::MINOR_MODE_EASTER_EGG
                 && !curr->hasEasterEggs())
                 continue;
+            core::stringw search_text = m_search_box->getText();
+            search_text.make_lower();
+            if (!search_text.empty() &&
+                curr->getName().make_lower().find(search_text.c_str()) == -1)
+                continue;
             if (curr->isArena() || curr->isSoccer()) continue;
             if (curr->isInternal()) continue;
 
@@ -248,6 +273,11 @@ void EasterEggScreen::buildTrackList()
             Track* curr = track_manager->getTrack( curr_group[n] );
             if(RaceManager::get()->getMinorMode()==RaceManager::MINOR_MODE_EASTER_EGG
                 && !curr->hasEasterEggs())
+                continue;
+            core::stringw search_text = m_search_box->getText();
+            search_text.make_lower();
+            if (!search_text.empty() &&
+                curr->getName().make_lower().find(search_text.c_str()) == -1)
                 continue;
             if (curr->isArena()) continue;
             if (curr->isSoccer()) continue;
