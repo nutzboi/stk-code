@@ -37,6 +37,7 @@
 #include "network/rewind_manager.hpp"
 #include "tracks/quad.hpp"
 #include "utils/constants.hpp"
+#include "utils/kart_tags.hpp"
 #include "mini_glm.hpp"
 
 #include <IMeshCache.h>
@@ -928,6 +929,7 @@ void SlipStream::update(int ticks)
     for(unsigned int i=0; i<num_karts; i++)
     {
         m_target_kart= world->getKart(i);
+
         target_value.push_back(0);
 
         // Don't test for slipstream with itself, a kart that is being
@@ -1032,6 +1034,14 @@ void SlipStream::update(int ticks)
     //Select the best target
     for(unsigned int i=0; i<num_karts; i++)
     {
+        // It is not posible to slipstream off of ghosted karts.
+        if (world->getKart(i)->getBody()
+            && (world->getKart(i)->getBody()->getTag() == NO_COLLISION_KART_TAG
+                 || world->getKart(i)->getBody()->getTag() == GHOST_NO_COLLECTIBLE_KART_TAG)
+        ) {
+            continue;                    
+        }
+
         if (target_value[i] > best_target_value)
         {
             best_target_value = target_value[i];

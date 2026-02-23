@@ -104,6 +104,11 @@ public:
     bool m_tme_enable_tyre_changers; /**< If false, tyre changers will never spawn */
     bool m_tme_enable_tyre_degradation; /**< If false, tyres will never degrade*/
 
+    /** If true, any time the pit state is active, pitting will be disabled */
+    bool m_tme_enable_pit_autoghost;
+    /** If true, any time the kart has finished, pitting will be disabled */
+    bool m_tme_enable_finish_autoghost;
+
     /** Prevent some items before this world time. */
     float m_limited_items_timeout;
 

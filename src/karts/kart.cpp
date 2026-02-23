@@ -3507,7 +3507,16 @@ void Kart::updatePhysics(int ticks)
 	if (!item_policy->isKartUnderVirtualPaceCarSlowdown(getPosition())
 	    && !m_controller->isPlayerController()
 	    && m_max_speed->isSpeedDecreaseActive(MaxSpeed::MS_DECREASE_STOP)) {
-		getBody()->setTag(GHOST_NO_COLLECTIBLE_KART_TAG);    
+		getBody()->setTag(GHOST_NO_COLLECTIBLE_KART_TAG);
+	}
+
+	if (m_max_speed->isSpeedDecreaseActive(MaxSpeed::MS_DECREASE_STOP)
+	    && stk_config->m_tme_enable_pit_autoghost) {
+		getBody()->setTag(NO_COLLISION_KART_TAG);
+	}
+
+	if (hasFinishedRace() && stk_config->m_tme_enable_finish_autoghost) {
+		getBody()->setTag(GHOST_NO_COLLECTIBLE_KART_TAG);
 	}
 
 #ifdef XX

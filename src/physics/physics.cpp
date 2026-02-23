@@ -136,7 +136,7 @@ bool noCollisionAndRegularKartCollisionCallback(btCollisionObject *self, btColli
 	    return false;
 	}
 	// If one of the two is a no collision kart, and both are either no collision karts or regular karts, don't collide
-	if (st == NO_COLLISION_KART_TAG && (ot == KART_TAG || ot == NO_COLLISION_KART_TAG || ot == GHOST_NO_COLLECTIBLE_KART_TAG)) {
+	if ((st == NO_COLLISION_KART_TAG || st == GHOST_NO_COLLECTIBLE_KART_TAG) && (ot == KART_TAG || ot == NO_COLLISION_KART_TAG || ot == GHOST_NO_COLLECTIBLE_KART_TAG)) {
 		return false;
 	} else if (st == KART_TAG && (ot == NO_COLLISION_KART_TAG || ot == GHOST_NO_COLLECTIBLE_KART_TAG)) {
 		return false;

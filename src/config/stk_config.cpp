@@ -322,6 +322,8 @@ void STKConfig::getAllData(const XMLNode * root)
     {
         node->get("enable-tyre-changers", &m_tme_enable_tyre_changers);
         node->get("enable-tyre-degradation", &m_tme_enable_tyre_degradation);
+        node->get("enable-pit-autoghost", &m_tme_enable_pit_autoghost);
+        node->get("enable-finish-autoghost", &m_tme_enable_finish_autoghost);
     }
 
 
