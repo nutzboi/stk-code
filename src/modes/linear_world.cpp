@@ -206,7 +206,7 @@ void LinearWorld::update(int ticks)
         m_finish_timeout != std::numeric_limits<float>::max())
     {
         m_finish_timeout -= STKConfig::get()->ticks2Time(ticks);
-        if (m_finish_timeout < 0.0f)
+        if (!STKConfig::get()->m_tme_enable_leader_ends_race && m_finish_timeout < 0.0f)
         {
             endRaceEarly();
             m_finish_timeout = std::numeric_limits<float>::max();
@@ -544,6 +544,11 @@ void LinearWorld::newLap(unsigned int kart_index)
                 m_finish_timeout = m_worst_finish_time;
                 m_worst_finish_time += finish_time;
             }
+
+            if (STKConfig::get()->m_tme_enable_leader_ends_race) {
+                m_finish_timeout = std::numeric_limits<float>::max();
+            }
+
             kart->finishedRace(finish_time);
         }
     }

@@ -23,6 +23,7 @@
 #include "karts/controller/controller.hpp"
 #include "karts/controller/ghost_controller.hpp"
 #include "network/network_config.hpp"
+#include "config/stk_config.hpp"
 
 //-----------------------------------------------------------------------------
 StandardRace::StandardRace() : LinearWorld()
@@ -42,7 +43,11 @@ bool StandardRace::isRaceOver()
     }
     // The race is over if all players have finished the race. Remaining
     // times for AI opponents will be estimated in enterRaceOverState
-    return RaceManager::get()->allPlayerFinished();
+    if (STKConfig::get()->m_tme_enable_leader_ends_race) {
+        return getNumKarts() == RaceManager::get()->getFinishedKarts();
+    } else {
+        return RaceManager::get()->allPlayerFinished();    
+    }
 }   // isRaceOver
 
 //-----------------------------------------------------------------------------
