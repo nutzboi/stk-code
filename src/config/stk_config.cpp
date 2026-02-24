@@ -225,6 +225,9 @@ void STKConfig::init_defaults()
     m_shield_gum_boost           = false;
     m_tme_enable_tyre_changers   = false;
     m_tme_enable_tyre_degradation   = false;
+    m_tme_enable_pit_autoghost   = false;
+    m_tme_enable_finish_autoghost= false;
+    m_tme_enable_leader_ends_race= false;
     m_max_karts                  = -100;
     m_max_skidmarks              = -100;
     m_min_kart_version           = -100;
@@ -324,6 +327,7 @@ void STKConfig::getAllData(const XMLNode * root)
         node->get("enable-tyre-degradation", &m_tme_enable_tyre_degradation);
         node->get("enable-pit-autoghost", &m_tme_enable_pit_autoghost);
         node->get("enable-finish-autoghost", &m_tme_enable_finish_autoghost);
+        node->get("enable-leader-ends-race", &m_tme_enable_leader_ends_race);
     }
 
 

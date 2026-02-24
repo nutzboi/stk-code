@@ -969,7 +969,7 @@ void RaceResultGUI::determineTableLayout()
     std::string max_time = StringUtils::timeToString(max_finish_time, time_precision, true, /*display hours*/ active_gp);
     core::stringw string_max_time(max_time.c_str());
     core::dimension2du r = m_font->getDimension(string_max_time.c_str());
-    m_width_finish_time = r.Width;
+    m_width_finish_time = r.Width*12/10;
 
     // Top pixel where to display text
     m_top = table_area->m_y;
@@ -1034,7 +1034,7 @@ void RaceResultGUI::determineTableLayout()
     m_table_width = m_width_icon + m_width_column_space + m_width_kart_name;
 
     if (!RaceManager::get()->isFollowMode())
-        m_table_width += m_width_finish_time + m_width_column_space;
+        m_table_width += m_width_finish_time + m_width_column_space*2;
 
     // Only in GP mode are the points displayed.
     if (active_gp)
@@ -1504,7 +1504,12 @@ void RaceResultGUI::displayOneEntry(unsigned int x, unsigned int y,
         core::recti dest_rect = core::recti(current_x, y, current_x + 100, y + 10);
         m_font->draw(ri->m_finish_time_string, dest_rect, color, false, false,
             NULL, true /* ignoreRTL */);
-        current_x += m_width_finish_time + m_width_column_space;
+        current_x += m_width_finish_time*10/12 + m_width_column_space + 100;
+
+        core::recti pos_laps = core::recti(current_x, y, current_x + 100, y + 10);
+        m_font->draw(StringUtils::utf8ToWide(std::to_string(ri->m_laps) + "L"), pos_laps, color, false, false,
+            NULL, true /* ignoreRTL */);
+        current_x += m_width_finish_time*2/12 + m_width_column_space;
     }
     
 

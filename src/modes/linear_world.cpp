@@ -503,7 +503,9 @@ void LinearWorld::newLap(unsigned int kart_index)
     // Race finished
     // We compute the exact moment the kart crossed the line
     // This way, even with poor framerate, we get a time significant to the ms
-    if(kart_info.m_finished_laps >= RaceManager::get()->getNumLaps() && raceHasLaps())
+    if(raceHasLaps() &&
+        (kart_info.m_finished_laps >= RaceManager::get()->getNumLaps()
+            || (STKConfig::get()->m_tme_enable_leader_ends_race && getKartAtPosition(1)->hasFinishedRace())))
     {
         if (kart->isGhostKart())
         {
@@ -1060,11 +1062,11 @@ void LinearWorld::updateRacePosition()
                 continue;
 
             // If the other kart has:
-            // - finished the race (but this kart hasn't)
+            // - finished the race (but this kart hasn't) AND we're not in F1-style leader-dictates-finish mode
             // - or is ahead
             // - or has the same distance (very unlikely) but started earlier
             // it is ahead --> increase position
-            if((!kart->hasFinishedRace() && m_karts[j]->hasFinishedRace()) ||
+            if((!kart->hasFinishedRace() && m_karts[j]->hasFinishedRace() && !STKConfig::get()->m_tme_enable_leader_ends_race) ||
                 m_kart_info[j].m_overall_distance > my_distance            ||
                (m_kart_info[j].m_overall_distance == my_distance &&
                 m_karts[j]->getInitialPosition()<kart->getInitialPosition() ) )

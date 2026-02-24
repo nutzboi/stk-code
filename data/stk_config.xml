@@ -28,7 +28,8 @@
     enable-tyre-degradation: if false, tyres will never degrade 
     -->
   <tme-rules enable-tyre-changers="true" enable-tyre-degradation="true"
-             enable-pit-autoghost="false" enable-finish-autoghost="true"/>
+             enable-pit-autoghost="false" enable-finish-autoghost="true"
+             enable-leader-ends-race="true"/>
 
   <!-- Everything related to online play.
             url: The server used for online multiplayer.
