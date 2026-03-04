@@ -44,6 +44,15 @@ bool KickCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const
     *parser >> player_name;
     parser->parse_full(reason); // allow more arguments
 
+    // Crowned players must always supply a reason of at least 8 characters
+    if (stk_ctx->isCrowned() && reason.size() < 8)
+    {
+        ctx->write("As the server owner, you must provide a kick reason "
+                   "of at least 8 characters when using /kick.");
+        ctx->flush();
+        return false;
+    }
+
     std::shared_ptr<STKPeer> player_peer = STKHost::get()->findPeerByName(
         StringUtils::utf8ToWide(player_name), true/*ignoreCase*/, true/*prefixOnly*/);
 

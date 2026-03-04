@@ -847,6 +847,15 @@ void ServerLobby::kickHost(Event* event)
 {
     if (m_server_owner.lock() != event->getPeerSP())
         return;
+
+    if (!ServerConfig::m_allow_gui_kick)
+    {
+        sendStringToPeer(
+            std::string("Kicking via GUI is disabled on this server. "
+                        "Use /kick <player> <reason> instead."),
+            event->getPeer());
+        return;
+    }
     if (!checkDataSize(event, 4)) return;
     NetworkString& data = event->data();
     uint32_t host_id = data.getUInt32();

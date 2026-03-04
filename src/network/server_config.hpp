@@ -496,6 +496,12 @@ namespace ServerConfig
         "was created using the in-game GUI. The changed difficulty and game "
         "mode will not be saved in this config file."));
 
+    SERVER_CFG_PREFIX BoolServerConfigParam m_allow_gui_kick
+        SERVER_CFG_DEFAULT(BoolServerConfigParam(false, "allow-gui-kick",
+        "If true, the server owner can kick players using the GUI player "
+        "dialog. If false (default), kicking must be done via the /kick "
+        "command in chat."));
+
     SERVER_CFG_PREFIX BoolServerConfigParam m_real_addon_karts
         SERVER_CFG_DEFAULT(BoolServerConfigParam(true, "real-addon-karts",
         "If true, server will send its addon karts real physics (kart size, "
