@@ -2808,7 +2808,7 @@ void ServerLobby::startSelection(const Event *event)
         char buf[sizeof "2011-10-08T07:07:09Z"];
         strftime(buf, sizeof buf, "%FT%TZ", gmtime(&now));
         std::string buf2;
-        for (int i=0;i< sizeof buf - 1 ;i++)
+        for (size_t i = 0; i < sizeof(buf) - 1; i++)
             buf2 += buf[i];
         std::string msg = "Match started at " + buf2 + "\n";
         GlobalLog::writeLog(msg, GlobalLogTypes::POS_LOG);
@@ -3928,8 +3928,8 @@ void ServerLobby::handleUnencryptedConnection(std::shared_ptr<STKPeer> peer,
     uint32_t restrictions;
     std::string set_kart;
     auto red_blue = STKHost::get()->getAllPlayersTeamInfo();
-    if (ServerConfig::m_server_owner > 0 && 
-            online_id == ServerConfig::m_server_owner)
+    if (ServerConfig::m_server_owner > 0 &&
+            online_id == static_cast<uint32_t>(ServerConfig::m_server_owner))
     {
         permlvl = std::numeric_limits<int>::max();
     }
@@ -4189,7 +4189,6 @@ void ServerLobby::updatePlayerList(bool update_when_reset_server)
     else
         m_current_ai_count.store(0);
 
-    const int prev_lobby_players = m_lobby_players.load();
     m_lobby_players.store((int)all_profiles.size());
 
     if (m_state.load() == WAITING_FOR_START_GAME)
@@ -6656,7 +6655,7 @@ std::tuple<uint32_t, std::string> ServerLobby::loadRestrictionsForOID(const uint
 #ifdef ENABLE_SQLITE3
     return m_db->loadRestrictionsForOID(online_id);
 #else
-    return 0;
+    return std::tuple<uint32_t, std::string>(0u, std::string());
 #endif
 }
 std::tuple<uint32_t, std::string> ServerLobby::loadRestrictionsForUsername(const core::stringw& name)
@@ -6664,7 +6663,7 @@ std::tuple<uint32_t, std::string> ServerLobby::loadRestrictionsForUsername(const
 #ifdef ENABLE_SQLITE3
     return m_db->loadRestrictionsForUsername(name);
 #else
-    return 0;
+    return std::tuple<uint32_t, std::string>(0u, std::string());
 #endif
 }
 void ServerLobby::writeRestrictionsForOID(const uint32_t online_id, const uint32_t flags)
