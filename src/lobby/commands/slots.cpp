@@ -26,6 +26,8 @@
 #include <parser/argline_parser.hpp>
 #include <stdexcept>
 #include <string>
+#include <cctype>
+#include <cstdlib>
 
 bool SlotsCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const data)
 {
@@ -38,16 +40,16 @@ bool SlotsCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* cons
     unsigned char amount;
 
     // workaround for "status" argument, violating type hints:
-    std::string try_status;
+    std::string first_arg;
 
-    parser->parse_string(try_status, true);
-    if (try_status == "status")
+    parser->parse_string(first_arg, true);
+    if (first_arg == "status")
     {
         CMD_VOTABLE(data, false);
         // the amount of slots are not specified here
         const unsigned int current =
             LobbyPlayerQueue::get()->getMaxPlayersInGame();
-        ctx->nprintf("Current slots: %u", 18, 
+        ctx->nprintf("Current slots: %u", 18,
                 current);
         ctx->flush();
         return true;
@@ -55,9 +57,39 @@ bool SlotsCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* cons
     parser->reset_pos();
     parser->reset_argument_pos();
 
-    *parser >> amount;
-
+    // Read the slots value as string first and validate
+    std::string amount_str;
+    parser->parse_string(amount_str, true);
     parser->parse_finish();
+
+    bool numeric = !amount_str.empty();
+    for (char ch : amount_str)
+    {
+        if (!std::isdigit(static_cast<unsigned char>(ch)))
+        {
+            numeric = false;
+            break;
+        }
+    }
+
+    if (!numeric)
+    {
+        ctx->write("You must specify a numeric slots amount, e.g. /slots 8.");
+        ctx->flush();
+        CMD_VOTABLE(data, false);
+        return false;
+    }
+
+    unsigned long amount_ul = std::strtoul(amount_str.c_str(), nullptr, 10);
+    if (amount_ul > 255UL)
+    {
+        ctx->write("The specified slots amount is too large.");
+        ctx->flush();
+        CMD_VOTABLE(data, false);
+        return false;
+    }
+
+    amount = static_cast<unsigned char>(amount_ul);
 
     if (amount < ServerConfig::m_slots_min || amount > ServerConfig::m_slots_max)
     {
