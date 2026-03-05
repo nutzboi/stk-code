@@ -777,7 +777,7 @@ namespace ServerConfig
         "the first one."));
 
     SERVER_CFG_PREFIX BoolServerConfigParam m_reverse_grid_gp
-        SERVER_CFG_DEFAULT(BoolServerConfigParam(false, "reverse-grand-prig-grid",
+        SERVER_CFG_DEFAULT(BoolServerConfigParam(false, "reverse-grand-prix-grid",
         "If true, the GP grid is reversed compared to what it should be."));
 
     SERVER_CFG_PREFIX BoolServerConfigParam m_preserve_battle_scores
