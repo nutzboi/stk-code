@@ -138,7 +138,7 @@ public:
     // ------------------------------------------------------------------------
     void sortPlayersForGrandPrix(
         std::vector<std::shared_ptr<NetworkPlayerProfile> >& players,
-        bool shuffle_instead) const;
+        bool shuffle_instead, bool reverse) const;
     // ------------------------------------------------------------------------
     void sortPlayersForGame(
         std::vector<std::shared_ptr<NetworkPlayerProfile> >& players) const;

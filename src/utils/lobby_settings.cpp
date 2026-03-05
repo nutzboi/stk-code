@@ -56,6 +56,7 @@ void LobbySettings::setupContextUser()
         )
     );
     m_shuffle_gp = ServerConfig::m_shuffle_gp;
+    m_reverse_grid_gp = ServerConfig::m_reverse_grid_gp;
     m_consent_on_replays = false;
     
     m_legacy_gp_mode = false;
@@ -343,6 +344,28 @@ std::string LobbySettings::getWhetherShuffledGPGridAsString(bool just_edited) co
         return prefix + "sorted by score";
     else
         return prefix + "shuffled";
+}   // getWhetherShuffledGPGridAsString
+//-----------------------------------------------------------------------------
+
+bool LobbySettings::isGPGridReverse() const {
+    return m_reverse_grid_gp;
+} // isGPGridReverse
+//-----------------------------------------------------------------------------
+
+void LobbySettings::setGPGridReverse(bool value)
+{
+    m_reverse_grid_gp = value;
+} // setGPGridReverse
+//-----------------------------------------------------------------------------
+
+std::string LobbySettings::getWhetherReverseGPGridAsString(bool just_edited) const
+{
+    std::string prefix = "The GP grid is ";
+    prefix += (just_edited ? "now " : "");
+    if (m_reverse_grid_gp)
+        return prefix + "sorted in reverse order";
+    else
+        return prefix + "sorted in normal order";
 }   // getWhetherShuffledGPGridAsString
 //-----------------------------------------------------------------------------
 

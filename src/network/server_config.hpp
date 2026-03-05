@@ -776,6 +776,10 @@ namespace ServerConfig
         "If true, the GP grid is shuffled before each race, not only before "
         "the first one."));
 
+    SERVER_CFG_PREFIX BoolServerConfigParam m_reverse_grid_gp
+        SERVER_CFG_DEFAULT(BoolServerConfigParam(false, "reverse-grand-prig-grid",
+        "If true, the GP grid is reversed compared to what it should be."));
+
     SERVER_CFG_PREFIX BoolServerConfigParam m_preserve_battle_scores
             SERVER_CFG_DEFAULT(BoolServerConfigParam(false, "preserve-battle-scores",
             "If true, when a player leaves and rejoins the battle server, "

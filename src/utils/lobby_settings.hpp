@@ -76,6 +76,9 @@ public:
     bool isGPGridShuffled() const;
     void setGPGridShuffled(bool value);
     std::string getWhetherShuffledGPGridAsString(bool just_edited = false) const;
+    bool isGPGridReverse() const;
+    void setGPGridReverse(bool value);
+    std::string getWhetherReverseGPGridAsString(bool just_edited = false) const;
     void updateWorldSettings(std::shared_ptr<GameInfo> game_info);
     void onResetToDefaultSettings();
     bool isPreservingMode() const;
@@ -223,6 +226,7 @@ private:
     bool m_consent_on_replays;
 
     bool m_shuffle_gp;
+    bool m_reverse_grid_gp;
 
     bool m_live_players;
 

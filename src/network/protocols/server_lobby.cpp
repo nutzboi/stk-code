@@ -902,7 +902,7 @@ void ServerLobby::asynchronousUpdate()
                         m_ai_profiles.end());
                 }
             }
-            m_game_setup->sortPlayersForGrandPrix(players, getSettings()->isGPGridShuffled());
+            m_game_setup->sortPlayersForGrandPrix(players, getSettings()->isGPGridShuffled(), getSettings()->isGPGridReverse());
             m_game_setup->sortPlayersForGame(players);
             for (unsigned i = 0; i < players.size(); i++)
             {

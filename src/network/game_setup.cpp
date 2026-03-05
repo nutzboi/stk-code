@@ -152,7 +152,7 @@ void GameSetup::addServerInfo(NetworkString* ns)
 //-----------------------------------------------------------------------------
 void GameSetup::sortPlayersForGrandPrix(
     std::vector<std::shared_ptr<NetworkPlayerProfile> >& players,
-    bool shuffle_instead) const
+    bool shuffle_instead, bool reverse) const
 {
     if (!isGrandPrix())
         return;
@@ -165,14 +165,15 @@ void GameSetup::sortPlayersForGrandPrix(
         return;
     }
 
-    std::sort(players.begin(), players.end(),
-        [](const std::shared_ptr<NetworkPlayerProfile>& a,
-        const std::shared_ptr<NetworkPlayerProfile>& b)
-        {
-            return (a->getScore() < b->getScore()) ||
-                (a->getScore() == b->getScore() &&
-                a->getOverallTime() > b->getOverallTime());
-        });
+    
+    auto sort_fn =  (!reverse)
+                    ? [](const std::shared_ptr<NetworkPlayerProfile>& a, const std::shared_ptr<NetworkPlayerProfile>& b)
+                        { return (a->getScore() < b->getScore()) || (a->getScore() == b->getScore() && a->getOverallTime() > b->getOverallTime()); }
+                    : [](const std::shared_ptr<NetworkPlayerProfile>& a, const std::shared_ptr<NetworkPlayerProfile>& b)
+                        { return (a->getScore() > b->getScore()) || (a->getScore() == b->getScore() && a->getOverallTime() < b->getOverallTime()); };
+
+ 
+    std::sort(players.begin(), players.end(), sort_fn);
     if (UserConfigParams::m_gp_most_points_first)
     {
         std::reverse(players.begin(), players.end());
