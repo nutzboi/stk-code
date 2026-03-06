@@ -372,6 +372,8 @@ void CommandManager::initCommands()
     applyFunctionIfPossible("allowstart =", &CM::process_allowstart_assign);
     applyFunctionIfPossible("shuffle", &CM::process_shuffle);
     applyFunctionIfPossible("shuffle =", &CM::process_shuffle_assign);
+    applyFunctionIfPossible("reverse", &CM::process_reverse);
+    applyFunctionIfPossible("reverse =", &CM::process_reverse_assign);
     applyFunctionIfPossible("timeout", &CM::process_timeout);
     applyFunctionIfPossible("team", &CM::process_team);
     applyFunctionIfPossible("swapteams", &CM::process_swapteams);
@@ -2562,6 +2564,26 @@ void CommandManager::process_shuffle_assign(Context& context)
     }
     getSettings()->setGPGridShuffled(argv[1] != "0");
     Comm::sendStringToAllPeers(getSettings()->getWhetherShuffledGPGridAsString(true));
+} // process_shuffle_assign
+// ========================================================================
+
+void CommandManager::process_reverse(Context& context)
+{
+    context.say(getSettings()->getWhetherReverseGPGridAsString());
+} // process_shuffle
+// ========================================================================
+
+void CommandManager::process_reverse_assign(Context& context)
+{
+    auto& argv = context.m_argv;
+    // Move validation to lobby settings.
+    if (argv.size() == 1 || !(argv[1] == "0" || argv[1] == "1"))
+    {
+        context.error();
+        return;
+    }
+    getSettings()->setGPGridReverse(argv[1] != "0");
+    Comm::sendStringToAllPeers(getSettings()->getWhetherReverseGPGridAsString(true));
 } // process_shuffle_assign
 // ========================================================================
 

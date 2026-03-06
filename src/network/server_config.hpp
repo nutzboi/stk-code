@@ -325,10 +325,20 @@ namespace ServerConfig
         "Clients below this value will be rejected from playing games. "
         "It's determined by number of addon soccer fields in client"));
 
+    SERVER_CFG_PREFIX StringServerConfigParam m_must_have_karts_string
+        SERVER_CFG_DEFAULT(StringServerConfigParam("",
+        "must-have-karts", "Karts needed to enter the server, "
+        "leave empty for no restriction."));
+
     SERVER_CFG_PREFIX StringServerConfigParam m_must_have_tracks_string
         SERVER_CFG_DEFAULT(StringServerConfigParam("",
         "must-have-tracks", "Tracks needed to enter the server, "
         "leave empty for no restriction."));
+
+    SERVER_CFG_PREFIX StringServerConfigParam m_play_requirement_karts_string
+        SERVER_CFG_DEFAULT(StringServerConfigParam("",
+       "play-requirement-karts", "Karts needed to be able to play, "
+       "leave empty for no restriction."));
 
     SERVER_CFG_PREFIX StringServerConfigParam m_play_requirement_tracks_string
         SERVER_CFG_DEFAULT(StringServerConfigParam("",
@@ -803,6 +813,10 @@ namespace ServerConfig
         SERVER_CFG_DEFAULT(BoolServerConfigParam(false, "shuffle-grand-prix-grid",
         "If true, the GP grid is shuffled before each race, not only before "
         "the first one."));
+
+    SERVER_CFG_PREFIX BoolServerConfigParam m_reverse_grid_gp
+        SERVER_CFG_DEFAULT(BoolServerConfigParam(false, "reverse-grand-prix-grid",
+        "If true, the GP grid is reversed compared to what it should be."));
 
     SERVER_CFG_PREFIX BoolServerConfigParam m_preserve_battle_scores
             SERVER_CFG_DEFAULT(BoolServerConfigParam(false, "preserve-battle-scores",

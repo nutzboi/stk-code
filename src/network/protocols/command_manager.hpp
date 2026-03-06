@@ -168,6 +168,8 @@ private:
     void process_allowstart_assign(Context& context);
     void process_shuffle(Context& context);
     void process_shuffle_assign(Context& context);
+    void process_reverse(Context& context);
+    void process_reverse_assign(Context& context);
     void process_timeout(Context& context);
     void process_team(Context& context);
     void process_swapteams(Context& context);

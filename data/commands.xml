@@ -826,6 +826,20 @@ here later. For now, please refer to the code for the strings being used. -->
                  permissions="UP_HAMMER"
         />
     </command>
+    <command name="reverse"
+             usage="/reverse"
+             description="Shows if the Grand Prix grid is reversed before each race, or is normal (0)."
+             permissions="UP_EVERYONE | PE_ALLOW_ANYONE"
+             permissions-verbose="everyone; invokable for another player"
+    >
+        <command name="="
+                 usage="/reverse (0 | 1)"
+                 omit-name="true"
+                 permissions-verbose="hammers"
+                 description="Toggles whether the Grand Prix grid is reversed before each race (1), or is normal (0)."
+                 permissions="UP_HAMMER"
+        />
+    </command>
     <command name="timeout"
              usage="/timeout [positive int x]"
              permissions-verbose="hammers"

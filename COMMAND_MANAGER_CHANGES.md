@@ -8,6 +8,8 @@ This page lists the major changes of this repository compared to standard STK co
 
 You can find more information such as explanations and minor details in [wiki](https://github.com/kimden/stk-code/wiki/). It will be probably filled with even more data in the future.
 
+---
+
 ## Improved Grand Prix mode
 
 * Server doesn't become private
