@@ -3481,6 +3481,13 @@ void Kart::updatePhysics(int ticks)
 
 
     ItemPolicy *item_policy = RaceManager::get()->getItemPolicy();
+
+	if (item_policy->isKartUnderVirtualPaceCarSlowdown(getPosition()) && World::getWorld()->getTicksSinceStart() > 1) {
+         m_controls.setBrake(false);
+         m_controls.setAccel(1.0);
+	}
+
+
     item_policy->enforceVirtualPaceCarRulesForKart(this);
  
 
@@ -3518,6 +3525,11 @@ void Kart::updatePhysics(int ticks)
 	if (hasFinishedRace() && stk_config->m_tme_enable_finish_autoghost) {
 		getBody()->setTag(GHOST_NO_COLLECTIBLE_KART_TAG);
 	}
+
+    // Ghosting during VPC periods to prevend lappings and lappers from hitting each other
+    if (item_policy->isKartUnderVirtualPaceCarSlowdown(getPosition())) {
+		getBody()->setTag(GHOST_NO_COLLECTIBLE_KART_TAG);        
+    }
 
 #ifdef XX
     Log::info("Kart","angVel %f %f %f heading %f suspension %f %f %f %f"

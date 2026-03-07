@@ -550,6 +550,14 @@ void ItemPolicy::enforceVirtualPaceCarRulesForKart(Kart *kart) {
     // Not in a virtual pace car yet, but since it is on the start of the race, this is done to prevent overtaking
     if (start_of_race_vpc) {
         kart->setSlowdown(MaxSpeed::MS_DECREASE_STOP, kart->getKartProperties()->getTyresPitSpeedFraction(), stk_config->time2Ticks(0.1f), -1);
+        int kart_num = (int)RaceManager::get()->getNumberOfKarts();
+        // For VPC race starts (from lap 0), make sure to disable controls if attempting to overtake
+        if (kart->getPosition() < kart_num && kart->getPosition() < kart->getInitialPosition()) {
+            if (kart->getSpeed() > 0) {
+                kart->getControls().setBrake(true);
+                kart->getControls().setAccel(0.0);
+            }
+        }
         return;
     }
 
@@ -567,6 +575,15 @@ void ItemPolicy::enforceVirtualPaceCarRulesForKart(Kart *kart) {
             // Set slowdown time to 0 (disable it) if its time to restart
             kart->setSlowdown(MaxSpeed::MS_DECREASE_STOP, kart->getKartProperties()->getTyresPitSpeedFraction(), stk_config->time2Ticks(0.1f), stk_config->time2Ticks(0));
             did_restart = true;
+        } else {
+            // For VPC race starts (from lap 0), make sure to disable controls if attempting to overtake
+            int kart_num = (int)RaceManager::get()->getNumberOfKarts();
+            if (m_leader_section == 0 && kart->getPosition() < kart_num && kart->getPosition() < kart->getInitialPosition()) {
+                if (kart->getSpeed() > 0) {
+                    kart->getControls().setBrake(true);
+                    kart->getControls().setAccel(0.0);
+                }
+            }
         }
     }
 
