@@ -173,6 +173,8 @@ private:
     void process_swapteams(Context& context);
     void process_resetteams(Context& context);
     void process_randomteams(Context& context);
+    void process_gpsetslot(Context& context);
+    void process_gpcloneslot(Context& context);
     void process_resetgp(Context& context);
     void process_cat(Context& context);
     void process_vip(Context& context);

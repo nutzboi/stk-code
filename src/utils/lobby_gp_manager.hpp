@@ -22,6 +22,7 @@
 #include "irrString.h"
 #include "utils/track_filter.hpp"
 #include "utils/lobby_context.hpp"
+#include "utils/gp_scoring.hpp"
 
 #include <memory>
 #include <queue>
@@ -53,9 +54,9 @@ public:
 
     void onStartSelection();
 
-    void setScoresToPlayer(std::shared_ptr<NetworkPlayerProfile> player) const;
+    void setScoresToPlayer(std::shared_ptr<NetworkPlayerProfile> player);
 
-    std::string getGrandPrixStandings(bool showIndividual = false, bool showTeam = true) const;
+    std::string getGrandPrixStandings(bool showIndividual = false, bool showTeam = true);
 
     void resetGrandPrix();
 
@@ -65,16 +66,72 @@ public:
 
     bool trySettingGPScoring(const std::string& input);
 
-    void updateWorldScoring() const;
+    void updateWorldScoring();
 
-    std::string getScoringAsString() const;
+    std::string getScoringAsString();
+
+    void cloneGPSlot(unsigned from, unsigned to) {
+        gp_data.cloneGPSlot(from, to);
+    }
+    void setGPSlot(unsigned i) {
+        gp_data.setGPSlot(i);
+    }
 
 private:
-    std::map<std::string, GPScore> m_gp_scores;
-
-    std::map<int, GPScore> m_gp_team_scores;
-
-    std::shared_ptr<GPScoring> m_gp_scoring;
+    struct GrandPrixSlot {
+        std::map<std::string, GPScore> m_gp_scores;
+        std::map<int, GPScore> m_gp_team_scores;
+        std::shared_ptr<GPScoring> m_gp_scoring;
+    };
+    #define GP_CHECK(__x) if (__x >= SLOT_NUM) throw std::out_of_range("Invalid GP slot.");
+    class GrandPrixData {
+    friend LobbyGPManager;
+    private:
+        static const unsigned SLOT_NUM = 10;
+        GrandPrixSlot m_slots[SLOT_NUM];
+        unsigned m_current_slot = 0;
+    protected:
+        std::map<std::string, GPScore> &getGPPlayerScores(void) {
+            GP_CHECK(m_current_slot);
+            return m_slots[m_current_slot].m_gp_scores;
+        }
+        std::map<int, GPScore> &getGPTeamScores(void) {
+            GP_CHECK(m_current_slot);
+            return m_slots[m_current_slot].m_gp_team_scores;
+        }
+        std::shared_ptr<GPScoring> &getGPScoring(void) {
+            GP_CHECK(m_current_slot);
+            return m_slots[m_current_slot].m_gp_scoring;
+        }
+        void setGPPlayerScores(std::map<std::string, GPScore> &x) {
+            GP_CHECK(m_current_slot);
+            m_slots[m_current_slot].m_gp_scores = x;
+        }
+        void setGPTeamScores(std::map<int, GPScore> &x) {
+            GP_CHECK(m_current_slot);
+            m_slots[m_current_slot].m_gp_team_scores = x;
+        }
+        void setGPScoring(std::shared_ptr<GPScoring> x) {
+            GP_CHECK(m_current_slot);
+            m_slots[m_current_slot].m_gp_scoring = x;
+        }
+    public:
+        void cloneGPSlot(unsigned from, unsigned to) {
+            GP_CHECK(from);
+            GP_CHECK(to);
+            m_slots[to].m_gp_scores = m_slots[from].m_gp_scores;
+            m_slots[to].m_gp_team_scores = m_slots[from].m_gp_team_scores;
+            if (m_slots[from].m_gp_scoring) {
+                m_slots[to].m_gp_scoring = GPScoring::createFromIntParamString(m_slots[from].m_gp_scoring->toString());
+            }
+        }
+        void setGPSlot(unsigned i) {
+            GP_CHECK(i);
+            m_current_slot = i;
+        }
+    };
+    GrandPrixData gp_data;
+    #undef GP_CHECK
 
 };
 

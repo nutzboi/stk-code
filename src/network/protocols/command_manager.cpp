@@ -373,6 +373,8 @@ void CommandManager::initCommands()
     applyFunctionIfPossible("swapteams", &CM::process_swapteams);
     applyFunctionIfPossible("resetteams", &CM::process_resetteams);
     applyFunctionIfPossible("randomteams", &CM::process_randomteams);
+    applyFunctionIfPossible("gpsetslot", &CM::process_gpsetslot);
+    applyFunctionIfPossible("gpcloneslot", &CM::process_gpcloneslot);
     applyFunctionIfPossible("resetgp", &CM::process_resetgp);
     applyFunctionIfPossible("vip", &CM::process_vip);
     applyFunctionIfPossible("vip+", &CM::process_vip);
@@ -2622,6 +2624,51 @@ void CommandManager::process_resetgp(Context& context)
     }
     getGPManager()->resetGrandPrix();
     Comm::sendStringToAllPeers("GP is now reset");
+} // process_resetgp
+// ========================================================================
+
+    void process_gpsetlot(Context& context);
+    void process_gpcloneslot(Context& context);
+
+void CommandManager::process_gpsetslot(Context& context)
+{
+    auto& argv = context.m_argv;
+    if (argv.size() >= 2)
+    {
+        unsigned slot;
+        if (!StringUtils::parseString(argv[1], &slot))
+        {
+            context.error();
+            return;
+        }
+        getGPManager()->setGPSlot(slot);
+        Comm::sendStringToAllPeers("GP slot set to " + std::to_string(slot));
+    } else
+    {
+        context.error();
+        return;
+    }
+} // process_resetgp
+// ========================================================================
+
+void CommandManager::process_gpcloneslot(Context& context)
+{
+    auto& argv = context.m_argv;
+    if (argv.size() >= 3)
+    {
+        unsigned from, to;
+        if (!StringUtils::parseString(argv[1], &from) || !StringUtils::parseString(argv[2], &to))
+        {
+            context.error();
+            return;
+        }
+        getGPManager()->cloneGPSlot(from, to);
+        Comm::sendStringToAllPeers("GP slot " + std::to_string(from) + " cloned to slot " + std::to_string(to));
+    } else
+    {
+        context.error();
+        return;
+    }
 } // process_resetgp
 // ========================================================================
 

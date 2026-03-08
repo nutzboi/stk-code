@@ -34,7 +34,7 @@
 void LobbyGPManager::setupContextUser()
 {
     if (!trySettingGPScoring(ServerConfig::m_gp_scoring))
-        m_gp_scoring = {};
+        gp_data.setGPScoring({});
 }   // setupContextUser
 //-----------------------------------------------------------------------------
 
@@ -42,19 +42,19 @@ void LobbyGPManager::onStartSelection()
 {
     if (!getGameSetupFromCtx()->isGrandPrixStarted())
     {
-        m_gp_scores.clear();
-        m_gp_team_scores.clear();
+        gp_data.getGPPlayerScores().clear();
+        gp_data.getGPTeamScores().clear();
     }
 }   // onStartSelection
 //-----------------------------------------------------------------------------
 
-void LobbyGPManager::setScoresToPlayer(std::shared_ptr<NetworkPlayerProfile> player) const
+void LobbyGPManager::setScoresToPlayer(std::shared_ptr<NetworkPlayerProfile> player)
 {
     std::string username = StringUtils::wideToUtf8(player->getName());
     if (getGameSetupFromCtx()->isGrandPrix())
     {
-        auto it = m_gp_scores.find(username);
-        if (it != m_gp_scores.end())
+        auto it = gp_data.getGPPlayerScores().find(username);
+        if (it != gp_data.getGPPlayerScores().end())
         {
             player->setScore(it->second.score);
             player->setOverallTime(it->second.time);
@@ -63,14 +63,14 @@ void LobbyGPManager::setScoresToPlayer(std::shared_ptr<NetworkPlayerProfile> pla
 }   // setScoresToPlayer
 //-----------------------------------------------------------------------------
 
-std::string LobbyGPManager::getGrandPrixStandings(bool showIndividual, bool showTeam) const
+std::string LobbyGPManager::getGrandPrixStandings(bool showIndividual, bool showTeam)
 {
     std::stringstream response;
     response << "Grand Prix standings";
 
     if (!showIndividual && !showTeam)
     {
-        if (m_gp_team_scores.empty())
+        if (gp_data.getGPTeamScores().empty())
             showIndividual = true;
         else
             showTeam = true;
@@ -100,7 +100,7 @@ std::string LobbyGPManager::getGrandPrixStandings(bool showIndividual, bool show
     if (showIndividual)
     {
         std::vector<std::pair<GPScore, std::string>> results;
-        for (auto &p: m_gp_scores)
+        for (auto &p: gp_data.getGPPlayerScores())
             results.emplace_back(p.second, p.first);
         std::stable_sort(results.rbegin(), results.rend());
         for (unsigned i = 0; i < results.size(); i++)
@@ -115,12 +115,12 @@ std::string LobbyGPManager::getGrandPrixStandings(bool showIndividual, bool show
 
     if (showTeam)
     {
-        if (!m_gp_team_scores.empty())
+        if (!gp_data.getGPTeamScores().empty())
         {
             std::vector<std::pair<GPScore, int>> results2;
             if (showIndividual)
                 response << "\n";
-            for (auto &p: m_gp_team_scores)
+            for (auto &p: gp_data.getGPTeamScores())
                 results2.emplace_back(p.second, p.first);
             std::stable_sort(results2.rbegin(), results2.rend());
             for (unsigned i = 0; i < results2.size(); i++)
@@ -139,8 +139,8 @@ std::string LobbyGPManager::getGrandPrixStandings(bool showIndividual, bool show
 
 void LobbyGPManager::resetGrandPrix()
 {
-    m_gp_scores.clear();
-    m_gp_team_scores.clear();
+    gp_data.getGPPlayerScores().clear();
+    gp_data.getGPTeamScores().clear();
     getGameSetupFromCtx()->stopGrandPrix();
 
     getLobby()->sendServerInfoToEveryone();
@@ -150,15 +150,15 @@ void LobbyGPManager::resetGrandPrix()
 
 void LobbyGPManager::shuffleGPScoresWithPermutation(const std::map<int, int>& permutation)
 {
-    auto old_scores = m_gp_team_scores;
-    m_gp_team_scores.clear();
+    auto old_scores = gp_data.getGPTeamScores();
+    gp_data.getGPTeamScores().clear();
     for (auto& p: old_scores)
     {
         auto it = permutation.find(p.first);
         if (it != permutation.end())
-            m_gp_team_scores[it->second] = p.second;
+            gp_data.getGPTeamScores()[it->second] = p.second;
         else
-            m_gp_team_scores[p.first] = p.second;
+            gp_data.getGPTeamScores()[p.first] = p.second;
     }
 }   // shuffleGPScoresWithPermutation
 //-----------------------------------------------------------------------------
@@ -213,20 +213,20 @@ void LobbyGPManager::updateGPScores(std::vector<float>& gp_changes, NetworkStrin
         int team = getTeamManager()->getTeamForUsername(username);
         if (team > 0)
         {
-            auto& item = m_gp_team_scores[team];
+            auto& item = gp_data.getGPTeamScores()[team];
             item.score += cur_score;
             item.time += overall_time;
         }
-        last_score = m_gp_scores[username].score;
+        last_score = gp_data.getGPPlayerScores()[username].score;
         cur_score += last_score;
-        overall_time = overall_time + m_gp_scores[username].time;
+        overall_time = overall_time + gp_data.getGPPlayerScores()[username].time;
         if (auto player =
             RaceManager::get()->getKartInfo(i).getNetworkPlayerProfile().lock())
         {
             player->setScore(cur_score);
             player->setOverallTime(overall_time);
         }
-        auto& item = m_gp_scores[username];
+        auto& item = gp_data.getGPPlayerScores()[username];
         item.score = cur_score;
         item.time = overall_time;
         last_scores.push_back(last_score);
@@ -268,24 +268,24 @@ bool LobbyGPManager::trySettingGPScoring(const std::string& input)
         return false;
     }
 
-    std::swap(m_gp_scoring, new_scoring);
+    std::swap(gp_data.getGPScoring(), new_scoring);
     return true;
 }   // trySettingGPScoring
 //-----------------------------------------------------------------------------
 
-void LobbyGPManager::updateWorldScoring() const
+void LobbyGPManager::updateWorldScoring()
 {
     WorldWithRank *wwr = dynamic_cast<WorldWithRank*>(World::getWorld());
     if (wwr)
-        wwr->setCustomScoringSystem(m_gp_scoring);
+        wwr->setCustomScoringSystem(gp_data.getGPScoring());
 }   // updateWorldScoring
 //-----------------------------------------------------------------------------
 
-std::string LobbyGPManager::getScoringAsString() const
+std::string LobbyGPManager::getScoringAsString()
 {
     std::string msg = "Current scoring is \"";
-    if (m_gp_scoring)
-        msg += m_gp_scoring->toString();
+    if (gp_data.getGPScoring())
+        msg += gp_data.getGPScoring()->toString();
     msg += "\"";
     return msg;
 }   // getScoringAsString
