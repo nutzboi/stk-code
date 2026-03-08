@@ -348,7 +348,7 @@ std::string LobbySettings::getWhetherShuffledGPGridAsString(bool just_edited) co
 {
     std::string prefix = "The GP grid is ";
     prefix += (just_edited ? "now " : "");
-    if (m_shuffle_gp)
+    if (!m_shuffle_gp)
         return prefix + "sorted by score";
     else
         return prefix + "shuffled";

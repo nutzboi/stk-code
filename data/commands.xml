@@ -877,6 +877,20 @@ here later. For now, please refer to the code for the strings being used. -->
              permissions="UP_HAMMER"
              state-scope="SS_LOBBY"
     />
+    <command name="gpsetslot"
+             usage="/gpsetslot [slot to set]"
+             permissions-verbose="hammers"
+             description="Set the Grand Prix config slot."
+             permissions="UP_HAMMER"
+             state-scope="SS_LOBBY"
+    />
+    <command name="gpcloneslot"
+             usage="/gpcloneslot [slot to set from] [slot to set to]"
+             permissions-verbose="hammers"
+             description="Clone the Grand Prix config slot to another one."
+             permissions="UP_HAMMER"
+             state-scope="SS_LOBBY"
+    />
     <command name="cat+"
              usage="/cat+ (category) (username)"
              permissions-verbose="hammers"
