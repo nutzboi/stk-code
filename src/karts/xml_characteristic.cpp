@@ -367,6 +367,8 @@ void XmlCharacteristic::load(const XMLNode *node)
             &m_values[TURN_RADIUS]);
         sub_node->get("time-full-steer",
             &m_values[TURN_TIME_FULL_STEER]);
+        sub_node->get("time-reset-steer",
+            &m_values[TURN_TIME_RESET_STEER]);
         sub_node->get("brake-multiplier",
             &m_values[TURN_BRAKE_MULTIPLIER]);
     }

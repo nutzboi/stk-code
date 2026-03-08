@@ -3798,14 +3798,13 @@ void Kart::updateSteering(int ticks)
         requested_steer = 0;
     }
 
-    // Changes in steering are limited according to timeFullSteer
-    // If the steering is 'back to straight', we use the time
-    // to full steer for a current steer of 0 (which should be
-    // the highest possible value)
+    // Amount the steering is changed for digital devices.
+    // If the steering is 'back to straight', a different steering
+    // change speed is used.
     float dt = stk_config->ticks2Time(ticks);
     float STEER_CHANGE = ( (requested_steer > m_effective_steer && m_effective_steer < 0) ||
                                  (requested_steer < m_effective_steer && m_effective_steer > 0)   )
-                     ? dt/getTimeFullSteer(0.0f)
+                     ? dt/getKartProperties()->getTurnTimeResetSteer()
                      : dt/getTimeFullSteer(fabsf(m_effective_steer));
 
     if (requested_steer < m_effective_steer)
