@@ -20,9 +20,10 @@
 #include "lobby/server_lobby_commands.hpp"
 #include "lobby/stk_command.hpp"
 #include "lobby/stk_command_context.hpp"
+#include "network/protocols/server_lobby.hpp"
 #include "network/server_config.hpp"
+#include "network/database/abstract_database.hpp"
 #include <parser/argline_parser.hpp>
-#include <fstream>
 #include <string>
 
 bool ReportCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* const data)
@@ -49,35 +50,32 @@ bool ReportCommand::execute(nnwcli::CommandExecutorContext* const ctx, void* con
         return false;
     }
 
-    // open a file, for append
-    std::fstream file(
-            ServerConfig::m_reports_filepath, std::ios_base::app );
-    if (file.fail() || file.bad())
-    {
-        ctx->write("Failed to record a report. Input/output error (1). Please inform the administrator.");
-        ctx->flush();
-        return false;
-    }
     std::string player_name = stk_ctx->getProfileName();
-    const std::time_t now = std::chrono::system_clock::to_time_t(
-            std::chrono::system_clock::now());
 
-    char datetime[20];
-    std::strftime(datetime, 20, "%Y-%m-%d %H:%M:%S", std::localtime(&now));
-    file << datetime;
-
-    file << " [" << player_name << "]: " << message << std::endl;
-
-    file.flush();
-    if (!file.good())
+    ServerLobby* lobby = stk_ctx->get_lobby();
+    if (!lobby)
     {
-        ctx->write("Failed to record a report. Input/output error (2). Please inform the administrator.");
+        ctx->write("Failed to record a report. Internal error (no lobby). Please inform the administrator.");
         ctx->flush();
         return false;
     }
 
-    // inform success
-    ctx->write("Thank you for your report. We will review it at some point and take appropriate action if applicable.");
+    AbstractDatabase* db = lobby->getDatabase();
+    if (!ServerConfig::m_sql_management || !db || !db->hasDatabase())
+    {
+        ctx->write("Failed to record a report. Database is not configured. Please inform the administrator.");
+        ctx->flush();
+        return false;
+    }
+
+    if (!db->writeTextReport(player_name, message))
+    {
+        ctx->write("Failed to record a report. Database error. Please inform the administrator.");
+        ctx->flush();
+        return false;
+    }
+
+    ctx->write("Thank you for your report. It has been recorded in the database and will be reviewed at some point.");
     ctx->flush();
     return true;
 }

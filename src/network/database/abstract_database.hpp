@@ -139,6 +139,10 @@ public:
          STKPeer* reporter, std::shared_ptr<NetworkPlayerProfile> reporter_npp,
        STKPeer* reporting, std::shared_ptr<NetworkPlayerProfile> reporting_npp,
                                                      irr::core::stringw& info) = 0;
+    virtual bool writeFeatureMessage(const std::string& player_name,
+                                     const std::string& message) = 0;
+    virtual bool writeTextReport(const std::string& player_name,
+                                 const std::string& message) = 0;
     virtual bool hasDatabase() const = 0;
     bool hasServerStatsTable() const  { return !m_server_stats_table.empty(); }
     bool hasPlayerReportsTable() const
