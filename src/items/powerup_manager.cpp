@@ -35,6 +35,7 @@
 #include "utils/constants.hpp"
 #include "utils/string_utils.hpp"
 #include "network/network_config.hpp"
+#include "network/stk_host.hpp"
 
 #include <IMesh.h>
 #include <iostream>
@@ -366,8 +367,8 @@ void PowerupManager::WeightsData::readData(int num_karts, const XMLNode *node)
 }   // WeightsData::readData
 
 void PowerupManager::WeightsData::setData(int num_karts, const std::vector<std::vector<int>> &weights) {
-	m_num_karts = num_karts;
-	m_weights_for_section = weights;
+    m_num_karts = num_karts;
+    m_weights_for_section = weights;
 }
 
 //-----------------------------------------------------------------------------
@@ -828,7 +829,7 @@ void PowerupManager::saveWeights(BareNetworkString *ns) {
     ns->addUInt16(m_current_item_weights.m_weights_for_section.size());
     for (unsigned i = 0; i < m_current_item_weights.m_weights_for_section.size(); i++)
         for (int j = 0; j < 3*(int)POWERUP_LAST; j++)
-            ns->addUInt16(m_current_item_weights.m_weights_for_section.at(i).at(j));
+            ns->addUInt16(m_current_item_weights.m_weights_for_section[i][j]);
 }
 
 
@@ -842,25 +843,28 @@ void PowerupManager::computeWeightsForRace(int num_karts, BareNetworkString *ns)
     // If there's a networkstring to read, set from here and store it in
     // a "server items" vector as well as the regular items vector
     if (ns != NULL) {
-		m_current_item_weights.reset();
-		WeightsData *newweight = new WeightsData();
-		m_current_item_weights = *newweight;
-		m_current_item_weights.m_powerup_order = m_sorted_race_weights;
-
         num_karts = ns->getUInt16();
         unsigned num_sections = ns->getUInt16();
-		std::vector<std::vector<int>> weights;
+        std::vector<std::vector<int>> weights;
         for (unsigned i = 0; i < num_sections; i++) {
-    		weights.emplace_back();
+            weights.emplace_back();
             for (int j = 0; j < 3*(int)POWERUP_LAST; j++)
-                weights.at(i).push_back(ns->getUInt16());
+                weights[i].push_back(ns->getUInt16());
         }
 
-		m_current_item_weights.setData(1, weights);
-        m_current_item_weights.setNumKarts(num_karts);
-		m_current_item_weights.precomputeWeights();
+        if (STKHost::get()->isClientServer())
+           return; 
 
-		m_current_item_weights.sortWeights();
+        m_current_item_weights.reset();
+        WeightsData *newweight = new WeightsData();
+        m_current_item_weights = *newweight;
+        m_current_item_weights.m_powerup_order = m_sorted_race_weights;
+
+        m_current_item_weights.setData(1, weights);
+        m_current_item_weights.setNumKarts(num_karts);
+        m_current_item_weights.precomputeWeights();
+
+        m_current_item_weights.sortWeights();
 
         m_current_item_weights_server = m_current_item_weights;
         return;
@@ -870,41 +874,41 @@ void PowerupManager::computeWeightsForRace(int num_karts, BareNetworkString *ns)
 
     // If ItemPolicy for overriding powerup weights is active,
     // override any
-	ItemPolicy *item_policy = RaceManager::get()->getItemPolicy();
-	int leader_section = item_policy->m_leader_section;
-	if (leader_section == -1) leader_section = 0;
-	ItemPolicySection *curr_sec = &item_policy->m_policy_sections[leader_section];
-	uint32_t rules = curr_sec->m_rules;
-	bool item_override = rules & ItemPolicyRules::IPT_BONUS_BOX_OVERRIDE;
-	bool item_automatic = rules & ItemPolicyRules::IPT_AUTOMATIC_WEIGHTS;
+    ItemPolicy *item_policy = RaceManager::get()->getItemPolicy();
+    int leader_section = item_policy->m_leader_section;
+    if (leader_section == -1) leader_section = 0;
+    ItemPolicySection *curr_sec = &item_policy->m_policy_sections[leader_section];
+    uint32_t rules = curr_sec->m_rules;
+    bool item_override = rules & ItemPolicyRules::IPT_BONUS_BOX_OVERRIDE;
+    bool item_automatic = rules & ItemPolicyRules::IPT_AUTOMATIC_WEIGHTS;
 
-	if (item_override && !item_automatic) {
-		m_current_item_weights.reset();
-		WeightsData *newweight = new WeightsData();
-		m_current_item_weights = *newweight;
-		m_current_item_weights.m_powerup_order = m_sorted_race_weights;
-		std::vector<std::vector<int>> weights;
-		weights.emplace_back();
-		weights[0].clear();
-		for (int i = 0; i < 3*(int)POWERUP_LAST; i++) {
-			weights[0].push_back(0);
-		}
-		int powerup_amount = (int)POWERUP_LAST;
-	
-		for (unsigned j = 0; j < curr_sec->m_possible_types.size(); j++) {
-				PowerupType currtype = curr_sec->m_possible_types[j];
+    if (item_override && !item_automatic) {
+        m_current_item_weights.reset();
+        WeightsData *newweight = new WeightsData();
+        m_current_item_weights = *newweight;
+        m_current_item_weights.m_powerup_order = m_sorted_race_weights;
+        std::vector<std::vector<int>> weights;
+        weights.emplace_back();
+        weights[0].clear();
+        for (int i = 0; i < 3*(int)POWERUP_LAST; i++) {
+            weights[0].push_back(0);
+        }
+        int powerup_amount = (int)POWERUP_LAST;
+    
+        for (unsigned j = 0; j < curr_sec->m_possible_types.size(); j++) {
+                PowerupType currtype = curr_sec->m_possible_types[j];
 
-				if (currtype == POWERUP_NOTHING) continue;
-				weights[0][0*powerup_amount + (int)currtype-1] = curr_sec->m_weight_distribution[j];
-				// TODO: make triple items have a 5-10% chance to spawn automatically?
-				// This is since item policy does not allow to specify a weight for
-				// double and triple items.
-		}
-		m_current_item_weights.setData(1, weights);
+                if (currtype == POWERUP_NOTHING) continue;
+                weights[0][0*powerup_amount + (int)currtype-1] = curr_sec->m_weight_distribution[j];
+                // TODO: make triple items have a 5-10% chance to spawn automatically?
+                // This is since item policy does not allow to specify a weight for
+                // double and triple items.
+        }
+        m_current_item_weights.setData(1, weights);
         m_current_item_weights.setNumKarts(num_karts);
-		m_current_item_weights.precomputeWeights();
-		return;
-	}
+        m_current_item_weights.precomputeWeights();
+        return;
+    }
 
     // If we're in a networked game and the server
     // synced custom weights, use these instead of the
