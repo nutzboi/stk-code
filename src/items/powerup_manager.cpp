@@ -257,13 +257,14 @@ void PowerupManager::sortRaceWeights(const XMLNode *powerup_node,
         wd[i]->sortWeights();
     }
 
+    std::vector<int> values_check = values;
 //#ifdef ITEM_DISTRIBUTION_DEBUG
-    std::sort(values.begin(), values.end());
+    std::sort(values_check.begin(), values_check.end());
     for (unsigned int i = 0; i < 3 * (int)POWERUP_LAST - 1; i++)
     {
-        if (values[i] == values[i+1])
+        if (values_check[i] == values_check[i+1])
             Log::error("PowerupManager", "Two powerups have an identical goodness value of %d",
-                      values[i]);
+                      values_check[i]);
     }
 //#endif       
 }   // sortRaceWeights
@@ -822,14 +823,27 @@ void PowerupManager::loadMiniIconsHalf(const XMLNode &node, bool wide)
 }   // loadMiniIconsHalf
 
 
+static void printVec(const std::string &s, const std::vector<std::vector<int>> &x) {
+    printf("%s Weights:\n", s.c_str());
+    for (const std::vector<int> &i : x) {
+        for (int j : i) {
+            printf("% 3d ", j);
+        }
+        printf("\n");
+    }
+}
+
 // ----------------------------------------------------------------------------
 void PowerupManager::saveWeights(BareNetworkString *ns) {
 
     ns->addUInt16(m_current_item_weights.m_num_karts);
     ns->addUInt16(m_current_item_weights.m_weights_for_section.size());
+    // printVec("Sending:", m_current_item_weights.m_weights_for_section);
+
+
     for (unsigned i = 0; i < m_current_item_weights.m_weights_for_section.size(); i++)
         for (int j = 0; j < 3*(int)POWERUP_LAST; j++)
-            ns->addUInt16(m_current_item_weights.m_weights_for_section[i][j]);
+            ns->addUInt16(m_current_item_weights.m_weights_for_section[i][m_current_item_weights.m_powerup_order[j]]);
 }
 
 
@@ -851,6 +865,7 @@ void PowerupManager::computeWeightsForRace(int num_karts, BareNetworkString *ns)
             for (int j = 0; j < 3*(int)POWERUP_LAST; j++)
                 weights[i].push_back(ns->getUInt16());
         }
+        // printVec("Receiving:", weights);
 
         if (STKHost::get()->isClientServer())
            return; 
@@ -862,9 +877,13 @@ void PowerupManager::computeWeightsForRace(int num_karts, BareNetworkString *ns)
 
         m_current_item_weights.setData(1, weights);
         m_current_item_weights.setNumKarts(num_karts);
-        m_current_item_weights.precomputeWeights();
 
         m_current_item_weights.sortWeights();
+
+        m_current_item_weights.precomputeWeights();
+
+
+        // printVec("Processed:", m_current_item_weights.m_weights_for_section);
 
         m_current_item_weights_server = m_current_item_weights;
         return;
@@ -907,6 +926,7 @@ void PowerupManager::computeWeightsForRace(int num_karts, BareNetworkString *ns)
         m_current_item_weights.setData(1, weights);
         m_current_item_weights.setNumKarts(num_karts);
         m_current_item_weights.precomputeWeights();
+        // printVec("ItemPolicy:", m_current_item_weights.m_weights_for_section);
         return;
     }
 
@@ -915,9 +935,10 @@ void PowerupManager::computeWeightsForRace(int num_karts, BareNetworkString *ns)
     // ones in the powerup.xml files
     if (NetworkConfig::get()->isNetworking()
         && !NetworkConfig::get()->isServer()
+        && !STKHost::get()->isClientServer()
         && m_current_item_weights_server.m_weights_for_section.size() > 0) {
         m_current_item_weights = m_current_item_weights_server;
-        m_current_item_weights.precomputeWeights();
+        // printVec("Restore:", m_current_item_weights.m_weights_for_section);
         return;
     }
 
@@ -987,6 +1008,7 @@ void PowerupManager::computeWeightsForRace(int num_karts, BareNetworkString *ns)
                                            num_karts                      );
     }
     m_current_item_weights.precomputeWeights();
+    // printVec("Regular:", m_current_item_weights.m_weights_for_section);
 }   // computeWeightsForRace
 
 // ----------------------------------------------------------------------------
