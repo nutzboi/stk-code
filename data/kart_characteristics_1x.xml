@@ -654,29 +654,6 @@
                    duration-factor="*0.6" fade-out-time="*1" />
             <parachute lbound-fraction="0.55" ubound-fraction="0.35" />
         </characteristic>
-        <characteristic name="hypercar">
-            <suspension stiffness="*1" />
-            <turn radius="-100:6.2 -1:6.2 0:3.15 5:4.6 12:11.75 20:27 30:55 38:100"
-                  brake-multiplier="1.05" />
-            <engine power="*1" max-speed="*1.4"
-                    max-speed-reverse-ratio="*1" brake-factor="15" time-full-brake="0.35" />
-            <gear switch-ratio="0.1 0.25 0.45 0.7 1 4"
-                  power-increase="1.85 1.54 1.33 1.22 1.16 1" />
-            <mass value="*1.5" />
-            <virtualmass value="*1" />
-            <fuel mass-real="*1" mass-virtual="*1" consumption="*1" capacity="*1" lift-and-coast-factor="0.5"/>
-            <skid enabled="false" />
-            <startup boost="*0.01 *0.01"
-                 engine-force="*0.01 *0.01"
-            />
-            <friction kart-friction="0.0" slowdown-factor="2.25" drag-coefficient="5.0" drag-exponent="1.5" game-engine-speed-uncap="false"/>
-            <trackzipperfactor value="0.0" />
-            <explosion duration="*0.6" radius="*0.6" />
-            <nitro engine-force="*0.4" consumption="1" max="5" max-speed-increase="3" duration="0.1" min-burst="0.1" fade-out-time="0.8" />
-            <slipstream length="*1.1" collect-time="*1.1"
-                   duration-factor="*0.6" fade-out-time="*1" />
-            <parachute lbound-fraction="0.55" ubound-fraction="0.35" />
-        </characteristic>
     </kart-types>
 
     <!-- Per-player settings/handicaps (or boosts) -->
