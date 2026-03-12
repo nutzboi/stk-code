@@ -541,7 +541,7 @@ void CommandManager::handleCommand(Event* event, std::shared_ptr<STKPeer> peer)
     auto& target_peer = context.m_target_peer;
     std::shared_ptr<STKPeer> target_peer_strong = context.m_target_peer.lock();
 
-    data.decodeString(&cmd);
+    data.decodeString32L(&cmd);
     argv = StringUtils::splitQuoted(cmd, ' ', '"', '"', '\\');
     if (argv.empty())
         return;

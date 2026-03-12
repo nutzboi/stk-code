@@ -1821,7 +1821,7 @@ void ClientLobby::handleClientCommand(const std::string& cmd)
             // Send for server command
             NetworkString* cmd_ns = getNetworkString(1);
             const std::string& language = UserConfigParams::m_language;
-            cmd_ns->addUInt8(LE_COMMAND).encodeString(language).encodeString("itempolicy " + policy);
+            cmd_ns->addUInt8(LE_COMMAND).encodeString(language).encodeString32L("itempolicy " + policy);
             Comm::sendToServer(cmd_ns, PRM_RELIABLE);
             delete cmd_ns;
         }
@@ -2038,7 +2038,7 @@ void ClientLobby::handleClientCommand(const std::string& cmd)
         // Send for server command
         NetworkString* cmd_ns = getNetworkString(1);
         const std::string& language = UserConfigParams::m_language;
-        cmd_ns->addUInt8(LE_COMMAND).encodeString(language).encodeString(cmd);
+        cmd_ns->addUInt8(LE_COMMAND).encodeString(language).encodeString32L(cmd);
         Comm::sendToServer(cmd_ns, PRM_RELIABLE);
         delete cmd_ns;
     }
@@ -2056,7 +2056,7 @@ static PyObject* stkclientpy_addCommand(PyObject *self, PyObject *args)
 
     NetworkString *nstr = new NetworkString(PROTOCOL_LOBBY_ROOM, 1);
     const std::string& language = UserConfigParams::m_language;
-    nstr->addUInt8(LE_COMMAND).encodeString(language).encodeString(std::string(str));
+    nstr->addUInt8(LE_COMMAND).encodeString(language).encodeString32L(std::string(str));
     Comm::sendToServer(nstr, PRM_RELIABLE);
 
     Py_RETURN_NONE;
@@ -2080,7 +2080,7 @@ static PyObject* stkclientpy_loadItemPolicyPreset(PyObject *self, PyObject *args
         // Send for server command
         NetworkString* cmd_ns = new NetworkString(PROTOCOL_LOBBY_ROOM, 1);
         const std::string& language = UserConfigParams::m_language;
-        cmd_ns->addUInt8(LE_COMMAND).encodeString(language).encodeString("itempolicy " + policy);
+        cmd_ns->addUInt8(LE_COMMAND).encodeString(language).encodeString32L("itempolicy " + policy);
         Comm::sendToServer(cmd_ns, PRM_RELIABLE);
         delete cmd_ns;
     }
