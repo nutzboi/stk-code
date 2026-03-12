@@ -3,7 +3,7 @@
     <div x="2%" y="2%" width="96%" height="96%" layout="vertical-row" >
         <header id="title" text_align="center" width="80%" align="center" I18N="In Item Policy Rules config" text="Item Policy Edit"/>
         <spacer height="1%" width="20"/>
-        <box proportion="1" width="90%" layout="vertical-row" align="center">
+        <box proportion="1" width="100%" layout="vertical-row" align="center">
 
             <div width="100%" height="20%" layout="horizontal-row">
                 <div proportion="3" height="fit" layout="horizontal-row">
@@ -27,7 +27,7 @@
 
             <spacer height="1%" width="20"/>
 
-            <div width="90%" height="fit" layout="horizontal-row">
+            <div width="100%" height="fit" layout="horizontal-row">
                 <label word_wrap="true" id="section-start-label" proportion="3" text="Start lap:" text_align="left" />
                 <spinner id="section-start-spinner" proportion="3" wrap_around="false" />
             </div>
@@ -43,8 +43,8 @@
             <spacer height="1f" width="20"/>
 
             <div x="2%" x="2%" width="96%" height="96%">
-            <div x="10%" y="0" width="96%" height="96%" layout="vertical-row">
-                    <div width="90%" height="fit" layout="horizontal-row">
+            <div x="1%" y="0" width="96%" height="96%" layout="vertical-row">
+                    <div width="100%" height="fit" layout="horizontal-row">
                         <label word_wrap="true" id="clear-previous-label" proportion="9" text="Clear previous items" text_align="left" />
                         <checkbox id="clear-previous-checkbox" proportion="1" />
 
@@ -55,18 +55,18 @@
                     </div>
 
 
-                    <div width="90%" height="fit" layout="horizontal-row">
+                    <div width="100%" height="fit" layout="horizontal-row">
                         <label word_wrap="true" id="give-at-start-label" proportion="3" text="Give items at section start:" text_align="left" />
                         <textbox id="give-at-start-textbox" proportion="3" />
                         <label word_wrap="true" id="give-at-start-info-label" proportion="3" text="* Length" text_align="left" />
                     </div>
 
-                    <div width="90%" height="fit" layout="horizontal-row">
+                    <div width="100%" height="fit" layout="horizontal-row">
                         <label word_wrap="true" id="give-per-lap-label" proportion="3" text="Give items per lap:" text_align="left" />
                         <spinner id="give-per-lap-spinner" proportion="3" wrap_around="false" />
                     </div>
 
-                    <div width="90%" height="fit" layout="horizontal-row">
+                    <div width="100%" height="fit" layout="horizontal-row">
                         <label word_wrap="true" id="overwrite-label" proportion="3" text="Overwrite items" text_align="left" />
                         <checkbox id="overwrite-checkbox" proportion="1" />
 
@@ -76,7 +76,7 @@
                         <checkbox id="force-use-checkbox" proportion="1" />
                     </div>
 
-                    <div width="90%" height="fit" layout="horizontal-row">
+                    <div width="100%" height="fit" layout="horizontal-row">
                         <label word_wrap="true" id="anti-hoard-label" proportion="3" text="Remove hoarded items" text_align="left" />
                         <checkbox id="anti-hoard-checkbox" proportion="1" />
 
@@ -87,13 +87,13 @@
             </div>
 
 
-            <div x="10%" y="0" width="96%" height="96%" layout="vertical-row">
-                    <div width="90%" height="fit" layout="horizontal-row">
+            <div x="1%" y="0" width="96%" height="96%" layout="vertical-row">
+                    <div width="100%" height="fit" layout="horizontal-row">
                         <label word_wrap="true" id="automatic-weights-label" proportion="9" text="Automatic weights?" text_align="left" />
                         <checkbox id="automatic-weights-checkbox" proportion="1" />
                     </div>
 
-                    <div width="90%" height="fit" layout="horizontal-row">
+                    <div width="100%" height="fit" layout="horizontal-row">
                         <label word_wrap="true" id="powerup-nothing-label" proportion="2" text="nothing" text_align="left" />
                         <checkbox id="powerup-nothing-checkbox" proportion="1" />
                         <spinner id="powerup-nothing-spinner" proportion="3" wrap_around="false" />
@@ -110,7 +110,7 @@
                         <label word_wrap="true" id="powerup-cake-autorefreshed-label" proportion="1" text="....." text_align="left" />
 
                     </div>
-                    <div width="90%" height="fit" layout="horizontal-row">
+                    <div width="100%" height="fit" layout="horizontal-row">
                         <label word_wrap="true" id="powerup-bowling-label" proportion="2" text="bowling" text_align="left" />
                         <checkbox id="powerup-bowling-checkbox" proportion="1" />
                         <spinner id="powerup-bowling-spinner" proportion="3" wrap_around="false" />
@@ -126,7 +126,7 @@
                         <spinner id="powerup-plunger-spinner" proportion="3" wrap_around="false" />
                         <label word_wrap="true" id="powerup-plunger-autorefreshed-label" proportion="1" text="....." text_align="left" />
                     </div>
-                    <div width="90%" height="fit" layout="horizontal-row">
+                    <div width="100%" height="fit" layout="horizontal-row">
                         <label word_wrap="true" id="powerup-switch-label" proportion="2" text="switch" text_align="left" />
                         <checkbox id="powerup-switch-checkbox" proportion="1" />
                         <spinner id="powerup-switch-spinner" proportion="3" wrap_around="false" />
@@ -142,7 +142,7 @@
                         <spinner id="powerup-rubber-ball-spinner" proportion="3" wrap_around="false" />
                         <label word_wrap="true" id="powerup-rubber-ball-autorefreshed-label" proportion="1" text="....." text_align="left" />
                     </div>
-                    <div width="90%" height="fit" layout="horizontal-row">
+                    <div width="100%" height="fit" layout="horizontal-row">
                         <label word_wrap="true" id="powerup-parachute-label" proportion="2" text="parachute" text_align="left" />
                         <checkbox id="powerup-parachute-checkbox" proportion="1" />
                         <spinner id="powerup-parachute-spinner" proportion="3" wrap_around="false" />
@@ -158,7 +158,7 @@
                         <spinner id="powerup-electro-shield-spinner" proportion="3" wrap_around="false" />
                         <label word_wrap="true" id="powerup-electro-shield-autorefreshed-label" proportion="1" text="....." text_align="left" />
                     </div>
-                    <div width="90%" height="fit" layout="horizontal-row">
+                    <div width="100%" height="fit" layout="horizontal-row">
                         <label word_wrap="true" id="powerup-mini-wish-label" proportion="2" text="mini-wish" text_align="left" />
                         <checkbox id="powerup-mini-wish-checkbox" proportion="1" />
                         <spinner id="powerup-mini-wish-spinner" proportion="3" wrap_around="false" />
@@ -173,8 +173,8 @@
 
 
 
-            <div x="10%" y="0" width="96%" height="96%" layout="vertical-row">
-                    <div width="90%" height="fit" layout="horizontal-row">
+            <div x="1%" y="0" width="96%" height="96%" layout="vertical-row">
+                    <div width="100%" height="fit" layout="horizontal-row">
                         <label word_wrap="true" id="disable-lapping-hits-label" proportion="3" text="Disable lapping hits" text_align="left" />
                         <checkbox id="disable-lapping-hits-checkbox" proportion="1" />
 
@@ -189,12 +189,12 @@
                         <checkbox id="pace-car-unlap-checkbox" proportion="1" />
                     </div>
 
-                    <div width="90%" height="fit" layout="horizontal-row">
+                    <div width="100%" height="fit" layout="horizontal-row">
                         <label word_wrap="true" id="pace-car-intervals-label" proportion="3" text="VPC release intervals (secs)" text_align="left" />
                         <textbox id="pace-car-intervals-textbox" proportion="3" />
                     </div>
 
-                    <div width="90%" height="fit" layout="horizontal-row">
+                    <div width="100%" height="fit" layout="horizontal-row">
                         <label word_wrap="true" id="forbid-bananas-label" proportion="3" text="Forbid bananas" text_align="left" />
                         <checkbox id="forbid-bananas-checkbox" proportion="1" />
 
@@ -209,12 +209,12 @@
                         <checkbox id="forbid-nitro-checkbox" proportion="1" />
                     </div>
 
-                    <div width="90%" height="fit" layout="horizontal-row">
+                    <div width="100%" height="fit" layout="horizontal-row">
                         <label word_wrap="true" id="joker-laps-override-label" proportion="9" text="Joker laps override" text_align="left" />
                         <checkbox id="joker-laps-override-checkbox" proportion="1" />
                     </div>
 
-                    <div width="90%" height="fit" layout="horizontal-row">
+                    <div width="100%" height="fit" layout="horizontal-row">
                         <label word_wrap="true" id="joker-laps-min-max-label" proportion="3" text="Joker laps min/max (WIP USELESS)" text_align="left" />
                         <spinner id="joker-laps-min-spinner" proportion="3" wrap_around="false" />
                         <spinner id="joker-laps-max-spinner" proportion="3" wrap_around="false" />
@@ -223,35 +223,35 @@
 
 
 
-            <div x="10%" y="0" width="96%" height="96%" layout="vertical-row">
-                    <div width="90%" height="fit" layout="horizontal-row">
+            <div x="1%" y="0" width="96%" height="96%" layout="vertical-row">
+                    <div width="100%" height="fit" layout="horizontal-row">
                         <label word_wrap="true" id="deg-mult-label" proportion="3" text="Degradation multiplier:" text_align="left" />
                         <textbox id="deg-mult-textbox" proportion="3" />
                     </div>
 
-                    <div width="90%" height="fit" layout="horizontal-row">
+                    <div width="100%" height="fit" layout="horizontal-row">
                         <label word_wrap="true" id="fuel-mult-label" proportion="3" text="Fuel consumption multiplier:" text_align="left" />
                         <textbox id="fuel-mult-textbox" proportion="3" />
                     </div>
 
-                    <div width="90%" height="fit" layout="horizontal-row">
+                    <div width="100%" height="fit" layout="horizontal-row">
                         <label word_wrap="true" id="tyre-change-override-label" proportion="9" text="Tyre change time override?" text_align="left" />
                         <checkbox id="tyre-change-override-checkbox" proportion="1" />
                     </div>
 
-                    <div width="90%" height="fit" layout="horizontal-row">
+                    <div width="100%" height="fit" layout="horizontal-row">
                         <label word_wrap="true" id="tyre-change-override-val-label" proportion="3" text="Tyre change override val:" text_align="left" />
                         <textbox id="tyre-change-override-val-textbox" proportion="3" />
                     </div>
 
-                    <div width="90%" height="fit" layout="horizontal-row">
+                    <div width="100%" height="fit" layout="horizontal-row">
                         <label word_wrap="true" id="ghost-karts-label" proportion="9" text="Ghost karts" text_align="left" />
                         <checkbox id="ghost-karts-checkbox" proportion="1" />
                     </div>
             </div>
 
-            <div x="10%" y="0" width="96%" height="96%" layout="vertical-row">
-                    <div width="90%" height="fit" layout="horizontal-row">
+            <div x="1%" y="0" width="96%" height="96%" layout="vertical-row">
+                    <div width="100%" height="fit" layout="horizontal-row">
                         <label word_wrap="true" id="forbid-brake-label" proportion="3" text="Forbid brake?" text_align="left" />
                         <checkbox id="forbid-brake-checkbox" proportion="1" />
 
@@ -260,7 +260,7 @@
                         <label word_wrap="true" id="forbid-nitrouse-label" proportion="3" text="Forbid nitro usage?" text_align="left" />
                         <checkbox id="forbid-nitrouse-checkbox" proportion="1" />
                     </div>
-                    <div width="90%" height="fit" layout="horizontal-row">
+                    <div width="100%" height="fit" layout="horizontal-row">
                         <label word_wrap="true" id="forbid-skid-label" proportion="3" text="Forbid skid?" text_align="left" />
                         <checkbox id="forbid-skid-checkbox" proportion="1" />
 
@@ -269,7 +269,7 @@
                         <label word_wrap="true" id="forbid-lookback-label" proportion="3" text="Forbid lookback?" text_align="left" />
                         <checkbox id="forbid-lookback-checkbox" proportion="1" />
                     </div>
-                    <div width="90%" height="fit" layout="horizontal-row">
+                    <div width="100%" height="fit" layout="horizontal-row">
                         <label word_wrap="true" id="forbid-fire-label" proportion="3" text="Forbid fire?" text_align="left" />
                         <checkbox id="forbid-fire-checkbox" proportion="1" />
 
