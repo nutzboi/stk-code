@@ -12,7 +12,7 @@ sudo apt-get install build-essential cmake libbluetooth-dev libsdl2-dev \
 libcurl4-openssl-dev libenet-dev libfreetype6-dev libharfbuzz-dev \
 libjpeg-dev libogg-dev libopenal-dev libpng-dev \
 libssl-dev libvorbis-dev libmbedtls-dev pkg-config zlib1g-dev \
-nlohmann-json3-dev
+libsqlite3-dev nlohmann-json3-dev
 ```
 
 #### Arch Linux
@@ -37,14 +37,15 @@ wiiuse-devel zlib-devel nlohmann-json-devel
 ### Quick Build Instructions
 ```bash
 # Clone the repository
-git clone https://github.com/BcfWor/stk-code.git
+# This repository uses git submodules, so clone with --recursive.
+git clone --recursive https://github.com/BcfWor/stk-code.git
 cd stk-code
 
 # Create build directory
 mkdir build && cd build
 
 # Configure CMake
-cmake -DNO_SHADERC=on -DSERVER_ONLY=on
+cmake .. -DNO_SHADERC=on -DSERVER_ONLY=on
 
 # Build
 make -j4
