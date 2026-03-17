@@ -468,9 +468,12 @@ void Item::initItem(ItemType type, const Vec3 &xyz, const Vec3&normal,
         m_distance_from_center = distances.getX();
         const DriveNode* dn = DriveGraph::get()->getNode(m_graph_node);
         const Vec3& right = dn->getRightUnitVector();
-        // Give it 10% more space, since the kart will not always come
-        // parallel to the drive line.
-        Vec3 delta = right * sqrt(m_distance_2) * 1.3f;
+        // Give it 120% more space, because
+        // this piece of code was written back when
+        // the kart hitbox wasn't used in collision
+        // calculations.
+        // For almost all karts, 120% is a good enough value.
+        Vec3 delta = right * sqrt(m_distance_2) * 2.2f;
         m_avoidance_points[0] = new Vec3(getXYZ() + delta);
         m_avoidance_points[1] = new Vec3(getXYZ() - delta);
     }

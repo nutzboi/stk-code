@@ -964,13 +964,16 @@ bool SkiddingAI::steerToAvoid(const std::vector<const ItemState *> &items_to_avo
     if( !hit_left && !hit_right)
         return false;
 
-    // If we hit the left item, aim at the right avoidance point
-    // of the left item. We might still hit the right item ... this might
-    // still be better than going too far off track
+    // TME EDIT: SOMEONE WROTE
+                    // If we hit the left item, aim at the right avoidance point
+                    // of the left item. We might still hit the right item ... this might
+                    // still be better than going too far off track
+    // THIS IS NONSENSE.
+    // WE ARE PICKING THE LEFT OF THE LEFTMOST, EVIDENTLY.
     if(hit_left)
     {
         *aim_point =
-            *(items_to_avoid[index[0]]->getAvoidancePoint(/*left*/false));
+            *(items_to_avoid[index[0]]->getAvoidancePoint(/*left*/true));
         return true;
     }
 
