@@ -197,6 +197,9 @@ public:
     virtual const std::string formatBanInfo(const std::string& name) OVERRIDE;
     /* /Moderation toolkit */
 
+    void logCommandUsage(const std::string& command_name,
+                         const std::string& source);
+
     static void upperIPv6SQL(sqlite3_context* context, int argc, sqlite3_value** argv);
     static void insideIPv6CIDRSQL(sqlite3_context* context, int argc, sqlite3_value** argv);
 };

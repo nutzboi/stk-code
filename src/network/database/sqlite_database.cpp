@@ -229,6 +229,27 @@ bool SQLiteDatabase::easySQLQuery(
     return true;
 }   // easySQLQuery
 
+void SQLiteDatabase::logCommandUsage(const std::string& command_name,
+                                     const std::string& source)
+{
+    if (!m_db || !ServerConfig::m_sql_management)
+        return;
+
+    if (command_name.empty() || source.empty())
+        return;
+
+    std::shared_ptr<BinderCollection> coll = std::make_shared<BinderCollection>();
+    std::string query = StringUtils::insertValues(
+        "INSERT INTO command_usage_log "
+        "(server_uid, command_name, source, created_at) "
+        "VALUES (%s, %s, %s, datetime('now'));",
+        Binder(coll, ServerConfig::m_server_uid, "server_uid"),
+        Binder(coll, command_name, "command_name"),
+        Binder(coll, source, "source")
+    );
+    easySQLQuery(query, nullptr, coll->getBindFunction());
+}
+
 //-----------------------------------------------------------------------------
 /** Performs a query to determine if a certain table exists.
  *  \param table The searched name.

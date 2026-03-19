@@ -114,6 +114,10 @@
 #include "network/server_config.hpp"
 #include "network/stk_peer.hpp"
 #include "network/stk_host.hpp"
+#ifdef ENABLE_SQLITE3
+#include "network/database/abstract_database.hpp"
+#include "network/database/sqlite_database.hpp"
+#endif
 #include "utils/log.hpp"
 #include "utils/string_utils.hpp"
 
@@ -121,6 +125,23 @@
 #include <sstream>
 
 static const char* LOGNAME = "ServerLobbyCommands";
+
+static std::string extract_command_name(const std::string& line)
+{
+    if (line.empty())
+        return std::string();
+
+    std::string s = line;
+    if (!s.empty() && s[0] == '/')
+        s.erase(0, 1);
+
+    std::string::size_type pos = s.find(' ');
+    if (pos != std::string::npos)
+        s = s.substr(0, pos);
+
+    std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+    return s;
+}
 
 ServerLobbyCommands* ServerLobbyCommands::g_instance = nullptr;
 
@@ -372,6 +393,26 @@ void ServerLobbyCommands::handleServerCommand(ServerLobby* const lobby, std::sha
         lobby->submitPoleVote(peer, argv0_number);
         return;
     }
+
+#ifdef ENABLE_SQLITE3
+    {
+        const std::string cmd_name = extract_command_name(line);
+        if (!cmd_name.empty())
+        {
+            auto sl = LobbyProtocol::get<ServerLobby>();
+            if (sl)
+            {
+                AbstractDatabase* adb = sl->getDatabase();
+                if (adb)
+                {
+                    SQLiteDatabase* sdb = dynamic_cast<SQLiteDatabase*>(adb);
+                    if (sdb)
+                        sdb->logCommandUsage(cmd_name, "chat");
+                }
+            }
+        }
+    }
+#endif
     try {
         m_executor.dispatch_line(line, context, &dispatch_data);
     } catch (const std::exception& e) {
@@ -437,10 +478,26 @@ void ServerLobbyCommands::handleServerCommand(ServerLobby* const lobby, std::sha
 }
 void ServerLobbyCommands::handleNetworkConsoleCommand(std::string& line)
 {
-    auto sl = LobbyProtocol::get<ServerLobby>();
     DispatchData dispatch_data;
+    auto sl = LobbyProtocol::get<ServerLobby>();
     NetworkConsole::network_console_context->set_lobby(sl.get());
     NetworkConsole::network_console_context->set_lobby_commands(this);
+
+#ifdef ENABLE_SQLITE3
+    {
+        const std::string cmd_name = extract_command_name(line);
+        if (!cmd_name.empty() && sl)
+        {
+            AbstractDatabase* adb = sl->getDatabase();
+            if (adb)
+            {
+                SQLiteDatabase* sdb = dynamic_cast<SQLiteDatabase*>(adb);
+                if (sdb)
+                    sdb->logCommandUsage(cmd_name, "console");
+            }
+        }
+    }
+#endif
 
     try
     {

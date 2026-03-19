@@ -25,3 +25,17 @@ CREATE TABLE text_reports (
     player_name TEXT NOT NULL,
     message TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS command_usage_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    server_uid TEXT NOT NULL,
+    command_name TEXT NOT NULL,
+    source TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_command_usage_server_time
+    ON command_usage_log(server_uid, created_at);
+
+CREATE INDEX IF NOT EXISTS idx_command_usage_command
+    ON command_usage_log(command_name);
