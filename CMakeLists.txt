@@ -99,6 +99,42 @@ if(UNIX OR MINGW)
     option(DEBUG_SYMBOLS "Compile with debug symbols" OFF)
 endif()
 
+find_package(Git QUIET)
+
+if(GIT_FOUND)
+    execute_process(
+        COMMAND "${GIT_EXECUTABLE}" rev-parse --short HEAD
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+        OUTPUT_VARIABLE GIT_VERSION_STRING
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET
+    )
+    execute_process(
+        COMMAND "${GIT_EXECUTABLE}" show -s --format=%s HEAD
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+        OUTPUT_VARIABLE GIT_SUBJECT_STRING
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET
+    )
+    execute_process(
+        COMMAND "${GIT_EXECUTABLE}" rev-parse --abbrev-ref HEAD
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+        OUTPUT_VARIABLE GIT_BRANCH_STRING
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET
+    )
+endif()
+
+if(NOT GIT_VERSION_STRING)
+    set(GIT_VERSION_STRING "unknown")
+endif()
+if(NOT GIT_SUBJECT_STRING)
+    set(GIT_SUBJECT_STRING "")
+endif()
+if(NOT GIT_BRANCH_STRING)
+    set(GIT_BRANCH_STRING "")
+endif()
+
 if(MSVC AND (MSVC_VERSION LESS 1900))
     # Normally hide the option to build wiiuse on VS, since it depends
     # on the installation of the Windows DDK (Driver Developer Kit),
@@ -628,6 +664,11 @@ else()
     else()
         add_executable(supertuxkart ${STK_SOURCES} ${STK_RESOURCES} ${STK_HEADERS})
     endif()
+    target_compile_definitions(supertuxkart PRIVATE
+        GIT_VERSION_STRING="${GIT_VERSION_STRING}"
+        GIT_SUBJECT_STRING="${GIT_SUBJECT_STRING}"
+        GIT_BRANCH_STRING="${GIT_BRANCH_STRING}"
+    )
     if (NOT WIN32)
         target_link_libraries(supertuxkart ${PTHREAD_LIBRARY})
     endif()

@@ -1,3 +1,4 @@
+
 //
 //  SuperTuxKart - a fun racing game with go-kart
 //  Copyright (C) 2013-2015 SuperTuxKart-Team
@@ -93,6 +94,7 @@
 #include "lobby/commands/autokick.hpp"
 #include "lobby/commands/endgame.hpp"
 #include "lobby/commands/goalhistory.hpp"
+#include "lobby/commands/git_version.hpp"
 // special features
 #include "lobby/commands/pole.hpp"
 // moderation
@@ -344,6 +346,7 @@ void ServerLobbyCommands::registerCommands()
     m_executor.register_command(std::make_shared<JumblewordCommand>());
     m_executor.add_alias("jw", "jumbleword");
     m_executor.register_command(std::make_shared<AuthenticateCommand>());
+    m_executor.register_command(std::make_shared<GitVersionCommand>());
 }
 
 void ServerLobbyCommands::handleServerCommand(ServerLobby* const lobby, std::shared_ptr<STKPeer>& peer, std::string& line)
@@ -386,7 +389,7 @@ void ServerLobbyCommands::handleServerCommand(ServerLobby* const lobby, std::sha
         // the command itself can't always provide the SHARED pointer of the m_voted_command
         // due to the limitations of the nnwcli library
         auto stk_command = std::dynamic_pointer_cast<STKCommand>(
-            dispatch_data.m_voted_command ? 
+            dispatch_data.m_voted_command ?
             dispatch_data.m_voted_command :
             // in case the command votes for itself, it can't provide shared pointer,
             // find it again
@@ -771,7 +774,7 @@ void ServerLobbyCommands::applyVoteIfPresent(ServerLobby* lobby)
             vote++;
             continue;
         }
-        
+
         // send the command to the vote and erase the entry
         dispatchVotedCommand(lobby, vote->first.m_voted_command, vote->first.m_voted_args,
                 vote->first.m_voted_argline);
