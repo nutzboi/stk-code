@@ -939,7 +939,7 @@ void ClientLobby::updatePlayerList(Event* event)
         lp.m_handicap = (uint8_t)packet.handicap;
         if (lp.m_handicap != 0)
         {
-            lp.m_user_name = _("%s (handicapped)", lp.m_user_name);
+            lp.m_user_name = _("%s (%d.%d% handicapped)", lp.m_user_name, lp.m_handicap/2, (lp.m_handicap % 2) ? 5 : 0);
         }
         lp.m_starting_tyre = packet.starting_tyre;
         KartTeam team = (KartTeam)packet.kart_team;
