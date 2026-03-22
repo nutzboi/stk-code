@@ -666,9 +666,10 @@
                     max-speed-reverse-ratio="*1" brake-factor="15" time-full-brake="0.35" />
             <gear switch-ratio="0.1 0.25 0.45 0.7 1 4"
                   power-increase="1.85 1.54 1.33 1.22 1.16 1" />
-            <mass value="*1.5" />
-            <virtualmass value="*1" />
-            <fuel mass-real="*1" mass-virtual="*1" consumption="*1" capacity="*1" lift-and-coast-factor="0.5"/>
+            <mass value="525" />
+            <virtualmass value="525" />
+            <fuel mass-real="0.4" mass-virtual="0.4" consumption="14" capacity="100" stop-rate="0.1" max-speed-decrease="0" turn-radius-increase="0.0009" lift-and-coast-factor="0.5" />
+
             <skid enabled="false" />
             <startup boost="*0.01 *0.01"
                  engine-force="*0.01 *0.01"
