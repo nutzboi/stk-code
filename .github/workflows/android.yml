@@ -61,6 +61,7 @@ jobs:
           mkdir stk-assets
           cd stk-assets
           unzip ../stk-assets-full.zip
+          cd ..
           cd lib
           wget -q https://github.com/nutzboi/stk-dependencies/releases/download/git/dependencies-android-src.tar.xz
           tar xf dependencies-android-src.tar.xz
