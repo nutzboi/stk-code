@@ -331,11 +331,11 @@ void KartSelectionScreen::beforeAddingWidget()
     //I18N: kart group name
     FOR_GETTEXT_ONLY( _("Add-Ons") )
     //I18N: kart class name
-    FOR_GETTEXT_ONLY( _("Light") )
+    FOR_GETTEXT_ONLY( _C("Kart class", "Light") )
     //I18N: kart class name
-    FOR_GETTEXT_ONLY( _("Medium") )
+    FOR_GETTEXT_ONLY( _C("Kart class", "Medium") )
     //I18N: kart class name
-    FOR_GETTEXT_ONLY( _("Heavy") )
+    FOR_GETTEXT_ONLY( _C("Kart class", "Heavy") )
 
 
     // Add other groups after
@@ -362,10 +362,20 @@ void KartSelectionScreen::beforeAddingWidget()
         {
             class_str[0] += 'A' - 'a';
         }
-        kart_class->addLabel(_(class_str.c_str()));
+        kart_class->addLabel(_C("Kart class", class_str.c_str()));
     }
-    kart_class->addLabel(_("All"));
+    kart_class->addLabel(_C("Kart class", "All"));
 }   // beforeAddingWidget
+
+// ----------------------------------------------------------------------------
+
+void KartSelectionScreen::configureChooseKarts(bool enable)
+{
+    // Only allow keyboard and gamepad to choose kart without continue button in
+    // multitouch GUI, so mouse (touch) clicking can be used as previewing karts
+    getWidget("karts")->setEventCallbackActive(Input::IT_MOUSEBUTTON,
+        enable ? !useContinueButton() : true);
+}   // configureChooseKarts
 
 // ----------------------------------------------------------------------------
 
@@ -409,9 +419,9 @@ void KartSelectionScreen::init()
     m_search_box->clearListeners();
     m_search_box->addListener(this);
 
+    configureChooseKarts(true);
     DynamicRibbonWidget* w = getWidget<DynamicRibbonWidget>("karts");
     assert( w != NULL );
-
     KartHoverListener* karthoverListener = new KartHoverListener(this);
     w->registerHoverListener(karthoverListener);
 
@@ -1097,7 +1107,7 @@ void KartSelectionScreen::addMultiplayerMessage()
         m_multiplayer_message = new BubbleWidget();
         m_multiplayer_message->m_properties[PROP_TEXT_ALIGN] = "center";
         m_multiplayer_message->setText(_("Everyone:\n"
-            "Press the 'Select' button to join the game"));
+            "Press the 'Fire' or 'Select' button to join the game"));
         m_multiplayer_message->m_x = message_x;
         m_multiplayer_message->m_y = (int) (fullarea->m_y + fullarea->m_h * 0.3f);
         m_multiplayer_message->m_w = (int) (splitWidth * 0.6f);
@@ -1152,39 +1162,47 @@ void KartSelectionScreen::eventCallback(Widget* widget,
 
         handleKartListFocus();
     }
+    else if (name == "favorite")
+    {
+        bool state = getWidget<CheckBoxWidget>("favorite")->getState();
+        getWidget("continue")->setVisible(!state);
+        configureChooseKarts(!state);
+    }
     else if (name == "karts")
     {
         DynamicRibbonWidget* w = getWidget<DynamicRibbonWidget>("karts");
         assert(w != NULL);
         const std::string selection = w->getSelectionIDString(player_id);
-
         if (getWidget<CheckBoxWidget>("favorite")->getState() &&
             player_id == PLAYER_ID_GAME_MASTER && !m_game_master_confirmed &&
-            selection != RANDOM_KART_ID && !selection.empty())
+            !selection.empty())
         {
-            // Locked karts can't be set as favorites
-            if (StringUtils::startsWith(selection, ID_LOCKED))
+            if (selection != RANDOM_KART_ID)
             {
-                unlock_manager->playLockSound();
-            }
-            else
-            {
-                const KartProperties *kp = kart_properties_manager->getKart(selection);
-
-                if (PlayerManager::getCurrentPlayer()->isFavoriteKart(kp->getIdent()))
+                // Locked karts can't be set as favorites
+                if (StringUtils::startsWith(selection, ID_LOCKED))
                 {
-                    PlayerManager::getCurrentPlayer()->removeFavoriteKart(kp->getIdent());
+                    unlock_manager->playLockSound();
                 }
                 else
                 {
-                    PlayerManager::getCurrentPlayer()->addFavoriteKart(kp->getIdent());
-                }
-                setKartsFromCurrentGroup();
+                    const KartProperties *kp = kart_properties_manager->getKart(selection);
 
-                handleKartListFocus();
+                    if (PlayerManager::getCurrentPlayer()->isFavoriteKart(kp->getIdent()))
+                    {
+                        PlayerManager::getCurrentPlayer()->removeFavoriteKart(kp->getIdent());
+                    }
+                    else
+                    {
+                        PlayerManager::getCurrentPlayer()->addFavoriteKart(kp->getIdent());
+                    }
+                    setKartsFromCurrentGroup();
+
+                    handleKartListFocus();
+                }
             }
         }
-        else if (m_kart_widgets.size() > unsigned(player_id) && !useContinueButton())
+        else if (m_kart_widgets.size() > unsigned(player_id))
             playerConfirm(player_id);
     }
     else if (name == "kart_class" && !m_game_master_confirmed)
@@ -1245,7 +1263,7 @@ bool KartSelectionScreen::onEscapePressed()
 
 // ----------------------------------------------------------------------------
 
-void KartSelectionScreen::onFocusChanged(GUIEngine::Widget* previous, 
+void KartSelectionScreen::onFocusChanged(GUIEngine::Widget* previous,
                                          GUIEngine::Widget* focus, int playerID)
 {
     if (playerID == PLAYER_ID_GAME_MASTER || !previous || !focus)
@@ -1398,8 +1416,8 @@ void KartSelectionScreen::allPlayersDone()
     // ---- Switch to assign mode
     input_manager->getDeviceManager()->setAssignMode(ASSIGN);
 
-    StateManager::ActivePlayer *ap = m_multiplayer 
-                                   ? NULL 
+    StateManager::ActivePlayer *ap = m_multiplayer
+                                   ? NULL
                                    : StateManager::get()->getActivePlayer(0);
     input_manager->getDeviceManager()->setSinglePlayer(ap);
 
@@ -1496,6 +1514,7 @@ bool KartSelectionScreen::validateIdentChoices()
             m_kart_widgets[n].m_player_ident_spinner->markAsCorrect();
 
             // verify internal consistency in debug mode
+#ifndef NDEBUG
             if (m_multiplayer)
             {
                 int spinner_value = m_kart_widgets[n].m_player_ident_spinner->getValue();
@@ -1504,6 +1523,7 @@ bool KartSelectionScreen::validateIdentChoices()
                 assert(m_kart_widgets[n].getAssociatedPlayer()->getProfile() ==
                     PlayerManager::get()->getPlayer(spinner_value));
             }
+#endif
         }
     }
 

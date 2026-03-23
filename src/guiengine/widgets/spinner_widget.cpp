@@ -17,7 +17,7 @@
 
 #include <iostream>
 
-// #include "graphics/irr_driver.hpp"
+#include "graphics/irr_driver.hpp"
 #include "guiengine/engine.hpp"
 #include "guiengine/scalable_font.hpp"
 #include "guiengine/widgets/spinner_widget.hpp"
@@ -571,15 +571,15 @@ void SpinnerWidget::setCustomText(const core::stringw& text)
 
 void SpinnerWidget::onPressed(int x, int y)
 {
-    if (m_children[1].m_deactivated || 
-        m_children[1].m_properties[PROP_ID] != "spinnerbody"  || 
-        !isGauge()) 
-    { 
+    if (m_children[1].m_deactivated ||
+        m_children[1].m_properties[PROP_ID] != "spinnerbody"  ||
+        !isGauge())
+    {
         return;
     }
 
     core::position2di mouse_position(x, y);
-    core::recti body_rect 
+    core::recti body_rect
         = m_children[1].getIrrlichtElement()->getAbsolutePosition();
 
     if (body_rect.isPointInside(mouse_position))
