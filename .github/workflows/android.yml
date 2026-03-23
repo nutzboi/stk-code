@@ -57,10 +57,11 @@ jobs:
           rm -r tmp
           ln -s /usr/local/lib/android/sdk android/android-sdk
           ln -s /usr/local/lib/android/sdk/ndk android/android-ndk
-          wget -q https://github.com/Nomagno/stk-assets/archive/refs/heads/master.zip
-          unzip master.zip -d ../ > /dev/null
-          mv ../stk-assets-master ../stk-assets
-          rm master.zip
+          wget -q https://github.com/supertuxkart/stk-assets-mobile/releases/download/git/stk-assets-full.zip
+          mkdir stk-assets
+          cd stk-assets
+          unzip ../stk-assets-full.zip > /dev/null
+          cd ..
           cd lib
           wget -q https://github.com/nutzboi/stk-dependencies/releases/download/git/dependencies-android-src.tar.xz
           tar xf dependencies-android-src.tar.xz
