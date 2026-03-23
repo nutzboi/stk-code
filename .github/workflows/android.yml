@@ -1,0 +1,83 @@
+#  Copyright (C) 2020-2021 Jacob Burroughs <maths22@gmail.com>
+#                2020-2021 A. Semphris <semphris@protonmail.com>
+#
+#  Released under the Creative Commons Zero (CC0) license, available at:
+#    Legal code: https://creativecommons.org/publicdomain/zero/1.0/legalcode
+#    Information: https://creativecommons.org/share-your-work/public-domain/cc0/
+
+
+
+# Note: Parts of this code were taken from the SuperTux project.
+#         ~ Semphris (responsible for transfering and adapting the file)
+
+name: android
+
+env:
+ BRANCH_NAME: ${{ github.head_ref || github.ref_name }} 
+
+on:
+  push:
+    branches:
+      - android
+    tags:
+      - '*'
+  pull_request: {}
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-latest]
+        compiler: [gcc]
+        build_type: [Beta]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+          submodules: true
+      - name: Configure packaging name
+        run: |
+          echo "release_tag=git`date +%Y%m%d`" >> $GITHUB_ENV
+          echo "release_name=preview" >> $GITHUB_ENV
+          printf '#ifndef VERSION_HPP\n#define VERSION_HPP\n#include <string>\nstruct Version { static std::string branch()  { return "%s"; } static std::string version() { return "%s"; } };\n#endif\n' $BRANCH_NAME $GITHUB_SHA > src/utils/version.hpp
+      - name: Install dependencies
+        run: |
+          sudo apt install -y autoconf automake make imagemagick cmake vorbis-tools pngquant advancecomp libjpeg-progs optipng
+          wget -q https://dl.google.com/android/repository/android-ndk-r23b-linux.zip
+          mkdir tmp
+          cd tmp
+          unzip ../android-ndk-r23b-linux.zip > /dev/null
+          rm ../android-ndk-r23b-linux.zip
+          cd ..
+          echo "PROGRESS CHECK: $PWD"
+          sudo mv tmp/android-ndk-r23b /usr/local/lib/android/sdk/ndk/23.1.7779620
+          rm -r tmp
+          ln -s /usr/local/lib/android/sdk android/android-sdk
+          ln -s /usr/local/lib/android/sdk/ndk android/android-ndk
+          wget -q https://github.com/supertuxkart/stk-assets-mobile/releases/download/git/stk-assets-full.zip
+          mkdir stk-assets
+          cd stk-assets
+          unzip ..\stk-assets-full.zip
+          cd lib
+          wget -q https://github.com/nutzboi/stk-dependencies/releases/download/git/dependencies-android-src.tar.xz
+          tar xf dependencies-android-src.tar.xz
+          rm dependencies-android-src.tar.xz
+          cd ..
+      - name: Build
+        run: |
+          cd android
+          # SDK_PATH=/usr/local/lib/android/sdk NDK_PATH=/usr/local/lib/android/sdk/ndk
+          PROJECT_VERSION=git PROJECT_CODE=1 COMPILE_ARCH=aarch64 BUILD_TYPE=beta ./generate_assets.sh
+          PROJECT_VERSION=git PROJECT_CODE=1 COMPILE_ARCH=aarch64 BUILD_TYPE=beta ./make_deps.sh
+          # manual fix for bad naming:
+          cp ./deps-arm64-v8a/astc-encoder/Source/libastcenc-native-static.a ./deps-arm64-v8a/astc-encoder/Source/libastcenc.a
+          PROJECT_VERSION=git PROJECT_CODE=1 COMPILE_ARCH=aarch64 BUILD_TYPE=beta ./make.sh
+          find build/outputs/apk/ -type f -name "*.apk" -exec mv {} stk-git.apk \;
+          cd ..
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          path: android/stk-git.apk
