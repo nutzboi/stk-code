@@ -60,7 +60,7 @@ jobs:
           wget -q https://github.com/supertuxkart/stk-assets-mobile/releases/download/git/stk-assets-full.zip
           mkdir stk-assets
           cd stk-assets
-          unzip ..\stk-assets-full.zip
+          unzip ../stk-assets-full.zip
           cd lib
           wget -q https://github.com/nutzboi/stk-dependencies/releases/download/git/dependencies-android-src.tar.xz
           tar xf dependencies-android-src.tar.xz
