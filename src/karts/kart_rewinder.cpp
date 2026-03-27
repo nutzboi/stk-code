@@ -169,7 +169,7 @@ BareNetworkString* KartRewinder::saveState(std::vector<std::string>* ru)
         return nullptr;
 
     ru->push_back(getUniqueIdentity());
-    const int MEMSIZE = 17*sizeof(float) + 9+3;
+    const int MEMSIZE = 17*sizeof(float) + 9+3 + 2;
 
     BareNetworkString *buffer = new BareNetworkString(MEMSIZE);
 
@@ -280,6 +280,7 @@ BareNetworkString* KartRewinder::saveState(std::vector<std::string>* ru)
     // -----------
     m_skidding->saveState(buffer);
     buffer->addFloat(m_retro_skidding_counter);
+    buffer->addUInt16(m_retro_skidding_cooldown);
 
     // 7) Tyres
     // -----------
@@ -481,6 +482,7 @@ void KartRewinder::restoreState(BareNetworkString *buffer, int count)
     // -----------
     m_skidding->rewindTo(buffer);
     m_retro_skidding_counter = buffer->getFloat();
+    m_retro_skidding_cooldown = buffer->getUInt16();
 
     // 7) Tyres
     // -----------

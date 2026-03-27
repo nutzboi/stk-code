@@ -431,6 +431,7 @@ public:
 
     /** For retro skidding*/
     float m_retro_skidding_counter;
+    uint16_t m_retro_skidding_cooldown;
     bool m_is_skidding;
     
 

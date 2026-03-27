@@ -585,6 +585,7 @@ void Kart::reset()
 
     m_is_skidding = false;
     m_retro_skidding_counter = 1.0f;
+    m_retro_skidding_cooldown = 0;
     m_weight = 0.0f;
     updateWeight();
 
@@ -3276,12 +3277,36 @@ void Kart::updatePhysics(int ticks)
     // If braking and not accelerating, skid a little
     bool brake_skid = m_controls.getBrake() && m_controls.getAccel() < 0.2f && m_speed > 0.0f;
     bool skidding_sound = false;
+    bool reset_cooldown = false;
 
     if (kp->getSkidMode() == "Retro") {
         KartControl::SkidControl sc = m_controls.getSkidControl();
-        bool is_skidding = std::fabs(m_controls.getSteer()) > 0.01f && (sc == KartControl::SC_LEFT || sc == KartControl::SC_RIGHT);
-        if (sc != m_prev_skid_control)
+
+        if (m_retro_skidding_cooldown > 0) {
+            m_retro_skidding_cooldown -= ticks;
+                if (m_retro_skidding_cooldown <= 0) {
+                    m_retro_skidding_cooldown = 0;
+                }
+        }
+
+        if (m_prev_skid_control == KartControl::SC_LEFT && m_controls.getSteer() > 0.01f) {
+            sc = KartControl::SC_RIGHT;
+            reset_cooldown = true;
+        }
+
+        if (m_prev_skid_control == KartControl::SC_RIGHT && m_controls.getSteer() < -0.01f) {
+            sc = KartControl::SC_LEFT;
+            reset_cooldown = true;
+        }
+
+        bool is_skidding = m_retro_skidding_cooldown == 0 && (std::fabs(m_controls.getSteer()) > 0.01f && (sc == KartControl::SC_LEFT || sc == KartControl::SC_RIGHT));
+
+        if (sc != m_prev_skid_control && !(m_prev_skid_control == KartControl::SC_NONE && reset_cooldown == false)) {
             m_retro_skidding_counter = 1.0f;
+            m_retro_skidding_cooldown = stk_config->time2Ticks(m_kart_properties->getSkidVisualTime());
+            if (m_retro_skidding_cooldown > 0)
+                is_skidding = false;
+        }
         m_prev_skid_control = sc;
 
         if (is_skidding) {
@@ -3705,8 +3730,8 @@ void Kart::updateEnginePowerAndBrakes(int ticks)
             engine_power *= 4.0f;
 
         // Lose some traction when skidding, to balance the advantage
-        if (m_controls.getSkidControl() &&
-            m_kart_properties->getSkidVisualTime() == 0)
+        if (false /*m_controls.getSkidControl() &&
+            m_kart_properties->getSkidVisualTime() == 0*/)
             engine_power *= 0.5f;
 
         // In case the acceleration value is analog,
