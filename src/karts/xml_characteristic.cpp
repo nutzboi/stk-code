@@ -605,6 +605,8 @@ void XmlCharacteristic::load(const XMLNode *node)
     {
         sub_node->get("pit-speed-fraction",
             &m_values[TYRES_PIT_SPEED_FRACTION]);
+        sub_node->get("pit-time-multiplier",
+            &m_values[TYRES_PIT_TIME_MULTIPLIER]);
         sub_node->get("change-kart-map",
             &m_values[TYRES_CHANGE_KART_MAP]);
         sub_node->get("names-long",

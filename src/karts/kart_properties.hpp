@@ -505,6 +505,7 @@ public:
     float getElectroFadeOutTime() const;
 
     float getTyresPitSpeedFraction() const;
+    float getTyresPitTimeMultiplier() const;
     std::string getTyresChangeKartMap() const;
     std::string getTyresNamesLong() const;
     std::string getTyresNamesShort() const;

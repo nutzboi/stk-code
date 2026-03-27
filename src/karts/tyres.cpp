@@ -544,7 +544,8 @@ void Tyres::commandChange(int compound, int time) {
         return;
     }
 
-
+    // Different kart classes can have different (non-fuel) pit stop lengths in the form of a multiplier
+    time *= m_kart->getKartProperties()->getTyresPitTimeMultiplier();
 
     if (compound >= 124) {
         std::string kart_to_change_to = TyreUtils::getKartFromCompound(compound);

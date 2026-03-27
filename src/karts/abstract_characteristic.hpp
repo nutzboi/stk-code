@@ -212,6 +212,7 @@ public:
 
         // Tyres
         TYRES_PIT_SPEED_FRACTION,
+        TYRES_PIT_TIME_MULTIPLIER,
         TYRES_CHANGE_KART_MAP,
         TYRES_NAMES_LONG,
         TYRES_NAMES_SHORT,
@@ -475,6 +476,7 @@ public:
     float getElectroFadeOutTime() const;
 
     float getTyresPitSpeedFraction() const;
+    float getTyresPitTimeMultiplier() const;
     std::string getTyresChangeKartMap() const;
     std::string getTyresNamesLong() const;
     std::string getTyresNamesShort() const;

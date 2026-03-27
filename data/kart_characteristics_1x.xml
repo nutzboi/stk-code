@@ -54,6 +54,7 @@
 
         pit-speed-fraction: when doing a pit stop/refuel/kart change, depending on other factors (usually tyre changer parameters in the scene.xml, or the track.xml in the case of AI pit stops).
                             the kart might be slowed down for some amount of time. Its top speed is capped to Tux's base speed multiplied by this number.
+        pit-time-multiplier: the stop time for non-fuel pit stops will be multiplier by this number
 
         (ARRAY) default-color: -1 indicates the tyre is disabled and can't be selected in-game, 1-99 indicates the tyre's color.
 
@@ -111,6 +112,7 @@
                names-short="C1 S M H C5 C6 C7 C8 C9 CHEAT"
                change-kart-map="kiki tux pidgin"
                pit-speed-fraction="0.1"
+               pit-time-multiplier="1.0"
                default-color="-1 1 12 63 -1 -1 -1 -1 -1 29"
                regular-transfer-turning="0.4 0.4 0.2 0.1 0.1 0 0 0 0 0"
                regular-transfer-traction="0.4 0.4 0.2 0.1 0.1 0 0 0 0 0"

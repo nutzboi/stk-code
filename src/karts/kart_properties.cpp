@@ -1326,6 +1326,12 @@ float KartProperties::getTyresPitSpeedFraction() const
 }  // getTyresPitSpeedFraction
 
 // ----------------------------------------------------------------------------
+float KartProperties::getTyresPitTimeMultiplier() const
+{
+    return m_cached_characteristic->getTyresPitTimeMultiplier();
+}  // getTyresPitTimeMultiplier
+
+// ----------------------------------------------------------------------------
 std::string KartProperties::getTyresChangeKartMap() const
 {
     return m_cached_characteristic->getTyresChangeKartMap();

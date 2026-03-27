@@ -245,6 +245,8 @@ AbstractCharacteristic::ValueType AbstractCharacteristic::getType(
         return TYPE_FLOAT;
     case TYRES_PIT_SPEED_FRACTION:
         return TYPE_FLOAT;
+    case TYRES_PIT_TIME_MULTIPLIER:
+        return TYPE_FLOAT;
     case TYRES_CHANGE_KART_MAP:
         return TYPE_STRING;
     case TYRES_NAMES_LONG:
@@ -647,6 +649,8 @@ std::string AbstractCharacteristic::getName(CharacteristicType type)
         return "ELECTRO_FADE_OUT_TIME";
     case TYRES_PIT_SPEED_FRACTION:
         return "TYRES_PIT_SPEED_FRACTION";
+    case TYRES_PIT_TIME_MULTIPLIER:
+        return "TYRES_PIT_TIME_MULTIPLIER";
     case TYRES_CHANGE_KART_MAP:
         return "TYRES_CHANGE_KART_MAP";
     case TYRES_NAMES_LONG:
@@ -1990,6 +1994,18 @@ float AbstractCharacteristic::getTyresPitSpeedFraction() const
                     getName(TYRES_PIT_SPEED_FRACTION).c_str());
     return result;
 }  // getTyresPitSpeedFraction
+
+// ----------------------------------------------------------------------------
+float AbstractCharacteristic::getTyresPitTimeMultiplier() const
+{
+    float result;
+    bool is_set = false;
+    process(TYRES_PIT_TIME_MULTIPLIER, &result, &is_set);
+    if (!is_set)
+        Log::fatal("AbstractCharacteristic", "Can't get characteristic %s",
+                    getName(TYRES_PIT_TIME_MULTIPLIER).c_str());
+    return result;
+}  // getTyresPitTimeMultiplier
 
 // ----------------------------------------------------------------------------
 std::string AbstractCharacteristic::getTyresChangeKartMap() const
