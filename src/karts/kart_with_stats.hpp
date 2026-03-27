@@ -78,7 +78,7 @@ public:
                                uint8_t handicap, unsigned starting_tyre);
     virtual void update(int ticks) OVERRIDE;
     virtual void reset() OVERRIDE;
-    virtual void collectedItem(ItemState *item_state) OVERRIDE;
+    virtual bool collectedItem(ItemState *item_state) OVERRIDE;
     virtual void setKartAnimation(AbstractKartAnimation *ka) OVERRIDE;
 
     /** Returns the top speed of this kart. */

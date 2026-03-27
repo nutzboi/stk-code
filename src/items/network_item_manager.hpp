@@ -75,7 +75,7 @@ public:
     virtual void reset() OVERRIDE;
     virtual void setItemConfirmationTime(std::weak_ptr<STKPeer> peer,
                                          int ticks) OVERRIDE;
-    virtual void  collectedItem(ItemState *item, Kart *kart) OVERRIDE;
+    virtual bool  collectedItem(ItemState *item, Kart *kart) OVERRIDE;
     virtual void  switchItems() OVERRIDE;
     virtual Item* dropNewItem(ItemState::ItemType type,
                               const Kart *kart,

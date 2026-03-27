@@ -521,7 +521,7 @@ public:
     /** Called when an item is collected. It will either adjust the collected
      *  energy, or update the attachment or powerup for this kart.
      *  \param item The item that was hit. */
-    virtual void  collectedItem(ItemState *item);
+    virtual bool collectedItem(ItemState *item);
     // ------------------------------------------------------------------------
     /** Called when the NitroHack powerup is used. **/
     virtual void  activateNitroHack();

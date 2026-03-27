@@ -26,6 +26,7 @@
 #include "graphics/sp/sp_base.hpp"
 #include "io/file_manager.hpp"
 #include "karts/kart.hpp"
+#include "karts/max_speed.hpp"
 #include "karts/controller/spare_tire_ai.hpp"
 #include "modes/easter_egg_hunt.hpp"
 #include "modes/profile_world.hpp"
@@ -401,7 +402,7 @@ Item* ItemManager::placeItem(ItemState::ItemType type, const Vec3& xyz,
  *  \param item The item that was collected.
  *  \param kart The kart that collected the item.
  */
-void ItemManager::collectedItem(ItemState *item, Kart *kart)
+bool ItemManager::collectedItem(ItemState *item, Kart *kart)
 {
     assert(item);
 
@@ -410,21 +411,31 @@ void ItemManager::collectedItem(ItemState *item, Kart *kart)
 
     // Ignore collision
     if (ignore_gums_if_shield && gum_shield_collision)
-        return;
+        return false;
 
     if (kart->getBody()->getTag() == GHOST_NO_COLLECTIBLE_KART_TAG)
-        return;
+        return false;
+
+    // Can't pit while the pit state is already active
+    if (item->m_type == ItemState::ItemType::ITEM_TYRE_CHANGE && kart->m_max_speed->isSpeedDecreaseActive(MaxSpeed::MS_DECREASE_STOP))
+        return false;
+
+    // AI can't take tyre changers, they have their own streamlined virtual pitting system
+    if (item->m_type == ItemState::ItemType::ITEM_TYRE_CHANGE && !kart->getController()->isPlayerController())
+        return false;
 
 
     item->collected(kart);
     // Inform the world - used for Easter egg hunt
     World::getWorld()->collectedItem(kart, item);
 
-    kart->collectedItem(item);
+    bool collected = kart->collectedItem(item);
 
 	bool do_preview = RaceManager::get()->getTyreModRules()->do_item_preview;
     if (do_preview && item->m_type == ItemState::ItemType::ITEM_BONUS_BOX)
         item->respawnBonusBox();
+
+    return collected;
 }   // collectedItem
 
 //-----------------------------------------------------------------------------

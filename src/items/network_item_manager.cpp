@@ -86,7 +86,7 @@ void NetworkItemManager::reset()
  *  \param item The item that was collected.
  *  \param kart The kart that collected the item.
  */
-void NetworkItemManager::collectedItem(ItemState *item, Kart *kart)
+bool NetworkItemManager::collectedItem(ItemState *item, Kart *kart)
 {
     if (m_network_item_debugging)
         Log::info("NIM", "collectedItem at %d index %d type %d ttr %d",
@@ -95,9 +95,9 @@ void NetworkItemManager::collectedItem(ItemState *item, Kart *kart)
 
     if(NetworkConfig::get()->isServer())
     {
-        ItemManager::collectedItem(item, kart);
+        bool collected = ItemManager::collectedItem(item, kart);
         // The server saves the collected item as item event info
-        if (kart->getBody()->getTag() != GHOST_NO_COLLECTIBLE_KART_TAG) {
+        if (collected) {
             m_item_events.lock();
             m_item_events.getData().emplace_back(World::getWorld()->getTicksSinceStart(),
                                                  item->getItemId(),
@@ -106,11 +106,13 @@ void NetworkItemManager::collectedItem(ItemState *item, Kart *kart)
                                                  item->m_compound, item->m_stop_time);
             m_item_events.unlock();
         }
+        return collected;
     }
     else
     {
         // The client predicts item collection:
-        ItemManager::collectedItem(item, kart);
+        bool collected = ItemManager::collectedItem(item, kart);
+        return collected;
     }
 }   // collectedItem
 

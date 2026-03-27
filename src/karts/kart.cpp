@@ -1390,7 +1390,7 @@ void Kart::setRaceResult()
  *  energy, or update the attachment or powerup for this kart.
  *  \param item_state The item that was hit.
  */
-void Kart::collectedItem(ItemState *item_state)
+bool Kart::collectedItem(ItemState *item_state)
 {
     float old_energy          = m_collected_energy;
     const Item::ItemType type = item_state->getType();
@@ -1400,10 +1400,10 @@ void Kart::collectedItem(ItemState *item_state)
     int sec;
     ItemPolicy *item_policy = NULL;
     if (getBody()->getTag() == GHOST_NO_COLLECTIBLE_KART_TAG)
-        return;
+        return false;
 
     if (getBody()->getTag() == NO_COLLISION_KART_TAG && m_ghost_collect_cooldown_ticks > 0)
-        return;
+        return false;
 
     switch (type)
     {
@@ -1420,6 +1420,17 @@ void Kart::collectedItem(ItemState *item_state)
         m_powerup->hitBonusBox(*item_state);
         break;
     case Item::ITEM_TYRE_CHANGE:
+        // If already pitted, can't collect a tyre changer item
+        if (m_max_speed->isSpeedDecreaseActive(MaxSpeed::MS_DECREASE_STOP))
+            return false;
+
+        // AI can not take tyre changers, they have their own,
+        // streamlined pitting system
+        if (!m_controller->isPlayerController())
+            return false;
+
+        
+
         if (item_state->m_compound < -1 || item_state->m_compound == 0) {
             Log::error("Kart", "Invalid compound index\n");
             break;
@@ -1442,7 +1453,7 @@ void Kart::collectedItem(ItemState *item_state)
     case Item::ITEM_BUBBLEGUM:
     case Item::ITEM_BUBBLEGUM_SMALL:
         if (getBody()->getTag() != KART_TAG)
-            return;
+            return false;
 
         is_mini = type == Item::ITEM_BUBBLEGUM_SMALL;
         m_has_caught_nolok_bubblegum = 
@@ -1487,6 +1498,7 @@ void Kart::collectedItem(ItemState *item_state)
     // Play sound effects if the kart is controlled by a local player
     m_controller->collectedItem(*item_state, old_energy);
 
+    return true;
 }   // collectedItem
 
 bool Kart::hasHeldMini() const

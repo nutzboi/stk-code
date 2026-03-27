@@ -102,10 +102,13 @@ void KartWithStats::setKartAnimation(AbstractKartAnimation *ka)
  *  represent counters for each type of item hit.
  *  \param item_state The item that was hit.
  */
-void KartWithStats::collectedItem(ItemState *item_state)
+bool KartWithStats::collectedItem(ItemState *item_state)
 {
-    Kart::collectedItem(item_state);
+    bool collected = Kart::collectedItem(item_state);
     const Item::ItemType type = item_state->getType();
+
+    if (collected == false)
+        return false;
 
     switch (type)
     {
@@ -127,6 +130,8 @@ void KartWithStats::collectedItem(ItemState *item_state)
         break;
     default        : break;
     }   // switch TYPE
+
+    return true;
 
 }   // collectedItem
 
