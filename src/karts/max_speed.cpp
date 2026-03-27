@@ -516,7 +516,7 @@ void MaxSpeed::update(int ticks)
 
     // PIT LIMITED / MAX SPEED IN PITS / PIT SPEED LIMITER
     if(m_speed_decrease[MS_DECREASE_STOP].m_duration != 0) {
-        m_current_max_speed = kart_properties_manager->getKart(std::string("tux"))->getEngineMaxSpeed()*0.1f;
+        m_current_max_speed = kart_properties_manager->getKart(std::string("tux"))->getEngineMaxSpeed()*m_kart->getKartProperties()->getTyresPitSpeedFraction();
         m_add_engine_force = 0.0f;
     }
 
