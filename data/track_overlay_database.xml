@@ -538,5 +538,18 @@
         <tyre-change compound="4" stop-time="25" id="tc2" x="-308.826965" y="2.739842" z="-799.876709" h="0.5"/>
         <tyre-change compound="123" stop-time="5" id="tcf" x="-318.324402" y="2.740937" z="-800.346436" h="0.5"/>
     </addon_forza>
+    <addon_mashed-angel-peak>
+        <tyre-change compound="2" stop-time="15" id="tc0" x="-41.818550" y="3.496392" z="160.362030" h="0.5"/>
+        <tyre-change compound="3" stop-time="15" id="tc1" x="-31.089527" y="4.058860" z="159.848145" h="0.5"/>
+        <tyre-change compound="4" stop-time="15" id="tc2" x="-20.602560" y="4.748880" z="159.353790" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tcf" x="3.925529" y="4.750088" z="152.149979" h="0.5"/>
+    </addon_mashed-angel-peak>
+    <addon_wide-view-mugello>
+        <tyre-change compound="2" stop-time="10" id="tc0" x="411.826782" y="3.844896" z="-22.415096" h="0.5"/>
+        <tyre-change compound="3" stop-time="10" id="tc0" x="419.581268" y="3.973157" z="-22.311161" h="0.5"/>
+        <tyre-change compound="4" stop-time="10" id="tc0" x="427.512695" y="4.154526" z="-22.361116" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tc0" x="435.279907" y="4.395494" z="-22.290684" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tc0" x="443.279297" y="4.744108" z="-22.342299" h="0.5"/>
+    </addon_wide-view-mugello>
     <!-- More tracks go here -->
 </overlay>
