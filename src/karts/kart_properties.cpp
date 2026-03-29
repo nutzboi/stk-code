@@ -1512,6 +1512,18 @@ float KartProperties::getTyresCompoundNumber() const
 }  // getTyresCompoundNumber
 
 // ----------------------------------------------------------------------------
+std::vector<float> KartProperties::getTyresLowGripEngineforceMult() const
+{
+    return m_cached_characteristic->getTyresLowGripEngineforceMult();
+}  // getTyresLowGripEngineforceMult
+
+// ----------------------------------------------------------------------------
+std::vector<float> KartProperties::getTyresLowGripTurningMult() const
+{
+    return m_cached_characteristic->getTyresLowGripTurningMult();
+}  // getTyresLowGripTurningMult
+
+// ----------------------------------------------------------------------------
 std::vector<float> KartProperties::getTyresOffroadFactor() const
 {
     return m_cached_characteristic->getTyresOffroadFactor();

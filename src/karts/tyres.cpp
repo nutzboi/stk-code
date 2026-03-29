@@ -295,6 +295,9 @@ void Tyres::applyCrashPenalty(void) {
 float Tyres::degEngineForce(float initial_force, float slowdown) {
     float percent = m_current_life_traction/m_c_max_life_traction * 100.0f;
     float factor = m_c_response_curve_traction.get(percent)*m_c_traction_constant;
+    if (slowdown > 0.79f && slowdown < 0.99f) // low grip mode
+        factor *= m_c_low_grip_engineforce_mult;
+
     float bonus_traction = (initial_force+m_c_initial_bonus_add_traction)*m_c_initial_bonus_mult_traction;
     if (m_c_do_substractive_traction) {
         return bonus_traction - factor;
@@ -310,6 +313,9 @@ float Tyres::degTurnRadius(float initial_radius, float slowdown) {
 
     float percent = m_current_life_turning/m_c_max_life_turning * 100.0f;
     float factor = m_c_response_curve_turning.get(percent)*m_c_turning_constant;
+    if (slowdown > 0.79f && slowdown < 0.99f) // low grip mode
+        factor *= m_c_low_grip_engineforce_mult;
+
     float bonus_turning = (initial_radius+m_c_initial_bonus_add_turning)*m_c_initial_bonus_mult_turning;
     if (m_c_do_substractive_turning) {
         return (bonus_turning - factor)/(1.0 + increase_per_liter*m_current_fuel);

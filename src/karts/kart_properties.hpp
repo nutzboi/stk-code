@@ -536,6 +536,8 @@ public:
     std::vector<float> getTyresTurningConstant() const;
     std::vector<float> getTyresTopspeedConstant() const;
     float getTyresCompoundNumber() const;
+    std::vector<float> getTyresLowGripEngineforceMult() const;
+    std::vector<float> getTyresLowGripTurningMult() const;
     std::vector<float> getTyresOffroadFactor() const;
     std::vector<float> getTyresRollingResistance() const;
     std::vector<float> getTyresSkidFactorPartial() const;

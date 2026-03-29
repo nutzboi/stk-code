@@ -80,6 +80,8 @@ private:
     float m_c_topspeed_constant;
 
     float m_c_offroad_factor;
+    float m_c_low_grip_engineforce_mult;
+    float m_c_low_grip_turning_mult;
     float m_c_rolling_resistance;
     float m_c_skid_factor_partial;
     float m_c_skid_factor_full;
