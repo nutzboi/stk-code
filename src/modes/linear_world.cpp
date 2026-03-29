@@ -296,9 +296,15 @@ void LinearWorld::updateTrackSectors()
              !kart->isGhostKart())
             continue;
         getTrackSector(n)->update(kart->getFrontXYZ());
-        kart_info.m_overall_distance = kart_info.m_finished_laps
+        float new_distance = kart_info.m_finished_laps
                                      * Track::getCurrentTrack()->getTrackLength()
                         + getDistanceDownTrackForKart(kart->getWorldKartId(), true);
+        if (kart->hasFinishedRace() && new_distance < kart_info.m_overall_distance) {
+            // Never decrease the distance of a kart that has already finished the race.
+        } else {
+            kart_info.m_overall_distance = new_distance;
+        }
+
     }   // for n
 }   // updateTrackSectors
 
