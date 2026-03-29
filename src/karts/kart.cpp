@@ -3531,8 +3531,18 @@ void Kart::updatePhysics(int ticks)
     item_policy->enforceVirtualPaceCarRulesForKart(this);
  
 
-    float track_factor = getKartProperties()->getTrackZipperFactor() < 1.0f ? getKartProperties()->getTrackZipperFactor() : 1.0f; 
-    float min_speed =  m && m->isZipper() ? (m->getZipperMinSpeed()*track_factor) : -1.0f;
+    float track_factor = getKartProperties()->getTrackZipperFactor() < 1.0f ? getKartProperties()->getTrackZipperFactor() : 1.0f;
+
+    float min_speed = -1.0f;
+    if (m && m->isZipper()) {
+        // STK has a default zipper with 37.0f min speed that is wrongly used in a lot of tracks,
+        // this one we want to ignore. But stronger ones? They're probably actually necessary for gameplay!
+        if (m->getZipperMinSpeed() < 38.0f) {
+            min_speed = m->getZipperMinSpeed()*track_factor;
+        } else {
+            min_speed = m->getZipperMinSpeed();
+        }
+    } 
     m_max_speed->setMinSpeed(min_speed);
     m_max_speed->update(ticks);
 
