@@ -440,132 +440,136 @@ buffer->addUInt32((static_cast<std::vector<float> *>(m_values[124].content))->si
     buffer->addFloat(*(static_cast<float *>(m_values[125].content))); // TyresCompoundNumber
 buffer->addUInt32((static_cast<std::vector<float> *>(m_values[126].content))->size());
     for (unsigned i = 0; i < (static_cast<std::vector<float> *>(m_values[126].content))->size(); i++) {
-        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[126].content))[i]); // TyresLowGripEngineforceMult
+        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[126].content))[i]); // TyresLowGripTopspeedMult
     }
 buffer->addUInt32((static_cast<std::vector<float> *>(m_values[127].content))->size());
     for (unsigned i = 0; i < (static_cast<std::vector<float> *>(m_values[127].content))->size(); i++) {
-        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[127].content))[i]); // TyresLowGripTurningMult
+        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[127].content))[i]); // TyresLowGripEngineforceMult
     }
 buffer->addUInt32((static_cast<std::vector<float> *>(m_values[128].content))->size());
     for (unsigned i = 0; i < (static_cast<std::vector<float> *>(m_values[128].content))->size(); i++) {
-        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[128].content))[i]); // TyresOffroadFactor
+        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[128].content))[i]); // TyresLowGripTurningMult
     }
 buffer->addUInt32((static_cast<std::vector<float> *>(m_values[129].content))->size());
     for (unsigned i = 0; i < (static_cast<std::vector<float> *>(m_values[129].content))->size(); i++) {
-        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[129].content))[i]); // TyresRollingResistance
+        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[129].content))[i]); // TyresOffroadFactor
     }
 buffer->addUInt32((static_cast<std::vector<float> *>(m_values[130].content))->size());
     for (unsigned i = 0; i < (static_cast<std::vector<float> *>(m_values[130].content))->size(); i++) {
-        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[130].content))[i]); // TyresSkidFactorPartial
+        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[130].content))[i]); // TyresRollingResistance
     }
 buffer->addUInt32((static_cast<std::vector<float> *>(m_values[131].content))->size());
     for (unsigned i = 0; i < (static_cast<std::vector<float> *>(m_values[131].content))->size(); i++) {
-        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[131].content))[i]); // TyresSkidFactorFull
+        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[131].content))[i]); // TyresSkidFactorPartial
     }
 buffer->addUInt32((static_cast<std::vector<float> *>(m_values[132].content))->size());
     for (unsigned i = 0; i < (static_cast<std::vector<float> *>(m_values[132].content))->size(); i++) {
-        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[132].content))[i]); // TyresUsageMultiplierTurning
+        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[132].content))[i]); // TyresSkidFactorFull
     }
 buffer->addUInt32((static_cast<std::vector<float> *>(m_values[133].content))->size());
     for (unsigned i = 0; i < (static_cast<std::vector<float> *>(m_values[133].content))->size(); i++) {
-        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[133].content))[i]); // TyresUsageMultiplierTraction
+        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[133].content))[i]); // TyresUsageMultiplierTurning
     }
 buffer->addUInt32((static_cast<std::vector<float> *>(m_values[134].content))->size());
     for (unsigned i = 0; i < (static_cast<std::vector<float> *>(m_values[134].content))->size(); i++) {
-        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[134].content))[i]); // TyresReferenceSpeedMult
+        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[134].content))[i]); // TyresUsageMultiplierTraction
     }
 buffer->addUInt32((static_cast<std::vector<float> *>(m_values[135].content))->size());
     for (unsigned i = 0; i < (static_cast<std::vector<float> *>(m_values[135].content))->size(); i++) {
-        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[135].content))[i]); // TyresBrakeThreshold
+        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[135].content))[i]); // TyresReferenceSpeedMult
     }
 buffer->addUInt32((static_cast<std::vector<float> *>(m_values[136].content))->size());
     for (unsigned i = 0; i < (static_cast<std::vector<float> *>(m_values[136].content))->size(); i++) {
-        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[136].content))[i]); // TyresCrashPenalty
+        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[136].content))[i]); // TyresBrakeThreshold
     }
 buffer->addUInt32((static_cast<std::vector<float> *>(m_values[137].content))->size());
     for (unsigned i = 0; i < (static_cast<std::vector<float> *>(m_values[137].content))->size(); i++) {
-        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[137].content))[i]); // TyresDefaultColor
+        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[137].content))[i]); // TyresCrashPenalty
     }
 buffer->addUInt32((static_cast<std::vector<float> *>(m_values[138].content))->size());
     for (unsigned i = 0; i < (static_cast<std::vector<float> *>(m_values[138].content))->size(); i++) {
-        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[138].content))[i]); // StartupTime
+        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[138].content))[i]); // TyresDefaultColor
     }
 buffer->addUInt32((static_cast<std::vector<float> *>(m_values[139].content))->size());
     for (unsigned i = 0; i < (static_cast<std::vector<float> *>(m_values[139].content))->size(); i++) {
-        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[139].content))[i]); // StartupBoost
+        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[139].content))[i]); // StartupTime
     }
 buffer->addUInt32((static_cast<std::vector<float> *>(m_values[140].content))->size());
     for (unsigned i = 0; i < (static_cast<std::vector<float> *>(m_values[140].content))->size(); i++) {
-        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[140].content))[i]); // StartupEngineForce
+        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[140].content))[i]); // StartupBoost
     }
-    buffer->addFloat(*(static_cast<float *>(m_values[141].content))); // StartupDuration
-    buffer->addFloat(*(static_cast<float *>(m_values[142].content))); // StartupFadeOutTime
-    buffer->addFloat(*(static_cast<float *>(m_values[143].content))); // RescueDuration
-    buffer->addFloat(*(static_cast<float *>(m_values[144].content))); // RescueVertOffset
-    buffer->addFloat(*(static_cast<float *>(m_values[145].content))); // RescueHeight
-    buffer->addFloat(*(static_cast<float *>(m_values[146].content))); // ExplosionDuration
-    buffer->addFloat(*(static_cast<float *>(m_values[147].content))); // ExplosionRadius
-    buffer->addFloat(*(static_cast<float *>(m_values[148].content))); // ExplosionInvulnerabilityTime
-    buffer->addFloat(*(static_cast<float *>(m_values[149].content))); // NitroDuration
-    buffer->addFloat(*(static_cast<float *>(m_values[150].content))); // NitroEngineForce
-    buffer->addFloat(*(static_cast<float *>(m_values[151].content))); // NitroEngineMult
-    buffer->addFloat(*(static_cast<float *>(m_values[152].content))); // NitroConsumption
-    buffer->addFloat(*(static_cast<float *>(m_values[153].content))); // NitroSmallContainer
-    buffer->addFloat(*(static_cast<float *>(m_values[154].content))); // NitroBigContainer
-    buffer->addFloat(*(static_cast<float *>(m_values[155].content))); // NitroMaxSpeedIncrease
-    buffer->addFloat(*(static_cast<float *>(m_values[156].content))); // NitroMinBurst
-    buffer->addFloat(*(static_cast<float *>(m_values[157].content))); // NitroFadeOutTime
-    buffer->addFloat(*(static_cast<float *>(m_values[158].content))); // NitroMax
-    buffer->addFloat(*(static_cast<float *>(m_values[159].content))); // SlipstreamDurationFactor
-    buffer->addFloat(*(static_cast<float *>(m_values[160].content))); // SlipstreamBaseSpeed
-    buffer->addFloat(*(static_cast<float *>(m_values[161].content))); // SlipstreamLength
-    buffer->addFloat(*(static_cast<float *>(m_values[162].content))); // SlipstreamWidth
-    buffer->addFloat(*(static_cast<float *>(m_values[163].content))); // SlipstreamInnerFactor
-    buffer->addFloat(*(static_cast<float *>(m_values[164].content))); // SlipstreamMinCollectTime
-    buffer->addFloat(*(static_cast<float *>(m_values[165].content))); // SlipstreamMaxCollectTime
-    buffer->addFloat(*(static_cast<float *>(m_values[166].content))); // SlipstreamAddPower
-    buffer->addFloat(*(static_cast<float *>(m_values[167].content))); // SlipstreamMinSpeed
-    buffer->addFloat(*(static_cast<float *>(m_values[168].content))); // SlipstreamMaxSpeedIncrease
-    buffer->addFloat(*(static_cast<float *>(m_values[169].content))); // SlipstreamFadeOutTime
-    buffer->addUInt8(*(static_cast<bool *>(m_values[170].content))); // SkidEnabled
-    buffer->encodeString32L(*(static_cast<std::string *>(m_values[171].content))); // SkidMode
-    buffer->addFloat(*(static_cast<float *>(m_values[172].content))); // SkidIncrease
-    buffer->addFloat(*(static_cast<float *>(m_values[173].content))); // SkidDecrease
-    buffer->addFloat(*(static_cast<float *>(m_values[174].content))); // SkidMax
-    buffer->addFloat(*(static_cast<float *>(m_values[175].content))); // SkidTimeTillMax
-    buffer->addFloat(*(static_cast<float *>(m_values[176].content))); // SkidSlowdown
-    buffer->addFloat(*(static_cast<float *>(m_values[177].content))); // SkidFadeIn
-    buffer->addFloat(*(static_cast<float *>(m_values[178].content))); // SkidFadeOut
-    buffer->addFloat(*(static_cast<float *>(m_values[179].content))); // SkidVisual
-    buffer->addFloat(*(static_cast<float *>(m_values[180].content))); // SkidVisualTime
-    buffer->addFloat(*(static_cast<float *>(m_values[181].content))); // SkidRevertVisualTime
-    buffer->addFloat(*(static_cast<float *>(m_values[182].content))); // SkidMinSpeed
-buffer->addUInt32((static_cast<std::vector<float> *>(m_values[183].content))->size());
-    for (unsigned i = 0; i < (static_cast<std::vector<float> *>(m_values[183].content))->size(); i++) {
-        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[183].content))[i]); // SkidTimeTillBonus
+buffer->addUInt32((static_cast<std::vector<float> *>(m_values[141].content))->size());
+    for (unsigned i = 0; i < (static_cast<std::vector<float> *>(m_values[141].content))->size(); i++) {
+        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[141].content))[i]); // StartupEngineForce
     }
+    buffer->addFloat(*(static_cast<float *>(m_values[142].content))); // StartupDuration
+    buffer->addFloat(*(static_cast<float *>(m_values[143].content))); // StartupFadeOutTime
+    buffer->addFloat(*(static_cast<float *>(m_values[144].content))); // RescueDuration
+    buffer->addFloat(*(static_cast<float *>(m_values[145].content))); // RescueVertOffset
+    buffer->addFloat(*(static_cast<float *>(m_values[146].content))); // RescueHeight
+    buffer->addFloat(*(static_cast<float *>(m_values[147].content))); // ExplosionDuration
+    buffer->addFloat(*(static_cast<float *>(m_values[148].content))); // ExplosionRadius
+    buffer->addFloat(*(static_cast<float *>(m_values[149].content))); // ExplosionInvulnerabilityTime
+    buffer->addFloat(*(static_cast<float *>(m_values[150].content))); // NitroDuration
+    buffer->addFloat(*(static_cast<float *>(m_values[151].content))); // NitroEngineForce
+    buffer->addFloat(*(static_cast<float *>(m_values[152].content))); // NitroEngineMult
+    buffer->addFloat(*(static_cast<float *>(m_values[153].content))); // NitroConsumption
+    buffer->addFloat(*(static_cast<float *>(m_values[154].content))); // NitroSmallContainer
+    buffer->addFloat(*(static_cast<float *>(m_values[155].content))); // NitroBigContainer
+    buffer->addFloat(*(static_cast<float *>(m_values[156].content))); // NitroMaxSpeedIncrease
+    buffer->addFloat(*(static_cast<float *>(m_values[157].content))); // NitroMinBurst
+    buffer->addFloat(*(static_cast<float *>(m_values[158].content))); // NitroFadeOutTime
+    buffer->addFloat(*(static_cast<float *>(m_values[159].content))); // NitroMax
+    buffer->addFloat(*(static_cast<float *>(m_values[160].content))); // SlipstreamDurationFactor
+    buffer->addFloat(*(static_cast<float *>(m_values[161].content))); // SlipstreamBaseSpeed
+    buffer->addFloat(*(static_cast<float *>(m_values[162].content))); // SlipstreamLength
+    buffer->addFloat(*(static_cast<float *>(m_values[163].content))); // SlipstreamWidth
+    buffer->addFloat(*(static_cast<float *>(m_values[164].content))); // SlipstreamInnerFactor
+    buffer->addFloat(*(static_cast<float *>(m_values[165].content))); // SlipstreamMinCollectTime
+    buffer->addFloat(*(static_cast<float *>(m_values[166].content))); // SlipstreamMaxCollectTime
+    buffer->addFloat(*(static_cast<float *>(m_values[167].content))); // SlipstreamAddPower
+    buffer->addFloat(*(static_cast<float *>(m_values[168].content))); // SlipstreamMinSpeed
+    buffer->addFloat(*(static_cast<float *>(m_values[169].content))); // SlipstreamMaxSpeedIncrease
+    buffer->addFloat(*(static_cast<float *>(m_values[170].content))); // SlipstreamFadeOutTime
+    buffer->addUInt8(*(static_cast<bool *>(m_values[171].content))); // SkidEnabled
+    buffer->encodeString32L(*(static_cast<std::string *>(m_values[172].content))); // SkidMode
+    buffer->addFloat(*(static_cast<float *>(m_values[173].content))); // SkidIncrease
+    buffer->addFloat(*(static_cast<float *>(m_values[174].content))); // SkidDecrease
+    buffer->addFloat(*(static_cast<float *>(m_values[175].content))); // SkidMax
+    buffer->addFloat(*(static_cast<float *>(m_values[176].content))); // SkidTimeTillMax
+    buffer->addFloat(*(static_cast<float *>(m_values[177].content))); // SkidSlowdown
+    buffer->addFloat(*(static_cast<float *>(m_values[178].content))); // SkidFadeIn
+    buffer->addFloat(*(static_cast<float *>(m_values[179].content))); // SkidFadeOut
+    buffer->addFloat(*(static_cast<float *>(m_values[180].content))); // SkidVisual
+    buffer->addFloat(*(static_cast<float *>(m_values[181].content))); // SkidVisualTime
+    buffer->addFloat(*(static_cast<float *>(m_values[182].content))); // SkidRevertVisualTime
+    buffer->addFloat(*(static_cast<float *>(m_values[183].content))); // SkidMinSpeed
 buffer->addUInt32((static_cast<std::vector<float> *>(m_values[184].content))->size());
     for (unsigned i = 0; i < (static_cast<std::vector<float> *>(m_values[184].content))->size(); i++) {
-        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[184].content))[i]); // SkidBonusSpeed
+        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[184].content))[i]); // SkidTimeTillBonus
     }
 buffer->addUInt32((static_cast<std::vector<float> *>(m_values[185].content))->size());
     for (unsigned i = 0; i < (static_cast<std::vector<float> *>(m_values[185].content))->size(); i++) {
-        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[185].content))[i]); // SkidBonusTime
+        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[185].content))[i]); // SkidBonusSpeed
     }
 buffer->addUInt32((static_cast<std::vector<float> *>(m_values[186].content))->size());
     for (unsigned i = 0; i < (static_cast<std::vector<float> *>(m_values[186].content))->size(); i++) {
-        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[186].content))[i]); // SkidFadeOutTime
+        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[186].content))[i]); // SkidBonusTime
     }
 buffer->addUInt32((static_cast<std::vector<float> *>(m_values[187].content))->size());
     for (unsigned i = 0; i < (static_cast<std::vector<float> *>(m_values[187].content))->size(); i++) {
-        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[187].content))[i]); // SkidBonusForce
+        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[187].content))[i]); // SkidFadeOutTime
     }
-    buffer->addFloat(*(static_cast<float *>(m_values[188].content))); // SkidPhysicalJumpTime
-    buffer->addFloat(*(static_cast<float *>(m_values[189].content))); // SkidGraphicalJumpTime
-    buffer->addFloat(*(static_cast<float *>(m_values[190].content))); // SkidPostSkidRotateFactor
-    buffer->addFloat(*(static_cast<float *>(m_values[191].content))); // SkidReduceTurnMin
-    buffer->addFloat(*(static_cast<float *>(m_values[192].content))); // SkidReduceTurnMax
-    buffer->addFloat(*(static_cast<float *>(m_values[193].content))); // ItemBonusBoxCap
+buffer->addUInt32((static_cast<std::vector<float> *>(m_values[188].content))->size());
+    for (unsigned i = 0; i < (static_cast<std::vector<float> *>(m_values[188].content))->size(); i++) {
+        buffer->addFloat((*static_cast<std::vector<float> *>(m_values[188].content))[i]); // SkidBonusForce
+    }
+    buffer->addFloat(*(static_cast<float *>(m_values[189].content))); // SkidPhysicalJumpTime
+    buffer->addFloat(*(static_cast<float *>(m_values[190].content))); // SkidGraphicalJumpTime
+    buffer->addFloat(*(static_cast<float *>(m_values[191].content))); // SkidPostSkidRotateFactor
+    buffer->addFloat(*(static_cast<float *>(m_values[192].content))); // SkidReduceTurnMin
+    buffer->addFloat(*(static_cast<float *>(m_values[193].content))); // SkidReduceTurnMax
+    buffer->addFloat(*(static_cast<float *>(m_values[194].content))); // ItemBonusBoxCap
 
     /* <characteristics-end ccnetworksave> */
 }
@@ -833,170 +837,176 @@ void CachedCharacteristic::restoreState(BareNetworkString *buffer) {
     size = buffer->getUInt32();
     (static_cast<std::vector<float> *>(m_values[126].content))->clear();
     for (unsigned i = 0; i < size; i++) {
-        (static_cast<std::vector<float> *>(m_values[126].content))->push_back(buffer->getFloat()); // TyresLowGripEngineforceMult
+        (static_cast<std::vector<float> *>(m_values[126].content))->push_back(buffer->getFloat()); // TyresLowGripTopspeedMult
     }
 
     size = buffer->getUInt32();
     (static_cast<std::vector<float> *>(m_values[127].content))->clear();
     for (unsigned i = 0; i < size; i++) {
-        (static_cast<std::vector<float> *>(m_values[127].content))->push_back(buffer->getFloat()); // TyresLowGripTurningMult
+        (static_cast<std::vector<float> *>(m_values[127].content))->push_back(buffer->getFloat()); // TyresLowGripEngineforceMult
     }
 
     size = buffer->getUInt32();
     (static_cast<std::vector<float> *>(m_values[128].content))->clear();
     for (unsigned i = 0; i < size; i++) {
-        (static_cast<std::vector<float> *>(m_values[128].content))->push_back(buffer->getFloat()); // TyresOffroadFactor
+        (static_cast<std::vector<float> *>(m_values[128].content))->push_back(buffer->getFloat()); // TyresLowGripTurningMult
     }
 
     size = buffer->getUInt32();
     (static_cast<std::vector<float> *>(m_values[129].content))->clear();
     for (unsigned i = 0; i < size; i++) {
-        (static_cast<std::vector<float> *>(m_values[129].content))->push_back(buffer->getFloat()); // TyresRollingResistance
+        (static_cast<std::vector<float> *>(m_values[129].content))->push_back(buffer->getFloat()); // TyresOffroadFactor
     }
 
     size = buffer->getUInt32();
     (static_cast<std::vector<float> *>(m_values[130].content))->clear();
     for (unsigned i = 0; i < size; i++) {
-        (static_cast<std::vector<float> *>(m_values[130].content))->push_back(buffer->getFloat()); // TyresSkidFactorPartial
+        (static_cast<std::vector<float> *>(m_values[130].content))->push_back(buffer->getFloat()); // TyresRollingResistance
     }
 
     size = buffer->getUInt32();
     (static_cast<std::vector<float> *>(m_values[131].content))->clear();
     for (unsigned i = 0; i < size; i++) {
-        (static_cast<std::vector<float> *>(m_values[131].content))->push_back(buffer->getFloat()); // TyresSkidFactorFull
+        (static_cast<std::vector<float> *>(m_values[131].content))->push_back(buffer->getFloat()); // TyresSkidFactorPartial
     }
 
     size = buffer->getUInt32();
     (static_cast<std::vector<float> *>(m_values[132].content))->clear();
     for (unsigned i = 0; i < size; i++) {
-        (static_cast<std::vector<float> *>(m_values[132].content))->push_back(buffer->getFloat()); // TyresUsageMultiplierTurning
+        (static_cast<std::vector<float> *>(m_values[132].content))->push_back(buffer->getFloat()); // TyresSkidFactorFull
     }
 
     size = buffer->getUInt32();
     (static_cast<std::vector<float> *>(m_values[133].content))->clear();
     for (unsigned i = 0; i < size; i++) {
-        (static_cast<std::vector<float> *>(m_values[133].content))->push_back(buffer->getFloat()); // TyresUsageMultiplierTraction
+        (static_cast<std::vector<float> *>(m_values[133].content))->push_back(buffer->getFloat()); // TyresUsageMultiplierTurning
     }
 
     size = buffer->getUInt32();
     (static_cast<std::vector<float> *>(m_values[134].content))->clear();
     for (unsigned i = 0; i < size; i++) {
-        (static_cast<std::vector<float> *>(m_values[134].content))->push_back(buffer->getFloat()); // TyresReferenceSpeedMult
+        (static_cast<std::vector<float> *>(m_values[134].content))->push_back(buffer->getFloat()); // TyresUsageMultiplierTraction
     }
 
     size = buffer->getUInt32();
     (static_cast<std::vector<float> *>(m_values[135].content))->clear();
     for (unsigned i = 0; i < size; i++) {
-        (static_cast<std::vector<float> *>(m_values[135].content))->push_back(buffer->getFloat()); // TyresBrakeThreshold
+        (static_cast<std::vector<float> *>(m_values[135].content))->push_back(buffer->getFloat()); // TyresReferenceSpeedMult
     }
 
     size = buffer->getUInt32();
     (static_cast<std::vector<float> *>(m_values[136].content))->clear();
     for (unsigned i = 0; i < size; i++) {
-        (static_cast<std::vector<float> *>(m_values[136].content))->push_back(buffer->getFloat()); // TyresCrashPenalty
+        (static_cast<std::vector<float> *>(m_values[136].content))->push_back(buffer->getFloat()); // TyresBrakeThreshold
     }
 
     size = buffer->getUInt32();
     (static_cast<std::vector<float> *>(m_values[137].content))->clear();
     for (unsigned i = 0; i < size; i++) {
-        (static_cast<std::vector<float> *>(m_values[137].content))->push_back(buffer->getFloat()); // TyresDefaultColor
+        (static_cast<std::vector<float> *>(m_values[137].content))->push_back(buffer->getFloat()); // TyresCrashPenalty
     }
 
     size = buffer->getUInt32();
     (static_cast<std::vector<float> *>(m_values[138].content))->clear();
     for (unsigned i = 0; i < size; i++) {
-        (static_cast<std::vector<float> *>(m_values[138].content))->push_back(buffer->getFloat()); // StartupTime
+        (static_cast<std::vector<float> *>(m_values[138].content))->push_back(buffer->getFloat()); // TyresDefaultColor
     }
 
     size = buffer->getUInt32();
     (static_cast<std::vector<float> *>(m_values[139].content))->clear();
     for (unsigned i = 0; i < size; i++) {
-        (static_cast<std::vector<float> *>(m_values[139].content))->push_back(buffer->getFloat()); // StartupBoost
+        (static_cast<std::vector<float> *>(m_values[139].content))->push_back(buffer->getFloat()); // StartupTime
     }
 
     size = buffer->getUInt32();
     (static_cast<std::vector<float> *>(m_values[140].content))->clear();
     for (unsigned i = 0; i < size; i++) {
-        (static_cast<std::vector<float> *>(m_values[140].content))->push_back(buffer->getFloat()); // StartupEngineForce
+        (static_cast<std::vector<float> *>(m_values[140].content))->push_back(buffer->getFloat()); // StartupBoost
     }
-    *(static_cast<float *>(m_values[141].content)) = buffer->getFloat(); // StartupDuration
-    *(static_cast<float *>(m_values[142].content)) = buffer->getFloat(); // StartupFadeOutTime
-    *(static_cast<float *>(m_values[143].content)) = buffer->getFloat(); // RescueDuration
-    *(static_cast<float *>(m_values[144].content)) = buffer->getFloat(); // RescueVertOffset
-    *(static_cast<float *>(m_values[145].content)) = buffer->getFloat(); // RescueHeight
-    *(static_cast<float *>(m_values[146].content)) = buffer->getFloat(); // ExplosionDuration
-    *(static_cast<float *>(m_values[147].content)) = buffer->getFloat(); // ExplosionRadius
-    *(static_cast<float *>(m_values[148].content)) = buffer->getFloat(); // ExplosionInvulnerabilityTime
-    *(static_cast<float *>(m_values[149].content)) = buffer->getFloat(); // NitroDuration
-    *(static_cast<float *>(m_values[150].content)) = buffer->getFloat(); // NitroEngineForce
-    *(static_cast<float *>(m_values[151].content)) = buffer->getFloat(); // NitroEngineMult
-    *(static_cast<float *>(m_values[152].content)) = buffer->getFloat(); // NitroConsumption
-    *(static_cast<float *>(m_values[153].content)) = buffer->getFloat(); // NitroSmallContainer
-    *(static_cast<float *>(m_values[154].content)) = buffer->getFloat(); // NitroBigContainer
-    *(static_cast<float *>(m_values[155].content)) = buffer->getFloat(); // NitroMaxSpeedIncrease
-    *(static_cast<float *>(m_values[156].content)) = buffer->getFloat(); // NitroMinBurst
-    *(static_cast<float *>(m_values[157].content)) = buffer->getFloat(); // NitroFadeOutTime
-    *(static_cast<float *>(m_values[158].content)) = buffer->getFloat(); // NitroMax
-    *(static_cast<float *>(m_values[159].content)) = buffer->getFloat(); // SlipstreamDurationFactor
-    *(static_cast<float *>(m_values[160].content)) = buffer->getFloat(); // SlipstreamBaseSpeed
-    *(static_cast<float *>(m_values[161].content)) = buffer->getFloat(); // SlipstreamLength
-    *(static_cast<float *>(m_values[162].content)) = buffer->getFloat(); // SlipstreamWidth
-    *(static_cast<float *>(m_values[163].content)) = buffer->getFloat(); // SlipstreamInnerFactor
-    *(static_cast<float *>(m_values[164].content)) = buffer->getFloat(); // SlipstreamMinCollectTime
-    *(static_cast<float *>(m_values[165].content)) = buffer->getFloat(); // SlipstreamMaxCollectTime
-    *(static_cast<float *>(m_values[166].content)) = buffer->getFloat(); // SlipstreamAddPower
-    *(static_cast<float *>(m_values[167].content)) = buffer->getFloat(); // SlipstreamMinSpeed
-    *(static_cast<float *>(m_values[168].content)) = buffer->getFloat(); // SlipstreamMaxSpeedIncrease
-    *(static_cast<float *>(m_values[169].content)) = buffer->getFloat(); // SlipstreamFadeOutTime
-    *(static_cast<bool *>(m_values[170].content)) = buffer->getUInt8(); // SkidEnabled
-    buffer->decodeString32L((static_cast<std::string *>(m_values[171].content))); // SkidMode
-    *(static_cast<float *>(m_values[172].content)) = buffer->getFloat(); // SkidIncrease
-    *(static_cast<float *>(m_values[173].content)) = buffer->getFloat(); // SkidDecrease
-    *(static_cast<float *>(m_values[174].content)) = buffer->getFloat(); // SkidMax
-    *(static_cast<float *>(m_values[175].content)) = buffer->getFloat(); // SkidTimeTillMax
-    *(static_cast<float *>(m_values[176].content)) = buffer->getFloat(); // SkidSlowdown
-    *(static_cast<float *>(m_values[177].content)) = buffer->getFloat(); // SkidFadeIn
-    *(static_cast<float *>(m_values[178].content)) = buffer->getFloat(); // SkidFadeOut
-    *(static_cast<float *>(m_values[179].content)) = buffer->getFloat(); // SkidVisual
-    *(static_cast<float *>(m_values[180].content)) = buffer->getFloat(); // SkidVisualTime
-    *(static_cast<float *>(m_values[181].content)) = buffer->getFloat(); // SkidRevertVisualTime
-    *(static_cast<float *>(m_values[182].content)) = buffer->getFloat(); // SkidMinSpeed
 
     size = buffer->getUInt32();
-    (static_cast<std::vector<float> *>(m_values[183].content))->clear();
+    (static_cast<std::vector<float> *>(m_values[141].content))->clear();
     for (unsigned i = 0; i < size; i++) {
-        (static_cast<std::vector<float> *>(m_values[183].content))->push_back(buffer->getFloat()); // SkidTimeTillBonus
+        (static_cast<std::vector<float> *>(m_values[141].content))->push_back(buffer->getFloat()); // StartupEngineForce
     }
+    *(static_cast<float *>(m_values[142].content)) = buffer->getFloat(); // StartupDuration
+    *(static_cast<float *>(m_values[143].content)) = buffer->getFloat(); // StartupFadeOutTime
+    *(static_cast<float *>(m_values[144].content)) = buffer->getFloat(); // RescueDuration
+    *(static_cast<float *>(m_values[145].content)) = buffer->getFloat(); // RescueVertOffset
+    *(static_cast<float *>(m_values[146].content)) = buffer->getFloat(); // RescueHeight
+    *(static_cast<float *>(m_values[147].content)) = buffer->getFloat(); // ExplosionDuration
+    *(static_cast<float *>(m_values[148].content)) = buffer->getFloat(); // ExplosionRadius
+    *(static_cast<float *>(m_values[149].content)) = buffer->getFloat(); // ExplosionInvulnerabilityTime
+    *(static_cast<float *>(m_values[150].content)) = buffer->getFloat(); // NitroDuration
+    *(static_cast<float *>(m_values[151].content)) = buffer->getFloat(); // NitroEngineForce
+    *(static_cast<float *>(m_values[152].content)) = buffer->getFloat(); // NitroEngineMult
+    *(static_cast<float *>(m_values[153].content)) = buffer->getFloat(); // NitroConsumption
+    *(static_cast<float *>(m_values[154].content)) = buffer->getFloat(); // NitroSmallContainer
+    *(static_cast<float *>(m_values[155].content)) = buffer->getFloat(); // NitroBigContainer
+    *(static_cast<float *>(m_values[156].content)) = buffer->getFloat(); // NitroMaxSpeedIncrease
+    *(static_cast<float *>(m_values[157].content)) = buffer->getFloat(); // NitroMinBurst
+    *(static_cast<float *>(m_values[158].content)) = buffer->getFloat(); // NitroFadeOutTime
+    *(static_cast<float *>(m_values[159].content)) = buffer->getFloat(); // NitroMax
+    *(static_cast<float *>(m_values[160].content)) = buffer->getFloat(); // SlipstreamDurationFactor
+    *(static_cast<float *>(m_values[161].content)) = buffer->getFloat(); // SlipstreamBaseSpeed
+    *(static_cast<float *>(m_values[162].content)) = buffer->getFloat(); // SlipstreamLength
+    *(static_cast<float *>(m_values[163].content)) = buffer->getFloat(); // SlipstreamWidth
+    *(static_cast<float *>(m_values[164].content)) = buffer->getFloat(); // SlipstreamInnerFactor
+    *(static_cast<float *>(m_values[165].content)) = buffer->getFloat(); // SlipstreamMinCollectTime
+    *(static_cast<float *>(m_values[166].content)) = buffer->getFloat(); // SlipstreamMaxCollectTime
+    *(static_cast<float *>(m_values[167].content)) = buffer->getFloat(); // SlipstreamAddPower
+    *(static_cast<float *>(m_values[168].content)) = buffer->getFloat(); // SlipstreamMinSpeed
+    *(static_cast<float *>(m_values[169].content)) = buffer->getFloat(); // SlipstreamMaxSpeedIncrease
+    *(static_cast<float *>(m_values[170].content)) = buffer->getFloat(); // SlipstreamFadeOutTime
+    *(static_cast<bool *>(m_values[171].content)) = buffer->getUInt8(); // SkidEnabled
+    buffer->decodeString32L((static_cast<std::string *>(m_values[172].content))); // SkidMode
+    *(static_cast<float *>(m_values[173].content)) = buffer->getFloat(); // SkidIncrease
+    *(static_cast<float *>(m_values[174].content)) = buffer->getFloat(); // SkidDecrease
+    *(static_cast<float *>(m_values[175].content)) = buffer->getFloat(); // SkidMax
+    *(static_cast<float *>(m_values[176].content)) = buffer->getFloat(); // SkidTimeTillMax
+    *(static_cast<float *>(m_values[177].content)) = buffer->getFloat(); // SkidSlowdown
+    *(static_cast<float *>(m_values[178].content)) = buffer->getFloat(); // SkidFadeIn
+    *(static_cast<float *>(m_values[179].content)) = buffer->getFloat(); // SkidFadeOut
+    *(static_cast<float *>(m_values[180].content)) = buffer->getFloat(); // SkidVisual
+    *(static_cast<float *>(m_values[181].content)) = buffer->getFloat(); // SkidVisualTime
+    *(static_cast<float *>(m_values[182].content)) = buffer->getFloat(); // SkidRevertVisualTime
+    *(static_cast<float *>(m_values[183].content)) = buffer->getFloat(); // SkidMinSpeed
 
     size = buffer->getUInt32();
     (static_cast<std::vector<float> *>(m_values[184].content))->clear();
     for (unsigned i = 0; i < size; i++) {
-        (static_cast<std::vector<float> *>(m_values[184].content))->push_back(buffer->getFloat()); // SkidBonusSpeed
+        (static_cast<std::vector<float> *>(m_values[184].content))->push_back(buffer->getFloat()); // SkidTimeTillBonus
     }
 
     size = buffer->getUInt32();
     (static_cast<std::vector<float> *>(m_values[185].content))->clear();
     for (unsigned i = 0; i < size; i++) {
-        (static_cast<std::vector<float> *>(m_values[185].content))->push_back(buffer->getFloat()); // SkidBonusTime
+        (static_cast<std::vector<float> *>(m_values[185].content))->push_back(buffer->getFloat()); // SkidBonusSpeed
     }
 
     size = buffer->getUInt32();
     (static_cast<std::vector<float> *>(m_values[186].content))->clear();
     for (unsigned i = 0; i < size; i++) {
-        (static_cast<std::vector<float> *>(m_values[186].content))->push_back(buffer->getFloat()); // SkidFadeOutTime
+        (static_cast<std::vector<float> *>(m_values[186].content))->push_back(buffer->getFloat()); // SkidBonusTime
     }
 
     size = buffer->getUInt32();
     (static_cast<std::vector<float> *>(m_values[187].content))->clear();
     for (unsigned i = 0; i < size; i++) {
-        (static_cast<std::vector<float> *>(m_values[187].content))->push_back(buffer->getFloat()); // SkidBonusForce
+        (static_cast<std::vector<float> *>(m_values[187].content))->push_back(buffer->getFloat()); // SkidFadeOutTime
     }
-    *(static_cast<float *>(m_values[188].content)) = buffer->getFloat(); // SkidPhysicalJumpTime
-    *(static_cast<float *>(m_values[189].content)) = buffer->getFloat(); // SkidGraphicalJumpTime
-    *(static_cast<float *>(m_values[190].content)) = buffer->getFloat(); // SkidPostSkidRotateFactor
-    *(static_cast<float *>(m_values[191].content)) = buffer->getFloat(); // SkidReduceTurnMin
-    *(static_cast<float *>(m_values[192].content)) = buffer->getFloat(); // SkidReduceTurnMax
-    *(static_cast<float *>(m_values[193].content)) = buffer->getFloat(); // ItemBonusBoxCap
+
+    size = buffer->getUInt32();
+    (static_cast<std::vector<float> *>(m_values[188].content))->clear();
+    for (unsigned i = 0; i < size; i++) {
+        (static_cast<std::vector<float> *>(m_values[188].content))->push_back(buffer->getFloat()); // SkidBonusForce
+    }
+    *(static_cast<float *>(m_values[189].content)) = buffer->getFloat(); // SkidPhysicalJumpTime
+    *(static_cast<float *>(m_values[190].content)) = buffer->getFloat(); // SkidGraphicalJumpTime
+    *(static_cast<float *>(m_values[191].content)) = buffer->getFloat(); // SkidPostSkidRotateFactor
+    *(static_cast<float *>(m_values[192].content)) = buffer->getFloat(); // SkidReduceTurnMin
+    *(static_cast<float *>(m_values[193].content)) = buffer->getFloat(); // SkidReduceTurnMax
+    *(static_cast<float *>(m_values[194].content)) = buffer->getFloat(); // ItemBonusBoxCap
 
     /* <characteristics-end ccnetworkrestore> */
 }

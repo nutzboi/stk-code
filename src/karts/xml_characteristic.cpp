@@ -667,6 +667,8 @@ void XmlCharacteristic::load(const XMLNode *node)
             &m_values[TYRES_TOPSPEED_CONSTANT]);
         sub_node->get("compound-number",
             &m_values[TYRES_COMPOUND_NUMBER]);
+        sub_node->get("low-grip-topspeed-mult",
+            &m_values[TYRES_LOW_GRIP_TOPSPEED_MULT]);
         sub_node->get("low-grip-engineforce-mult",
             &m_values[TYRES_LOW_GRIP_ENGINEFORCE_MULT]);
         sub_node->get("low-grip-turning-mult",

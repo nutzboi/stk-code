@@ -80,6 +80,7 @@ private:
     float m_c_topspeed_constant;
 
     float m_c_offroad_factor;
+    float m_c_low_grip_topspeed_mult;
     float m_c_low_grip_engineforce_mult;
     float m_c_low_grip_turning_mult;
     float m_c_rolling_resistance;
@@ -143,7 +144,7 @@ public:
 
     float degEngineForce(float val, float slowdown);
     float degTurnRadius(float val, float slowdown);
-    float degTopSpeed(float val);
+    float degTopSpeed(float val, float slowdown);
     void saveState(BareNetworkString *buffer);
     void rewindTo(BareNetworkString *buffer);
 

@@ -20,6 +20,7 @@
 #include "karts/tyres.hpp"
 
 #include "config/stk_config.hpp"
+#include "graphics/material.hpp"
 #include "karts/kart.hpp"
 #include "karts/kart_properties.hpp"
 #include "karts/kart_properties_manager.hpp"
@@ -68,7 +69,8 @@ MaxSpeed::MaxSpeed(Kart *kart)
  */
 void MaxSpeed::reset()
 {
-    m_current_max_speed = m_kart->m_tyres->degTopSpeed(m_kart->getKartProperties()->getEngineMaxSpeed());
+    float slowdown_fraction = m_kart->getMaterial() ? m_kart->getMaterial()->getMaxSpeedFraction() : 1.0f;
+    m_current_max_speed = m_kart->m_tyres->degTopSpeed(m_kart->getKartProperties()->getEngineMaxSpeed(), slowdown_fraction);
     m_min_speed         = -1.0f;
     m_last_triggered_skid_level = 0;
 
@@ -446,7 +448,8 @@ void MaxSpeed::update(int ticks)
     }
 
     m_add_engine_force  = 0;
-    m_current_max_speed = m_kart->m_tyres->degTopSpeed(m_kart->getKartProperties()->getEngineMaxSpeed());
+    float slowdown_fraction = m_kart->getMaterial() ? m_kart->getMaterial()->getMaxSpeedFraction() : 1.0f;
+    m_current_max_speed = m_kart->m_tyres->degTopSpeed(m_kart->getKartProperties()->getEngineMaxSpeed(), slowdown_fraction);
 
     // Then add the speed increase from each category
     // ----------------------------------------------

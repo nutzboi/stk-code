@@ -307,6 +307,8 @@ AbstractCharacteristic::ValueType AbstractCharacteristic::getType(
         return TYPE_FLOAT_VECTOR;
     case TYRES_COMPOUND_NUMBER:
         return TYPE_FLOAT;
+    case TYRES_LOW_GRIP_TOPSPEED_MULT:
+        return TYPE_FLOAT_VECTOR;
     case TYRES_LOW_GRIP_ENGINEFORCE_MULT:
         return TYPE_FLOAT_VECTOR;
     case TYRES_LOW_GRIP_TURNING_MULT:
@@ -715,6 +717,8 @@ std::string AbstractCharacteristic::getName(CharacteristicType type)
         return "TYRES_TOPSPEED_CONSTANT";
     case TYRES_COMPOUND_NUMBER:
         return "TYRES_COMPOUND_NUMBER";
+    case TYRES_LOW_GRIP_TOPSPEED_MULT:
+        return "TYRES_LOW_GRIP_TOPSPEED_MULT";
     case TYRES_LOW_GRIP_ENGINEFORCE_MULT:
         return "TYRES_LOW_GRIP_ENGINEFORCE_MULT";
     case TYRES_LOW_GRIP_TURNING_MULT:
@@ -2374,6 +2378,18 @@ float AbstractCharacteristic::getTyresCompoundNumber() const
                     getName(TYRES_COMPOUND_NUMBER).c_str());
     return result;
 }  // getTyresCompoundNumber
+
+// ----------------------------------------------------------------------------
+std::vector<float> AbstractCharacteristic::getTyresLowGripTopspeedMult() const
+{
+    std::vector<float> result;
+    bool is_set = false;
+    process(TYRES_LOW_GRIP_TOPSPEED_MULT, &result, &is_set);
+    if (!is_set)
+        Log::fatal("AbstractCharacteristic", "Can't get characteristic %s",
+                    getName(TYRES_LOW_GRIP_TOPSPEED_MULT).c_str());
+    return result;
+}  // getTyresLowGripTopspeedMult
 
 // ----------------------------------------------------------------------------
 std::vector<float> AbstractCharacteristic::getTyresLowGripEngineforceMult() const

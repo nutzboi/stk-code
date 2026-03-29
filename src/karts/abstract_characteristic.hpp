@@ -243,6 +243,7 @@ public:
         TYRES_TURNING_CONSTANT,
         TYRES_TOPSPEED_CONSTANT,
         TYRES_COMPOUND_NUMBER,
+        TYRES_LOW_GRIP_TOPSPEED_MULT,
         TYRES_LOW_GRIP_ENGINEFORCE_MULT,
         TYRES_LOW_GRIP_TURNING_MULT,
         TYRES_OFFROAD_FACTOR,
@@ -509,6 +510,7 @@ public:
     std::vector<float> getTyresTurningConstant() const;
     std::vector<float> getTyresTopspeedConstant() const;
     float getTyresCompoundNumber() const;
+    std::vector<float> getTyresLowGripTopspeedMult() const;
     std::vector<float> getTyresLowGripEngineforceMult() const;
     std::vector<float> getTyresLowGripTurningMult() const;
     std::vector<float> getTyresOffroadFactor() const;

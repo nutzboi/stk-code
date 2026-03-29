@@ -324,12 +324,15 @@ float Tyres::degTurnRadius(float initial_radius, float slowdown) {
     }
 }
 
-float Tyres::degTopSpeed(float initial_topspeed) {
+float Tyres::degTopSpeed(float initial_topspeed, float slowdown) {
     float decrease_per_liter = m_kart->getKartProperties()->getFuelMaxSpeedDecrease();
     if (m_c_fuel_weight_virtual < 0.001f && m_c_fuel_weight_real < 0.001f)
         decrease_per_liter = 0.0f; //no fuel or electric mode, fuel does not affect speed
     float percent = m_current_life_traction/m_c_max_life_traction * 100.0f;
     float factor = m_c_response_curve_topspeed.get(percent)*m_c_topspeed_constant;
+    if (slowdown > 0.79f && slowdown < 0.99f) // low grip mode
+        factor *= m_c_low_grip_engineforce_mult;
+
     float bonus_topspeed = (initial_topspeed+m_c_initial_bonus_add_topspeed)*m_c_initial_bonus_mult_topspeed;
     if (m_c_do_substractive_topspeed && m_current_fuel > 0.1f) {
         return bonus_topspeed - factor - decrease_per_liter*m_current_fuel;
