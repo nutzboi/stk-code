@@ -292,7 +292,7 @@ void Tyres::applyCrashPenalty(void) {
     }
 }
 
-float Tyres::degEngineForce(float initial_force) {
+float Tyres::degEngineForce(float initial_force, float slowdown) {
     float percent = m_current_life_traction/m_c_max_life_traction * 100.0f;
     float factor = m_c_response_curve_traction.get(percent)*m_c_traction_constant;
     float bonus_traction = (initial_force+m_c_initial_bonus_add_traction)*m_c_initial_bonus_mult_traction;
@@ -303,7 +303,7 @@ float Tyres::degEngineForce(float initial_force) {
     }
 }
 
-float Tyres::degTurnRadius(float initial_radius) {
+float Tyres::degTurnRadius(float initial_radius, float slowdown) {
     float increase_per_liter = m_kart->getKartProperties()->getFuelTurnRadiusIncrease();
     if (m_c_fuel_weight_virtual < 0.001f && m_c_fuel_weight_real < 0.001f)
         increase_per_liter = 0.0f; //no fuel or electric mode, fuel does not affect turning

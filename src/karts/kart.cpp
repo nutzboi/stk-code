@@ -2132,10 +2132,14 @@ void Kart::update(int ticks)
             //if (m_max_speed->isSpeedIncreaseActive(MaxSpeed::MS_INCREASE_ZIPPER) > 0)
             //    terrain_speed_fraction += (1.0f - terrain_speed_fraction)*0.5f;
             // This feature was disabled for STK: Tyre Mod Edition
-            if (terrain_speed_fraction >= 1.01f || terrain_speed_fraction <= 0.99f) {
+
+            if (terrain_speed_fraction <= 0.79f || terrain_speed_fraction >= 1.01f) {
                 m_max_speed->setSlowdown(MaxSpeed::MS_DECREASE_TERRAIN,
                                          terrain_speed_fraction,
                                          material->getSlowDownTicks()    );
+            } else if (terrain_speed_fraction > 0.79f && terrain_speed_fraction < 0.99f) {  // terrain speed fraction is in the range for low grip mode
+                m_max_speed->setSlowdown(MaxSpeed::MS_DECREASE_TERRAIN,
+                                         terrain_speed_fraction, material->getSlowDownTicks(), 0);
             } else { // terrain speed fraction is practically 1, don't do anything
                 m_max_speed->setSlowdown(MaxSpeed::MS_DECREASE_TERRAIN,
                                          terrain_speed_fraction, material->getSlowDownTicks(), 0);
@@ -3378,8 +3382,10 @@ void Kart::updatePhysics(int ticks)
 
     if (brake_pressure > 1.0f) brake_pressure = 1.0f;
 
+    float slowdown_fraction = getMaterial() ? getMaterial()->getMaxSpeedFraction() : 1.0f;
+    bool is_zippered = m_max_speed->isSpeedIncreaseActive(MaxSpeed::MS_INCREASE_ZIPPER) > 0;
 
-    float final_steering = m_tyres->degTurnRadius(steering);
+    float final_steering = m_tyres->degTurnRadius(steering, slowdown_fraction);
     // interpolate based on brake pressure, which is in range [0, 1]
     float brake_mult = 1.0f + brake_pressure*(getKartProperties()->getTurnBrakeMultiplier() - 1.0f);
 
@@ -3446,9 +3452,6 @@ void Kart::updatePhysics(int ticks)
         }
     }
 
-    bool do_slowdown = getMaterial() && getMaterial()->getMaxSpeedFraction();
-    bool is_zippered = m_max_speed->isSpeedIncreaseActive(MaxSpeed::MS_INCREASE_ZIPPER) > 0;
-
     /* 0.872281 is pidgin's wheelbase.
     We divide by the kart's wheelbase because the turn angle
     has been previously multiplied by it in getMaxSteerAngle(),
@@ -3459,7 +3462,7 @@ void Kart::updatePhysics(int ticks)
     unfair for a kart to degrade more simply because it is longer (as it is not really an STK mechanic)*/
     float tyres_steering = 0.872281*(fabs(steering)/(float)kp->getWheelBase());
     if (stk_config->m_tme_enable_tyre_degradation)
-        m_tyres->computeDegradation(dt, isOnGround(), m_is_skidding, skid_level, is_zippered, do_slowdown, brake_pressure, tyres_steering, m_controls.getAccel());
+        m_tyres->computeDegradation(dt, isOnGround(), m_is_skidding, skid_level, is_zippered, slowdown_fraction, brake_pressure, tyres_steering, m_controls.getAccel());
     updateSliding();
 
     // Cap speed if necessary
@@ -3701,7 +3704,10 @@ void Kart::updateEnginePowerAndBrakes(int ticks)
 {
     updateWeight();
     updateNitro(ticks);
-    float engine_power = m_tyres->degEngineForce(getActualWheelForce());
+
+    float slowdown_fraction = getMaterial() ? getMaterial()->getMaxSpeedFraction() : 1.0f;
+
+    float engine_power = m_tyres->degEngineForce(getActualWheelForce(), slowdown_fraction);
 
 
     // apply nitro boost if relevant

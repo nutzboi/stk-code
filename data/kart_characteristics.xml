@@ -124,7 +124,7 @@
                initial-bonus-mult-traction="1 1 1 1 1 1 1 1 1 1"
                initial-bonus-add-topspeed="0 0 0 0 0 0 0 0 0 0"
                initial-bonus-mult-topspeed="1 1 1 1 1 1 1 1 1 1"
-               offroad-factor="5 5 5 5 5 5 5 5 5 5"
+               offroad-factor="1.3 1.3 1.3 1.3 1.3 1.3 1.3 1.3 1.3 1.3"
                skid-factor-partial="3 3 3 3 3 3 3 3 3 3"
                skid-factor-full="3 3 3 3 3 3 3 3 3 3"
                rolling-resistance="0.02 0.02 0.02 0.02 0.02 0.02 0.02 0.02 0.02 0.02"

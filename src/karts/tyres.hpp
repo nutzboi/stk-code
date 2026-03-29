@@ -139,9 +139,9 @@ public:
 
     void applyCrashPenalty(void);
 
-    float degEngineForce(float);
-    float degTopSpeed(float);
-    float degTurnRadius(float);
+    float degEngineForce(float val, float slowdown);
+    float degTurnRadius(float val, float slowdown);
+    float degTopSpeed(float val);
     void saveState(BareNetworkString *buffer);
     void rewindTo(BareNetworkString *buffer);
 
