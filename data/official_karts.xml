@@ -7,13 +7,14 @@
     <kart name="gavroche" type="medium" width="0.77" height="0.614" length="1.272" gravity-shift="0 0.307 0"/>
     <kart name="gnu" type="medium" width="0.77" height="0.949" length="1.345" gravity-shift="0 0.4035 0"/>
     <kart name="hexley" type="light" width="0.611" height="0.858" length="1.608" gravity-shift="0 0.429 0"/>
+    <kart name="kartillac-v-series-r" type="hypercar" width="1.02" height="0.564" length="1.849" gravity-shift="0 0.282 0"/>
     <kart name="kiki" type="light" width="0.866" height="0.974" length="1.227" gravity-shift="0 0.3681 0"/>
     <kart name="konqi" type="medium" width="0.931" height="0.857" length="1.588" gravity-shift="0 0.4285 0"/>
     <kart name="nolok" type="medium" width="0.725" height="0.645" length="1.413" gravity-shift="0 0.3225 0"/>
     <kart name="pidgin" type="heavy" width="0.781" height="0.627" length="1.243" gravity-shift="0 0.3135 0"/>
     <kart name="puffy" type="heavy" width="1.109" height="0.621" length="1.573" gravity-shift="0 0.3105 0"/>
     <kart name="sara_the_racer" type="light" width="0.459" height="0.989" length="1.152" gravity-shift="0 0.3456 0"/>
-    <kart name="sara_the_wizard" type="medium" width="0.5" height="0.959" length="1.22" gravity-shift="0 0.366 0"/>
+    <kart name="sara_the_wizard" type="medium" width="0.5" height="0.958" length="1.22" gravity-shift="0 0.366 0"/>
     <kart name="suzanne" type="medium" width="0.935" height="0.645" length="1.405" gravity-shift="0 0.3225 0"/>
     <kart name="tux" type="medium" width="0.821" height="0.675" length="1.437" gravity-shift="0 0.3375 0"/>
     <kart name="wilber" type="light" width="0.837" height="0.871" length="1.715" gravity-shift="0 0.4355 0"/>
