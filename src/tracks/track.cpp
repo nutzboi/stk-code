@@ -206,12 +206,23 @@ Track::~Track()
 #endif
 }   // ~Track
 
-bool Track::hasPitStops() const {
-    const XMLNode *overlay_node = TrackManager::get()->getOverlayDB()->get(getIdent());
-    if (overlay_node == NULL) {
-        return isInGroup("TME");
+bool Track::hasPitStops() {
+    if (m_internal_pit_stop_support == -1) {
+        if (isInGroup("TME")) {
+            m_internal_pit_stop_support = 1;
+            return true;
+        } else {
+            const XMLNode *overlay_node = TrackManager::get()->getOverlayDB()->get(getIdent());
+            if (overlay_node == NULL) {
+                m_internal_pit_stop_support = 0;
+                return false;
+            } else {
+                m_internal_pit_stop_support = 1;
+                return true;
+            }
+        }
     } else {
-        return true;
+        return m_internal_pit_stop_support;
     }
 }
 
@@ -219,7 +230,7 @@ bool Track::hasPitStops() const {
 /** A < comparison of tracks. This is used to sort the tracks when displaying
  *  them in the gui.
  */
-bool Track::operator<(const Track &other) const
+bool Track::operator<(Track &other)
 {
     PlayerProfile *p = PlayerManager::getCurrentPlayer();
     bool this_is_locked = p->isLocked(getIdent());

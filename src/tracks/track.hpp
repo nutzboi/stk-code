@@ -272,6 +272,8 @@ private:
      *  on overworld, where karts have been pushed out of 'bubbles' . */
     bool                     m_enable_push_back;
 
+    int m_internal_pit_stop_support = -1;
+
     /** The type of sky to be used for the track. */
     enum {SKY_NONE, SKY_BOX,
           SKY_COLOR}          m_sky_type;
@@ -485,7 +487,7 @@ public:
     //-----------------------------------------------------------------------------
     core::stringw      getSortName() const;
     bool               isInGroup(const std::string &group_name) const;
-    bool               hasPitStops() const;
+    bool               hasPitStops();
     const core::vector3df& getSunRotation();
     void               handleExplosion(const Vec3 &pos,
                                        const PhysicalObject *mp,
@@ -738,7 +740,7 @@ public:
     void setActualNumberOfLaps(unsigned int laps)
                                          { m_actual_number_of_laps = laps; }
     // ------------------------------------------------------------------------
-    bool operator<(const Track &other) const;
+    bool operator<(Track &other);
     // ------------------------------------------------------------------------
     /** Adds mesh to cleanup list */
     void addCachedMesh(scene::IMesh* mesh) { m_all_cached_meshes.push_back(mesh); }
