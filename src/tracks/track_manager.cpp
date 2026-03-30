@@ -21,6 +21,7 @@
 #include "config/stk_config.hpp"
 #include "graphics/irr_driver.hpp"
 #include "io/file_manager.hpp"
+#include "io/xml_node.hpp"
 #include "tracks/track.hpp"
 
 #include <algorithm>
@@ -154,11 +155,41 @@ std::vector<std::string> TrackManager::getAllTrackIdentifiers()
     return all;
 }   // getAllTrackNames
 
+void TrackManager::loadTrackOverlay() {
+    if (overlay_db.root != NULL) {
+        Log::fatal("TrackManager::loadTrackOverlay",
+                "Track overlay file loaded twice. Aborting.");
+        return;
+    }
+
+    std::string filename = file_manager->getAsset("track_overlay_database.xml");
+    /* Format:
+        <overlay>
+            <hacienda>
+                <small-nitro x="-27.07802" y="-6.409512" z="128.547867" />
+                ...
+            </hacienda>
+            <golem-bight>
+                <small-nitro x="-27.07802" y="-6.409512" z="128.547867" />
+                ...
+            </golem-bight>
+        <overlay/>
+    */
+    overlay_db.root = file_manager->createXMLTree(filename);
+    if (!overlay_db.root || overlay_db.root->getName() != "overlay") {
+        delete overlay_db.root;
+        Log::fatal("TrackManager::loadTrackOverlay",
+                "Could not read track overlay file '%s'. Aborting.", filename.c_str());
+        return;
+    }
+}
+
 //-----------------------------------------------------------------------------
 /** Loads all tracks from the track directory (data/track).
  */
 void TrackManager::loadTrackList()
 {
+    loadTrackOverlay();
     m_all_track_dirs.clear();
 
     m_track_group_names.clear();

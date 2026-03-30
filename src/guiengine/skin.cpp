@@ -2546,13 +2546,6 @@ void Skin::drawBadgeOn(const Widget* widget, const core::recti& rect)
         float max_icon_size = 0.5f; // Lock badge can be quite big
         doDrawBadge(texture, rect, max_icon_size, true);
     }
-    if (widget->m_badges & OK_BADGE)
-    {
-        video::ITexture* texture = irr_driver->getTexture(FileManager::GUI_ICON,
-                                                          "green_check.png");
-        float max_icon_size = 0.35f;
-        doDrawBadge(texture, rect, max_icon_size, true);
-    }
     if (widget->m_badges & BAD_BADGE)
     {
         video::ITexture* texture = irr_driver->getTexture(FileManager::GUI_ICON,
@@ -2616,6 +2609,13 @@ void Skin::drawBadgeOn(const Widget* widget, const core::recti& rect)
                                                           "heart.png");
         doDrawBadge(texture, rect, max_icon_size, false);
     }
+    if (widget->m_badges & TYRE_BADGE)
+    {
+        float max_icon_size = 0.43f;
+        video::ITexture* texture = irr_driver->getTexture(FileManager::GUI_ICON,
+                                                          "android/drift.png");
+        doDrawBadge(texture, rect, max_icon_size, true);
+    }
     if (widget->m_badges & REDDOT_BADGE)
     {
         float max_icon_size = 0.43f;
@@ -2623,6 +2623,16 @@ void Skin::drawBadgeOn(const Widget* widget, const core::recti& rect)
                                                           "red_dot.png");
         doDrawBadge(texture, rect, max_icon_size, false);
     }
+
+    // OK BADGE will have the highest priority
+    if (widget->m_badges & OK_BADGE)
+    {
+        video::ITexture* texture = irr_driver->getTexture(FileManager::GUI_ICON,
+                                                          "green_check.png");
+        float max_icon_size = 0.35f;
+        doDrawBadge(texture, rect, max_icon_size, true);
+    }
+
 }   // drawBadgeOn
 
 // -----------------------------------------------------------------------------

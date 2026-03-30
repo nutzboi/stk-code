@@ -2667,6 +2667,8 @@ int main(int argc, char *argv[])
 
     RichPresenceNS::RichPresence::destroy();
 
+    TrackManager::get().reset();
+
 #ifdef DEBUG
     MemoryLeaks::checkForLeaks();
 #endif

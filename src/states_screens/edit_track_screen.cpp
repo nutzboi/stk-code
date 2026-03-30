@@ -258,13 +258,13 @@ void EditTrackScreen::loadTrackList()
         if (PlayerManager::getCurrentPlayer()->isFavoriteTrack(curr->getIdent()))
         {
             tracks_widget->addItem(curr->getName(), curr->getIdent(),
-                curr->getScreenshotFile(), HEART_BADGE,
+                curr->getScreenshotFile(), (curr->hasPitStops() ? TYRE_BADGE : 0) | HEART_BADGE,
                 IconButtonWidget::ICON_PATH_TYPE_ABSOLUTE);
         }
         else
         {
             tracks_widget->addItem(curr->getName(), curr->getIdent(),
-                curr->getScreenshotFile(), 0,
+                curr->getScreenshotFile(), (curr->hasPitStops() ? TYRE_BADGE : 0) | 0,
                 IconButtonWidget::ICON_PATH_TYPE_ABSOLUTE);
         }
     }

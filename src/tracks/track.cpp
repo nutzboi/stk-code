@@ -206,6 +206,15 @@ Track::~Track()
 #endif
 }   // ~Track
 
+bool Track::hasPitStops() const {
+    const XMLNode *overlay_node = TrackManager::get()->getOverlayDB()->get(getIdent());
+    if (overlay_node == NULL) {
+        return isInGroup("TME");
+    } else {
+        return true;
+    }
+}
+
 //-----------------------------------------------------------------------------
 /** A < comparison of tracks. This is used to sort the tracks when displaying
  *  them in the gui.
@@ -217,13 +226,26 @@ bool Track::operator<(const Track &other) const
     bool other_is_locked = p->isLocked(other.getIdent());
     bool this_is_favorite = p->isFavoriteTrack(getIdent());
     bool other_is_favorite = p->isFavoriteTrack(other.getIdent());
-    // Locked tracks cannot be favorite, so favorites < normal < locked
-    if (this_is_favorite != other_is_favorite)
-        return this_is_favorite;
-    else if(this_is_locked != other_is_locked)
-        return other_is_locked;
-    else
-        return getSortName() < other.getSortName();
+    bool this_has_pitstops = hasPitStops();
+    bool other_has_pitstops = other.hasPitStops();
+    // Locked tracks cannot be favorite, so favorites < pitstops < normal < locked
+    if (this_is_favorite && !other_is_favorite)
+        return true;
+    else if (!this_is_favorite && other_is_favorite)
+        return false;
+
+    if (this_has_pitstops && !other_has_pitstops)
+        return true;
+    else if (!this_has_pitstops && other_has_pitstops)
+        return false;
+
+    if (!this_is_locked && other_is_locked)
+        return true;
+    else if (this_is_locked && !other_is_locked)
+        return false;
+
+
+    return getSortName() < other.getSortName();
 }   // operator<
 
 //-----------------------------------------------------------------------------
@@ -262,7 +284,7 @@ core::stringw Track::getSortName() const
 /** Returns true if this track belongs to the specified track group.
  *  \param group_name Group name to test for.
  */
-bool Track::isInGroup(const std::string &group_name)
+bool Track::isInGroup(const std::string &group_name) const
 {
     return std::find(m_groups.begin(), m_groups.end(), group_name)
         != m_groups.end();
@@ -1873,31 +1895,6 @@ static void recursiveUpdatePhysics(std::vector<TrackObject*>& tos)
     }
 }   // recursiveUpdatePhysics
 
-static const XMLNode *loadTrackOverlay() {
-    std::string filename = file_manager->getAsset("track_overlay_database.xml");
-    /* Format:
-        <overlay>
-            <hacienda>
-                <small-nitro x="-27.07802" y="-6.409512" z="128.547867" />
-                ...
-            </hacienda>
-            <golem-bight>
-                <small-nitro x="-27.07802" y="-6.409512" z="128.547867" />
-                ...
-            </golem-bight>
-        <overlay/>
-    */
-    auto root = file_manager->createXMLTree(filename);
-    if (!root || root->getName() != "overlay") {
-        delete root;
-        Log::info("Track::loadTrackModel",
-                "Could not read track overlay file '%s'. Aborting.", filename.c_str());
-        return NULL;
-    }
-
-    return root;
-}
-
 // ----------------------------------------------------------------------------
 /** This function load the actual scene, i.e. all parts of the track,
  *  animations, items, ... It  is called from world during initialisation.
@@ -2346,17 +2343,8 @@ void Track::loadTrackModel(bool reverse_track, unsigned int mode_id)
 
     if (!arena_random_item_created)
     {
-        const XMLNode *overlay_root = loadTrackOverlay();
-        const XMLNode *overlay_nodes = NULL;
-        if (overlay_root != NULL) {
-            for (unsigned int i=0; i<overlay_root->getNumNodes(); i++) {
-                const XMLNode *node = overlay_root->getNode(i);
-                const std::string &name = node->getName();
-                const std::string &track_id = m_ident;
-                if (name == track_id)
-                    overlay_nodes = node;
-            }
-        }
+        const XMLNode *overlay_nodes =
+            TrackManager::get()->getOverlayDB()->get(m_ident);
 
         if (overlay_nodes != NULL) {
             for (unsigned int i=0; i<overlay_nodes->getNumNodes(); i++) {
@@ -2370,9 +2358,6 @@ void Track::loadTrackModel(bool reverse_track, unsigned int mode_id)
                 }
             }   // for i<overlay_nodes->getNumNodes()
         }
-        delete overlay_root;
-        overlay_root = NULL;
-        overlay_nodes = NULL;
 
         for (unsigned int i=0; i<root->getNumNodes(); i++)
         {

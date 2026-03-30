@@ -484,7 +484,8 @@ public:
     core::stringw      getName() const;
     //-----------------------------------------------------------------------------
     core::stringw      getSortName() const;
-    bool               isInGroup(const std::string &group_name);
+    bool               isInGroup(const std::string &group_name) const;
+    bool               hasPitStops() const;
     const core::vector3df& getSunRotation();
     void               handleExplosion(const Vec3 &pos,
                                        const PhysicalObject *mp,

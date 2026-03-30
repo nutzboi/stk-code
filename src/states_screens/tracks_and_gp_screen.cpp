@@ -356,20 +356,20 @@ void TracksAndGPScreen::buildTrackList()
         {
             tracks_widget->addItem(
                 _("Locked: solve active challenges to gain access to more!"),
-                "locked", curr->getScreenshotFile(), LOCKED_BADGE,
+                "locked", curr->getScreenshotFile(), (curr->hasPitStops() ? TYRE_BADGE : 0) | LOCKED_BADGE,
                 IconButtonWidget::ICON_PATH_TYPE_ABSOLUTE);
         }
         else if (PlayerManager::getCurrentPlayer()->isFavoriteTrack(curr->getIdent()))
         {
             tracks_widget->addItem(curr->getName(), curr->getIdent(),
-                curr->getScreenshotFile(), HEART_BADGE,
+                curr->getScreenshotFile(), (curr->hasPitStops() ? TYRE_BADGE : 0) | HEART_BADGE,
                 IconButtonWidget::ICON_PATH_TYPE_ABSOLUTE);
             m_random_track_list.push_back(curr->getIdent());
         }
         else
         {
             tracks_widget->addItem(curr->getName(), curr->getIdent(),
-                curr->getScreenshotFile(), 0,
+                curr->getScreenshotFile(), (curr->hasPitStops() ? TYRE_BADGE : 0) | 0,
                 IconButtonWidget::ICON_PATH_TYPE_ABSOLUTE);
             m_random_track_list.push_back(curr->getIdent());
         }

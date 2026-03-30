@@ -20,6 +20,7 @@
 #define HEADER_TRACK_MANAGER_HPP
 
 #include "config/favorite_status.hpp"
+#include "io/xml_node.hpp"
 
 #include <string>
 #include <vector>
@@ -91,6 +92,33 @@ private:
 public:
                 TrackManager();
                ~TrackManager();
+
+    class OverlayDB {
+    friend TrackManager;
+    protected:
+        XMLNode *root = NULL;
+    public:
+        const XMLNode *get(const std::string &ident) const {
+            if (root == NULL) return NULL;
+            for (unsigned int i=0; i<root->getNumNodes(); i++) {
+                const XMLNode *node = root->getNode(i);
+                const std::string &name = node->getName();
+                if (name == ident)
+                    return node;
+            }
+            return NULL;
+        }
+        ~OverlayDB() {
+            if (root != NULL)
+                delete root;
+        }
+    };
+private:
+    OverlayDB overlay_db;
+    void loadTrackOverlay();
+public:
+
+    const OverlayDB *getOverlayDB() const { return &overlay_db; };
 
     static std::shared_ptr<TrackManager>& get();
     static void removeTrackSearchDirs();
