@@ -63,7 +63,7 @@ jobs:
           unzip ../stk-assets-full.zip > /dev/null
           cd ..
           cd lib
-          wget -q https://github.com/nutzboi/stk-dependencies/releases/download/git/dependencies-android-src.tar.xz
+          wget -q https://github.com/supertuxkart/dependencies/releases/download/preview/dependencies-android-src.tar.xz
           tar xf dependencies-android-src.tar.xz
           rm dependencies-android-src.tar.xz
           cd ..
