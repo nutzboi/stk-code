@@ -875,9 +875,9 @@ void PlayerKartWidget::setSize(const int x, const int y, const int w, const int 
 
         m_kart_stats_w = w/2;
         // There is room for it no matter the resolution and it improves the display.
-        m_kart_stats_h = h*1.2;
+        m_kart_stats_h = h*1.2 - (player_name_h*2.0 + 10);
         m_kart_stats_x = x + w/2;
-        m_kart_stats_y = y;
+        m_kart_stats_y = y + player_name_h*2.0 + 10;
     }
 
     kart_name_x = x;
