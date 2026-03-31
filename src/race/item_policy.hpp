@@ -78,8 +78,7 @@ enum ItemPolicyRules {
     // The "virtual pace car" procedure will let all karts fully unlap.
     IPT_UNLAPPING  =  1 << 11,
 
-    // Joker laps (min and mass passes of all volumes) will be overridden from default lap-multiplied integer.
-    IPT_JOKER_OVERRIDE  =  1 << 12,
+    IPT_UNUSED  =  1 << 12,
 
     // Bonus boxes will instead have their powerup pool draw from the item policy section's current one, rather than the one in powerup.xml.
     IPT_BONUS_BOX_OVERRIDE  =  1 << 13,
