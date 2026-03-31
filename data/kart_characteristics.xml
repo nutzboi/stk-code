@@ -401,6 +401,58 @@
             <slipstream length="*1.1" collect-time="*1.1"
                    duration-factor="*0.6" fade-out-time="*1" />
         </characteristic>
+		<characteristic name="250cc">
+             <turn radius="0:2.6 10:9.75 25:19.5 45:39" />
+            <engine power="*1.97" max-speed="*1.081" brake-factor="*0.6"
+                    max-speed-reverse-ratio="*0.7" />
+            <gear switch-ratio="0.1 0.25 0.45 0.7 1 4"
+                  power-increase="2 1.9 1.7 1.5 1.35 1.2" />
+            <mass value="*1" />
+            <startup boost="*0.6 *0.6" />
+            <explosion time="*0.6" radius="*0.6" />
+            <nitro engine-force="*1" consumption="*0.85" max-speed-increase="*1.2" />
+            <slipstream length="*1.1" collect-time="*1.1"
+                   duration-factor="*0.6" fade-out-time="*1" />
+        </characteristic>
+		<characteristic name="300cc">
+             <turn radius="0:2.6 10:9.75 25:19.5 45:39" />
+            <engine power="*2.7" max-speed="*1.17" brake-factor="*0.6"
+                    max-speed-reverse-ratio="*0.7" />
+            <gear switch-ratio="0.1 0.25 0.45 0.7 1 4"
+                  power-increase="2.7 2.5 2.3 2.2 2.1 2.0" />
+            <mass value="*1" />
+            <startup boost="*0.6 *0.6" />
+            <explosion time="*0.6" radius="*0.6" />
+            <nitro engine-force="*1" consumption="*0.75" max-speed-increase="*1.2" />
+            <slipstream length="*1.1" collect-time="*1.1"
+                   duration-factor="*0.6" fade-out-time="*1" />
+        </characteristic>
+		<characteristic name="400cc">
+            <turn radius="0:2 10:5 25:10 45:20" />
+            <engine power="*4" max-speed="*1.5" brake-factor="*0.8"
+                    max-speed-reverse-ratio="*0.7" />
+            <gear switch-ratio="0.1 0.25 0.45 0.7 1 4"
+                  power-increase="2.8 2.7 2.5 2.3 2.15 1" />
+            <mass value="*1.5" />
+            <startup boost="*1 *1" />
+            <explosion time="*1.6" radius="*0.6" />
+            <nitro engine-force="*1" consumption="*0.67" max-speed-increase="*1.2" />
+            <slipstream length="*1.1" collect-time="*1.1"
+                        duration-factor="*0.6" fade-out-time="*1" />
+        </characteristic>
+		<characteristic name="nfs">
+             <turn radius="0:2.6 10:9.75 25:19.5 45:39" />
+            <engine power="*2.2" max-speed="*1.12" brake-factor="*0.6"
+                    max-speed-reverse-ratio="*0.7" />
+            <gear switch-ratio="0.1 0.25 0.45 0.7 1 4"
+                  power-increase="2.2 2.2 2.2 2.2 2.2 2.2" />
+            <mass value="*1" />
+            <startup boost="*0.6 *0.6" />
+            <explosion time="*0.6" radius="*0.6" />
+            <nitro engine-force="*1" consumption="*0.0001" max-speed-increase="*1.45" />
+            <slipstream length="*1.1" collect-time="*1.1"
+                   duration-factor="*1" fade-out-time="*1" />
+        </characteristic>
     </kart-types>
 
     <!-- Per-player settings/handicaps (or boosts) -->
