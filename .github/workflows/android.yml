@@ -58,10 +58,11 @@ jobs:
           ln -s /usr/local/lib/android/sdk android/android-sdk
           ln -s /usr/local/lib/android/sdk/ndk android/android-ndk
           wget -q https://github.com/supertuxkart/stk-assets-mobile/releases/download/git/stk-assets-full.zip
+          cd ..
           mkdir stk-assets
           cd stk-assets
           unzip ../stk-assets-full.zip > /dev/null
-          cd ..
+          cd ../stk-code
           cd lib
           wget -q https://github.com/supertuxkart/dependencies/releases/download/preview/dependencies-android-src.tar.xz
           tar xf dependencies-android-src.tar.xz
