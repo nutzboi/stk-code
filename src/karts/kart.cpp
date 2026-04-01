@@ -3434,13 +3434,18 @@ void Kart::updatePhysics(int ticks)
             m_max_speed->setSlowdown(MaxSpeed::MS_DECREASE_STOP, getKartProperties()->getTyresPitSpeedFraction(), stk_config->time2Ticks(0.1f), stk_config->time2Ticks(m_target_refuel*m_tyres->getFuelStopRatio()));
             m_tyres->m_current_fuel += m_target_refuel;
             m_target_refuel = 0;
-        }
-        if (can_increase_fuel && m_controls.getNitro()) {
-            m_refuel_press_cooldown_ticks = stk_config->time2Ticks(0.25f);
             float capacity = getKartProperties()->getFuelCapacity();
             m_target_refuel += 0.25f*capacity;
-            if (m_target_refuel > 1.24f*capacity) m_target_refuel -= capacity;
-            else if (m_target_refuel > capacity) m_target_refuel = capacity;
+        }
+        if (can_increase_fuel && m_controls.getNitro()) {
+            // To avoid lag, we don't change the refuel target ourselves as the client if playing online. We let the server hard sync it as needed
+            if (!NetworkConfig::get()->isNetworking() || NetworkConfig::get()->isServer()) {
+                m_refuel_press_cooldown_ticks = stk_config->time2Ticks(0.25f);
+                float capacity = getKartProperties()->getFuelCapacity();
+                m_target_refuel += 0.25f*capacity;
+                if (m_target_refuel > 1.24f*capacity) m_target_refuel -= capacity;
+                else if (m_target_refuel > capacity) m_target_refuel = capacity;
+            }
         }
     }
 
