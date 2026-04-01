@@ -157,8 +157,8 @@ std::vector<std::string> TrackManager::getAllTrackIdentifiers()
 
 void TrackManager::loadTrackOverlay() {
     if (overlay_db.root != NULL) {
-        Log::fatal("TrackManager::loadTrackOverlay",
-                "Track overlay file loaded twice. Aborting.");
+        Log::warn("TrackManager::loadTrackOverlay",
+                "Track overlay file loaded twice.");
         return;
     }
 
