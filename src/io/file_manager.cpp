@@ -60,7 +60,7 @@ namespace irr {
 }
 
 // For mkdir
-#if !defined(WIN32)
+#if !defined(WIN_BUILD)
 #  include <sys/stat.h>
 #  include <sys/types.h>
 #  include <dirent.h>
@@ -1245,7 +1245,7 @@ void FileManager::checkAndCreateGPDir()
 }   // checkAndCreateGPDir
 
 // ----------------------------------------------------------------------------
-#if !defined(WIN32) && !defined(__APPLE__)
+#if !defined(WIN_BUILD) && !defined(__APPLE__)
 
 /** Find a directory to use for remaining unix variants. Use the new standards
  *  for config directory based on XDG_* environment variables, or a
@@ -1532,7 +1532,7 @@ bool FileManager::removeFile(const std::string &name) const
     if(FileUtils::statU8Path(name, &mystat) < 0) return false;
     if( S_ISREG(mystat.st_mode))
     {
-#if defined(WIN32)
+#if defined(WIN_BUILD)
         return _wremove(StringUtils::utf8ToWide(name).c_str()) == 0;
 #else
         return remove(name.c_str()) == 0;
@@ -1584,7 +1584,7 @@ bool FileManager::removeDirectory(const std::string &name) const
         }
     }
 
-#if defined(WIN32)
+#if defined(WIN_BUILD)
     return RemoveDirectory(StringUtils::utf8ToWide(name).c_str())==TRUE;
 #else
     return remove(name.c_str())==0;
@@ -1659,7 +1659,7 @@ bool FileManager::moveDirectoryInto(std::string source, std::string target)
     if (isDirectory(target))
         return false;
 
-#if defined(WIN32)
+#if defined(WIN_BUILD)
     return MoveFileExW(StringUtils::utf8ToWide(source).c_str(),
         StringUtils::utf8ToWide(target).c_str(),
         MOVEFILE_WRITE_THROUGH) != 0;
