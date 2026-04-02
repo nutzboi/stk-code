@@ -49,6 +49,7 @@
 #include <sys/stat.h>
 #include <iostream>
 #include <string>
+#include <filesystem>
 
 #include <IFileSystem.h>
 
@@ -1660,9 +1661,15 @@ bool FileManager::moveDirectoryInto(std::string source, std::string target)
         return false;
 
 #if defined(WIN_BUILD)
-    return MoveFileExW(StringUtils::utf8ToWide(source).c_str(),
-        StringUtils::utf8ToWide(target).c_str(),
-        MOVEFILE_WRITE_THROUGH) != 0;
+    try{
+        std::filesystem::copy(source.c_str(), target.c_str(), std::filesystem::copy_options::recursive);
+        std::filesystem::remove_all(source.c_str());
+        return 1;
+    }
+    catch(std::filesystem::filesystem_error const& ex){
+        Log::error("FileManager", "%s", ex.what());
+        return 0;
+    }
 #else
     return rename(source.c_str(), target.c_str()) != -1;
 #endif
