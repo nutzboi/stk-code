@@ -1208,6 +1208,7 @@ void CommandManager::process_tyre(Context& context)
 
     if (argv.size() < 2) {
         context.error();
+        return;
     }
 
     int value = readTyre(argv[1]);
@@ -1229,6 +1230,7 @@ void CommandManager::process_handicap(Context& context)
 
     if (argv.size() < 2) {
         context.error();
+        return;
     }
 
     unsigned value = -1;
