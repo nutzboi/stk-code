@@ -232,14 +232,14 @@ void TrackInfoScreen::init()
     m_rules_spinner->setValue(0);
     m_rules_spinner->setVisible(true);
     m_rules_label->setVisible(true);
-    m_rules_label->setText(_("Rules:") , false);
+    m_rules_label->setText(_("Rules") , false);
 
 
     std::vector<unsigned> tyre_mapping = TyreUtils::getAllActiveCompounds();
 
     m_allowed_compound_value_spinner->setVisible(true);
     m_allowed_compound_value_label->setVisible(true);
-    m_allowed_compound_value_label->setText(_("Allowed amount:"), false);
+    m_allowed_compound_value_label->setText(_("Allowed amount"), false);
 
 
     bool first_value = true;
@@ -256,17 +256,17 @@ void TrackInfoScreen::init()
     }
     m_allowed_compound_selection_spinner->setVisible(true);
     m_allowed_compound_selection_label->setVisible(true);
-    m_allowed_compound_selection_label->setText(_("Tyre:"), false);
+    m_allowed_compound_selection_label->setText(_("Tyre"), false);
 
     m_allowed_wildcards_spinner->setValue(tme_rules->wildcards);
     m_allowed_wildcards_spinner->setVisible(true);
     m_allowed_wildcards_label->setVisible(true);
-    m_allowed_wildcards_label->setText(_("Wildcards:"), false);
+    m_allowed_wildcards_label->setText(_("Wildcards"), false);
 
     m_item_preview_checkbox->setState(tme_rules->do_item_preview);
     m_item_preview_checkbox->setVisible(true);
     m_item_preview_label->setVisible(true);
-    m_item_preview_label->setText(_("Global powerups?"), false);
+    m_item_preview_label->setText(_("Global powerups"), false);
 
     RaceManager::get()->setItemPolicy("normal");
 
