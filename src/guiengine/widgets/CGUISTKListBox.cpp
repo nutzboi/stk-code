@@ -93,7 +93,7 @@ const wchar_t* CGUISTKListBox::getCellText(u32 row_num, u32 col_num) const
     return Items[row_num].m_contents[col_num].m_text.c_str();
 }
 
-const CGUISTKListBox::ListItem& CGUISTKListBox::getItem(u32 id) const
+CGUISTKListBox::ListItem CGUISTKListBox::getItem(u32 id) const
 {
     return Items[id];
 }
@@ -140,15 +140,11 @@ s32 CGUISTKListBox::getItemAt(s32 xpos, s32 ypos) const
     if ( ItemHeight == 0 )
         return -1;
 
-    for (int i = 0; i < ItemPositions.size(); i++)
-    {
-        if (ItemPositions[i].first.isPointInside(irr::core::position2di(xpos, ypos)))
-        {
-            return ItemPositions[i].second;
-        }
-    }
+    s32 item = ((ypos - AbsoluteRect.UpperLeftCorner.Y - 1) + ScrollBar->getPos()) / ItemHeight;
+    if ( item < 0 || item >= (s32)Items.size())
+        return -1;
 
-    return -1;
+    return item;
 }
 
 //! clears the list
@@ -191,25 +187,8 @@ void CGUISTKListBox::recalculateItemHeight()
             Font->grab();
         }
     }
-    TotalItemHeight = 0;
-    for (int i = 0; i < Items.size(); i++)
-    {
-        if (Items[i].m_auto_height)
-        {
-            int new_height = 0;
-            for (int j = 0; j < Items[i].m_contents.size(); j++)
-            {
-                if (Items[i].m_contents[j].m_icon != -1)
-                    new_height = core::max_(new_height, (int)ItemsIconWidth);
-                
-                new_height = core::max_(new_height, 
-                    (int)getGlyphLayoutsDimension(Items[i].m_contents[j].m_glyph_layouts,
-                    Font->getHeightPerLine(), Font->getInverseShaping(), Font->getScale()).Height + 4);
-            }
-            Items[i].m_line_height_scale = 1.0f * new_height / ItemHeight;
-        }
-        TotalItemHeight += ItemHeight * Items[i].m_line_height_scale;
-    }
+
+    TotalItemHeight = ItemHeight * Items.size();
     ScrollBar->setMax( core::max_(0, TotalItemHeight - AbsoluteRect.getHeight()) );
     s32 minItemHeight = ItemHeight > 0 ? ItemHeight : 1;
     ScrollBar->setSmallStep ( minItemHeight );
@@ -385,17 +364,6 @@ bool CGUISTKListBox::OnEvent(const SEvent& event)
             {
                 core::position2d<s32> p(event.MouseInput.X, event.MouseInput.Y);
 
-                for (int i = 0; i < Layouts.size(); i++)
-                {
-                    if (Layouts[i].first.isPointInside(p)
-                        && Items[LayoutPositions[i].first].m_contents[LayoutPositions[i].second].m_callback
-                        && Items[LayoutPositions[i].first].m_contents[LayoutPositions[i].second].m_callback
-                            (this, LayoutPositions[i].first, LayoutPositions[i].second, event.MouseInput, Layouts[i].second))
-                    {
-                        return true;
-                    }
-                }
-
                 switch(event.MouseInput.Event)
                 {
                 case EMIE_MOUSE_WHEEL:
@@ -551,20 +519,16 @@ void CGUISTKListBox::draw()
     if (ScrollBar->isVisible())
         frameRect.LowerRightCorner.X -= ScrollBar->getRelativePosition().getWidth();
 
+    frameRect.LowerRightCorner.Y = AbsoluteRect.UpperLeftCorner.Y + ItemHeight;
+
     frameRect.UpperLeftCorner.Y -= ScrollBar->getPos();
     frameRect.LowerRightCorner.Y -= ScrollBar->getPos();
 
     bool hl = (HighlightWhenNotFocused || Environment->hasFocus(this) || Environment->hasFocus(ScrollBar));
 
-    Layouts.clear();
-    LayoutPositions.clear();
-    ItemPositions.clear();
-
     FontDrawer::startBatching();
     for (s32 i=0; i<(s32)Items.size(); ++i)
     {
-        frameRect.LowerRightCorner.Y = frameRect.UpperLeftCorner.Y + ItemHeight * Items[i].m_line_height_scale;
-
         if (frameRect.LowerRightCorner.Y >= AbsoluteRect.UpperLeftCorner.Y &&
             frameRect.UpperLeftCorner.Y <= AbsoluteRect.LowerRightCorner.Y)
         {
@@ -627,12 +591,6 @@ void CGUISTKListBox::draw()
                             hasItemOverrideColor(i, icon_color) ? getItemOverrideColor(i, icon_color) : getItemDefaultColor(icon_color),
                             (highlight) ? selectTime : 0, (i==Selected) ? (u32)StkTime::getTimeSinceEpoch() : 0, false, true);
 
-                        Layouts.push_back(std::make_pair(core::rect<s32>(iconPos.X - ItemsIconWidth/2,
-                                                        iconPos.Y - ItemsIconWidth/2,
-                                                        iconPos.X + ItemsIconWidth/2,
-                                                        iconPos.Y + ItemsIconWidth/2), true));
-                        LayoutPositions.push_back(std::make_pair((int)i, (int)x));
-
                         textRect.UpperLeftCorner.X += ItemsIconWidth;
                     }
 
@@ -648,7 +606,8 @@ void CGUISTKListBox::draw()
                         int text_width = (textRect.LowerRightCorner.X - textRect.UpperLeftCorner.X);
                         Font->initGlyphLayouts(Items[i].m_contents[x].m_text,
                             Items[i].m_contents[x].m_glyph_layouts);
-                        
+                        // Remove highlighted link if cache already has it
+                        gui::removeHighlightedURL(Items[i].m_contents[x].m_glyph_layouts);
                         if (Items[i].m_word_wrap)
                         {
                             gui::breakGlyphLayouts(Items[i].m_contents[x].m_glyph_layouts,
@@ -661,9 +620,6 @@ void CGUISTKListBox::draw()
                         textRect,
                         hasItemOverrideColor(i, font_color) ? getItemOverrideColor(i, font_color) : getItemDefaultColor(font_color),
                         Items[i].m_contents[x].m_center, true, &clientClip);
-                    
-                    Layouts.push_back(std::make_pair(textRect, false));
-                    LayoutPositions.push_back(std::make_pair((int)i, (int)x));
 
                     //Position back to inital pos
                     if (IconBank && (Items[i].m_contents[x].m_icon > -1))
@@ -675,11 +631,10 @@ void CGUISTKListBox::draw()
                     textRect.UpperLeftCorner.X += part_size;
                 }
             }
-            ItemPositions.push_back(std::make_pair(frameRect, (int)i));
         }
 
-        frameRect.UpperLeftCorner.Y += ItemHeight * Items[i].m_line_height_scale;
-        frameRect.LowerRightCorner.Y += ItemHeight * Items[i].m_line_height_scale;
+        frameRect.UpperLeftCorner.Y += ItemHeight;
+        frameRect.LowerRightCorner.Y += ItemHeight;
     }
     FontDrawer::endBatching();
 #endif
@@ -688,13 +643,11 @@ void CGUISTKListBox::draw()
 
 
 //! adds an list item with an icon
-u32 CGUISTKListBox::addItem(const ListItem & item, bool scroll_down)
+u32 CGUISTKListBox::addItem(const ListItem & item)
 {
     Items.push_back(item);
     recalculateItemHeight();
     recalculateIconWidth();
-    if (scroll_down && Selected == -1)
-        ScrollBar->setPos(core::max_(0, TotalItemHeight - AbsoluteRect.getHeight()));
     return Items.size() - 1;
 }
 
@@ -717,24 +670,16 @@ void CGUISTKListBox::recalculateScrollPos()
     if (!AutoScroll)
         return;
 
-    s32 sel_pos = -ScrollBar->getPos();
-    if (Selected == -1)
-    {
-        sel_pos += TotalItemHeight;
-    }
-    for (int i = 0; i < Selected; i++)
-    {
-        sel_pos += Items[i].m_line_height_scale * ItemHeight;
-    }
+    const s32 selPos = (Selected == -1 ? TotalItemHeight : Selected * ItemHeight) - ScrollBar->getPos();
 
-    if (sel_pos < 0)
+    if (selPos < 0)
     {
-        ScrollBar->setPos(ScrollBar->getPos() + sel_pos);
+        ScrollBar->setPos(ScrollBar->getPos() + selPos);
     }
-    else if (sel_pos > AbsoluteRect.getHeight() - Items[Selected].m_line_height_scale * ItemHeight)
+    else
+    if (selPos > AbsoluteRect.getHeight() - ItemHeight)
     {
-        ScrollBar->setPos(ScrollBar->getPos() + sel_pos - AbsoluteRect.getHeight()
-                        + Items[Selected].m_line_height_scale * ItemHeight);
+        ScrollBar->setPos(ScrollBar->getPos() + selPos - AbsoluteRect.getHeight() + ItemHeight);
     }
 }
 
@@ -871,37 +816,6 @@ video::SColor CGUISTKListBox::getItemDefaultColor(EGUI_LISTBOX_COLOR colorType) 
         default:
             return video::SColor();
     }
-}
-
-s32 CGUISTKListBox::getClusterAt(int row, int col, int x, int y,
-                                std::shared_ptr<std::u32string>* out_orig_str, int* out_glyph_idx)
-{
-    ListItem::ListCell &cell = Items[row].m_contents[col];
-    for (int i = 0; i < Layouts.size(); i++)
-    {
-        if (row == LayoutPositions[i].first && col == LayoutPositions[i].second)
-        {
-            return calculateClusterAt(x, y, Layouts[i].first, cell.m_center, true, cell.m_glyph_layouts,
-                                    Font->getInverseShaping(), Font->getFaceFontMaxHeight(),
-                                    Font->getFaceGlyphMaxHeight(), Font->getScale(), &AbsoluteClippingRect, 
-                                    out_orig_str, out_glyph_idx);
-        }
-    }
-    return -1;
-}
-
-bool CGUISTKListBox::hasElementAt(int x, int y, int *row_num, int *col_num)
-{
-    for (int i = 0; i < Layouts.size(); i++)
-    {
-        if (Layouts[i].first.isPointInside(core::position2di(x, y)))
-        {
-            if (row_num) *row_num = LayoutPositions[i].first;
-            if (col_num) *col_num = LayoutPositions[i].second;
-            return true;
-        }
-    }
-    return false;
 }
 
 //! set global itemHeight
