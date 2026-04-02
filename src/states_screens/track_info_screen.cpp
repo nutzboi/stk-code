@@ -254,6 +254,7 @@ void TrackInfoScreen::init()
             m_allowed_compound_value_spinner->setValue(tme_rules->tyre_allocation[tyre_mapping[i]-1]);
         }
     }
+    m_allowed_compound_selection_spinner->setMax(tyre_mapping.size()-1);
     m_allowed_compound_selection_spinner->setVisible(true);
     m_allowed_compound_selection_label->setVisible(true);
     m_allowed_compound_selection_label->setText(_("Tyre"), false);
