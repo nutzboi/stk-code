@@ -84,8 +84,8 @@
 
 	                    <div width="100%" height="fit" layout="horizontal-row">
 	                        <div proportion="3" height="fit" layout="horizontal-row">
-	                            <spinner id="allowed-compound-selection-spinner" width="100%" min_value="-1" max_value="50" align="center"
-	                                     wrap_around="true" />
+	                            <spinner id="allowed-compound-selection-spinner" width="100%" align="center"
+	                                     wrap_around="false" />
 	                        </div>
 	                        <label id="allowed-compound-selection-text" proportion="3" I18N="In the track info screen" text="Selected tyre:" text_align="left" />
 
