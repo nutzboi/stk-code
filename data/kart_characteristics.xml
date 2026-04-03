@@ -685,7 +685,7 @@
             <friction kart-friction="0.0" slowdown-factor="2.25" drag-coefficient="5.0" drag-exponent="1.5" game-engine-speed-uncap="false"/>
             <trackzipperfactor value="0.0" />
             <explosion duration="*0.6" radius="*0.6" />
-            <nitro engine-force="*0.4" consumption="1" max="5" max-speed-increase="3" duration="0.1" min-burst="0.1" fade-out-time="0.8" />
+            <nitro engine-force="*0.8" consumption="1" max="5" max-speed-increase="3" duration="0.1" min-burst="0.1" fade-out-time="0.8" />
             <slipstream length="*1.1" collect-time="*1.1"
                    duration-factor="*0.6" fade-out-time="*1" />
             <parachute lbound-fraction="0.55" ubound-fraction="0.35" />
