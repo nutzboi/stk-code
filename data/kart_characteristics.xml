@@ -113,7 +113,7 @@
                min-life-traction-gui="650 650 1300 2000 2400 100 100 100 100 100"
                names-long="COMPOUND1 SOFT MEDIUM HARD COMPOUND5 COMPOUND6 COMPOUND7 COMPOUND8 COMPOUND9 CHEAT"
                names-short="C1 S M H C5 C6 C7 C8 C9 CHEAT"
-               change-kart-map="kiki tux pidgin"
+               change-kart-map="kiki tux pidgin kartillac-v-series-r"
                pit-speed-fraction="0.1"
                pit-time-multiplier="1.0"
                default-color="-1 1 12 63 -1 -1 -1 -1 -1 29"
