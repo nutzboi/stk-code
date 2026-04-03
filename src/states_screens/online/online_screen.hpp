@@ -53,24 +53,10 @@ private:
 
     GUIEngine::CheckBoxWidget* m_enable_splitscreen;
 
-    GUIEngine::ListWidget* m_news_list;
-
     std::shared_ptr<Server> m_entered_server;
 
     /** Save the previous successfully connected server name. */
     core::stringw m_entered_server_name;
-
-    /** Icon for unread news. */
-    int              m_icon_red_dot;
-    /** Icon for headline news. */
-    int              m_icon_news_headline;
-    /** Icon for normal news. */
-    int              m_icon_news;
-
-    irr::gui::STKModifiedSpriteBank
-                    *m_icon_bank;
-
-    std::unordered_map<std::string, std::string> m_news_links;
 
     OnlineScreen();
 
