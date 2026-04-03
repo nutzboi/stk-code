@@ -538,17 +538,6 @@ void Physics::KartKartCollision(Kart *kart_a,
 
     float f_left = 1/f_right;
 
-    // Reduce the bouncing for low-speed impacts
-    float max_speed = std::max(right_kart->getSpeed(), left_kart->getSpeed());
-    if (max_speed < 20.0f)
-    {
-        if (max_speed < 0.0f)
-            max_speed = 0.0f;
-        f_right *= max_speed / 15.0f;
-        f_left  *= max_speed / 15.0f;
-    }
-
-
     // Check if a kart is more 'actively' trying to push another kart
     // To do this we check two things:
     // - The position of the contact point on the kart body.
@@ -588,8 +577,8 @@ void Physics::KartKartCollision(Kart *kart_a,
 
     // Now heading difference is in the range [0, pi/2] (approximately)
     // With 0 indicating parallel karts and pi/2 perpendicular karts
-    // We set ramming_factor in the [1, 1+3*pi/8] range
-    float ramming_factor = 1.0f + (heading_difference * 0.75f);
+    // We set ramming_factor in the [1, 1+pi/4] range
+    float ramming_factor = 1.0f + (heading_difference * 0.5f);
 
     if (left_kart_ramming)
     {
@@ -614,7 +603,7 @@ void Physics::KartKartCollision(Kart *kart_a,
             ->setTimedCentralImpulse(
             (uint16_t)stk_config->time2Ticks(kp->getCollisionImpulseTime()),
             impulse);
-        // The kart rotation will be prevented as the impulse is applied
+        right_kart ->getBody()->setAngularVelocity(btVector3(0,0,0));
     }
 
     // Then push the other kart to the right (if there is no
@@ -628,7 +617,7 @@ void Physics::KartKartCollision(Kart *kart_a,
             ->setTimedCentralImpulse(
             (uint16_t)stk_config->time2Ticks(kp->getCollisionImpulseTime()),
             impulse);
-        // The kart rotation will be prevented as the impulse is applied
+        left_kart->getBody()->setAngularVelocity(btVector3(0,0,0));
     }
 
 }   // KartKartCollision
