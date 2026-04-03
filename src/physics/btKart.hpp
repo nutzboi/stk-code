@@ -77,12 +77,6 @@ private:
      */
     bool                m_allow_sliding;
 
-    /** Used to know the direction of the visual kart-on-kart collision lean */
-    bool                m_leaning_right;
-
-    /** Used to know the strength of the visual kart-on-kart collision lean */
-    float               m_leaning_factor;    
-
     /** An additional impulse that is applied for a certain amount of time. */
     btVector3           m_additional_impulse;
 
@@ -245,16 +239,9 @@ public:
         m_ticks_additional_impulse = t;
     }   // setTimedImpulse
     // ------------------------------------------------------------------------
-    void setCollisionLean(bool lean_right) { m_leaning_right = lean_right; }
-    // ------------------------------------------------------------------------
-    void setCollisionLeanFactor(float lean_factor) { m_leaning_factor = lean_factor; }
-    // ------------------------------------------------------------------------
     /** Returns the time an additional impulse is activated. */
     uint16_t getCentralImpulseTicks() const
                                          { return m_ticks_additional_impulse; }
-    // ------------------------------------------------------------------------
-    /** Returns the collision (visual) lean. */
-    float getCollisionLean() const;
     // ------------------------------------------------------------------------
     const btVector3& getAdditionalImpulse() const
                                                { return m_additional_impulse; }
