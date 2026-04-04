@@ -244,7 +244,7 @@ bool ThreeStrikesBattle::kartHit(int kart_id, int hitter)
     // check if kart is 'dead'
     if (m_kart_info[kart_id].m_lives < 1)
     {
-        if (getCurrentNumPlayers())
+        if ((UserConfigParams::m_ai_tv_mode && RaceManager::get()->getNumPlayers() == 0) || getCurrentNumPlayers())
             eliminateKart(kart_id, /*notify_of_elimination*/ true);
         m_karts[kart_id]->finishedRace(WorldStatus::getTime());
         scene::ISceneNode** wheels = m_karts[kart_id]->getKartModel()
@@ -487,8 +487,13 @@ bool ThreeStrikesBattle::isRaceOver()
     {
         return false;
     }
+    
+    if (UserConfigParams::m_ai_tv_mode && RaceManager::get()->getNumPlayers() == 0) {
+        return getCurrentNumKarts()==1;
+    } else {
+        return getCurrentNumKarts()==1 || getCurrentNumPlayers()==0;
+    }
 
-    return getCurrentNumKarts()==1 || getCurrentNumPlayers()==0;
 }   // isRaceOver
 
 //-----------------------------------------------------------------------------

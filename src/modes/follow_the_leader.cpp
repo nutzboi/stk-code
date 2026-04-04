@@ -211,7 +211,15 @@ void FollowTheLeaderRace::countdownReachedZero()
  */
 bool FollowTheLeaderRace::isRaceOver()
 {
-    bool is_over = (getCurrentNumKarts()==2 || getCurrentNumPlayers()==0);
+    bool is_over;
+
+    if (UserConfigParams::m_ai_tv_mode && RaceManager::get()->getNumPlayers() == 0) {
+        is_over = getCurrentNumKarts()==2;
+    } else {
+        is_over = (getCurrentNumKarts()==2 || getCurrentNumPlayers()==0);
+
+    }
+
     if (is_over)
     {
         if (m_is_over_delay < 0.0f)
