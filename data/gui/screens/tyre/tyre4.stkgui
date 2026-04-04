@@ -58,7 +58,7 @@
                     <spacer width="3%" height="100%"/>
                     <bubble proportion="1" height="100%"
                             I18N="In the help menu"
-                            text="Inside pits, you'll find different tyre stacks. Run into the desired one to pit tyres (with their respective types S, M or H showing above eggs) or to pit fuel (as tyre stack called FUEL)."/>
+                            text="Inside pits, you'll find different tyre stacks. Run into the desired one to pit tyres (with their respective types SOFT, MEDIUM or HARD showing above) or to pit fuel (as tyre stack called FUEL)."/>
                 </div>
                 <spacer height="1%" width="10"/>
 
@@ -85,7 +85,7 @@
                     <spacer width="3%" height="100%"/>
                     <bubble proportion="1" height="100%"
                             I18N="In the help menu"
-                            text="All TME official tracks support pitting, but most other tracks don't. In track selection, they are inside the ''TME'' category. To install new tracks, you can search ''TME'' or ''Tyre Mod'' in add-on tracks manager."/>
+                            text="In track selection, tracks that support pits will have a TME icon in their thumbnail. Around 110 tracks, of which ~30 come preinstalled, support pits at the time of writing!"/>
                 </div>
             </box>
 
