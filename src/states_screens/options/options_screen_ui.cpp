@@ -274,6 +274,10 @@ void OptionsScreenUI::init()
     assert(override_kart_color_with_tyre != NULL);
     override_kart_color_with_tyre->setState(UserConfigParams::m_override_kart_color_with_tyre);
 
+    CheckBoxWidget* ai_tv_mode = getWidget<CheckBoxWidget>("ai_tv_mode");
+    assert(ai_tv_mode != NULL);
+    ai_tv_mode->setState(UserConfigParams::m_ai_tv_mode);
+
     GUIEngine::SpinnerWidget* tyre_selection_mode = getWidget<GUIEngine::SpinnerWidget>("tyre_selection_mode");
     assert( tyre_selection_mode != NULL );
 
@@ -525,6 +529,12 @@ void OptionsScreenUI::eventCallback(Widget* widget, const std::string& name, con
         CheckBoxWidget* override_kart_color_with_tyre = getWidget<CheckBoxWidget>("override_kart_color_with_tyre");
         assert(override_kart_color_with_tyre != NULL);
         UserConfigParams::m_override_kart_color_with_tyre = override_kart_color_with_tyre->getState();
+    }
+    else if (name == "ai_tv_mode")
+    {
+        CheckBoxWidget* ai_tv_mode = getWidget<CheckBoxWidget>("ai_tv_mode");
+        assert(ai_tv_mode != NULL);
+        UserConfigParams::m_ai_tv_mode = ai_tv_mode->getState();
     }
     else if (name == "tyre_selection_mode")
     {

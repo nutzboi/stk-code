@@ -1422,6 +1422,10 @@ void KartSelectionScreen::allPlayersDone()
         RaceManager::get()->setPlayerStartingTyre(n, m_kart_widgets[n].getStartingTyre());
     }
 
+    if (UserConfigParams::m_ai_tv_mode && players.size() == 1 && !NetworkConfig::get()->isNetworking()) {
+        RaceManager::get()->setNumPlayers(0);
+    }
+
     // ---- Switch to assign mode
     input_manager->getDeviceManager()->setAssignMode(ASSIGN);
 

@@ -48,6 +48,7 @@
 #include "utils/vs.hpp"
 #include "utils/tyre_utils.hpp"
 #include "utils/string_utils.hpp"
+#include "config/user_config.hpp"
 
 #include <line2d.h>
 
@@ -1983,7 +1984,7 @@ void SkiddingAI::computeNearestKarts()
     }
 
     // Force best driving when profiling and for FTL leaders
-    if(   ProfileWorld::isProfileMode()
+    if((UserConfigParams::m_ai_tv_mode && RaceManager::get()->getNumPlayers() == 0) ||   ProfileWorld::isProfileMode()
        || ( RaceManager::get()->isFollowMode() && m_kart->getWorldKartId() == 0))
         target_overall_distance = 999999.9f;
 

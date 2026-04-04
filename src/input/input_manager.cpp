@@ -587,6 +587,92 @@ int InputManager::getPlayerKeyboardID() const
 
     return -1;
 }
+
+static void changeSpectateTarget(PlayerAction action, int value,
+                                       Input::InputType type)
+{
+    Camera* cam = Camera::getActiveCamera();
+    if (!cam)
+        return;
+
+    // Only 1 local player will be able to change target, and this will replace
+    // the end camera with normal
+    if (cam->getType() != Camera::CM_TYPE_NORMAL)
+        Camera::changeCamera(0, Camera::CM_TYPE_NORMAL);
+
+    // Update if the camera again beacuse when race finished cam will be
+    // changed above and invalid
+    cam = Camera::getActiveCamera();
+    if (!cam)
+        return;
+
+    // Copied from EventHandler::processGUIAction
+    const bool pressed_down = value > Input::MAX_VALUE * 2 / 3;
+
+    if (!pressed_down)
+        return;
+
+    if (action == PA_PAUSE_RACE)
+    {
+        StateManager::get()->escapePressed();
+        return;
+    }
+    if (action == PA_LOOK_BACK)
+    {
+        if (cam->getMode() == Camera::CM_NORMAL)
+            cam->setMode(Camera::CM_REVERSE);
+        else
+            cam->setMode(Camera::CM_NORMAL);
+        return;
+    }
+    if (action == PA_ACCEL)
+    {
+        cam->setNextSpectatorMode();
+        return;
+    }
+
+    WorldWithRank* wwr = dynamic_cast<WorldWithRank*>(World::getWorld());
+    if (!wwr)
+        return;
+    std::vector<Kart*> karts;
+    for (unsigned i = 0; i < wwr->getNumKarts(); i++)
+        karts.push_back(wwr->getKartAtDrawingPosition(i + 1));
+
+    const int num_karts = (int)karts.size();
+    int current_idx = -1;
+    if (cam->getKart())
+    {
+        auto it = std::find(karts.begin(), karts.end(), cam->getKart());
+        if (it != karts.end())
+            current_idx = (int)std::distance(karts.begin(), it);
+    }
+    if (current_idx < 0 || current_idx >= num_karts)
+        return;
+
+    bool up = false;
+    if (action == PA_STEER_LEFT)
+        up = false;
+    else if (action == PA_STEER_RIGHT)
+        up = true;
+    else
+        return;
+    for (int i = 0; i < num_karts; i++)
+    {
+        current_idx = up ? current_idx + 1 : current_idx - 1;
+        // Handle looping
+        if (current_idx == -1)
+            current_idx = num_karts - 1;
+        else if (current_idx == num_karts)
+            current_idx = 0;
+
+        if (!karts[current_idx]->isEliminated())
+        {
+            cam->setKart(karts[current_idx]);
+            break;
+        }
+    }
+}   // changeSpectateTarget
+
 //-----------------------------------------------------------------------------
 /** Handles the conversion from some input to a GameAction and its distribution
  *  to the currently active menu.
@@ -791,11 +877,16 @@ void InputManager::dispatchInput(Input::InputType type, int deviceID,
              StateManager::get()->getGameState() == GUIEngine::GAME &&
              !GUIEngine::ModalDialog::isADialogActive();
 
+        bool is_offline_spectator = StateManager::get()->getGameState() == GUIEngine::GAME &&
+                     !GUIEngine::ModalDialog::isADialogActive()            &&
+                     !GUIEngine::ScreenKeyboard::isActive()                &&
+                     !RaceManager::get()->isWatchingReplay() && !is_nw_spectator && UserConfigParams::m_ai_tv_mode && RaceManager::get()->getNumPlayers() == 0;
+
         // ... when in-game
         if (StateManager::get()->getGameState() == GUIEngine::GAME &&
              !GUIEngine::ModalDialog::isADialogActive()            &&
              !GUIEngine::ScreenKeyboard::isActive()                &&
-             !RaceManager::get()->isWatchingReplay() && !is_nw_spectator)
+             !RaceManager::get()->isWatchingReplay() && !is_nw_spectator && !is_offline_spectator)
         {
             if (player == NULL)
             {
@@ -883,6 +974,9 @@ void InputManager::dispatchInput(Input::InputType type, int deviceID,
                 if (is_nw_spectator)
                 {
                     cl->changeSpectateTarget(action, abs(value), type);
+                    return;
+                } else if (is_offline_spectator) {
+                    changeSpectateTarget(action, abs(value), type);
                     return;
                 }
 

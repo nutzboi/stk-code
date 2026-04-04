@@ -506,6 +506,9 @@ namespace UserConfigParams
     PARAM_PREFIX BoolUserConfigParam          m_override_kart_color_with_tyre
             PARAM_DEFAULT(  BoolUserConfigParam(false, "override-kart-color",
             &m_race_setup_group, "Make kart color depend on tyre compound.") );
+    PARAM_PREFIX BoolUserConfigParam          m_ai_tv_mode
+            PARAM_DEFAULT(  BoolUserConfigParam(false, "ai-tv-mode",
+            &m_race_setup_group, "Spectate AIs in singleplayer") );
     PARAM_PREFIX IntUserConfigParam          m_tyre_selection_mode
             PARAM_DEFAULT(  IntUserConfigParam(0, "ai-tyre-selection-mode",
             &m_race_setup_group, "The starting tyre selection mode for AIs") );

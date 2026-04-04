@@ -74,20 +74,27 @@
                     <checkbox id="use_tyre_ai"/>
                     <spacer width="1%" height="100%" />
                     <label height="100%" I18N="In the ui settings" text="Use experimental Tyre Mod AI" word_wrap="true"/>
-                </div>
 
-                <spacer width="5" height="2%"/>
+                    <spacer width="3%" height="100%" />
 
-                <div layout="horizontal-row" width="100%" height="fit">
                     <checkbox id="override_kart_color_with_tyre"/>
                     <spacer width="1%" height="100%" />
                     <label height="100%" I18N="In the ui settings" text="Make kart color depend on tyre" word_wrap="true"/>
                 </div>
 
+                <spacer width="5" height="2%"/>
 
                 <div width="100%" height="fit" layout="horizontal-row">
                     <spinner id="tyre_selection_mode" width="10f" align="center" />
                     <label height="100%" x="0" y="0" I18N="In the ui settings" text="The method used for selecting AI tyre"/>
+                </div>
+
+                <spacer width="5" height="2%"/>
+
+                <div layout="horizontal-row" width="100%" height="fit">
+                    <checkbox id="ai_tv_mode"/>
+                    <spacer width="1%" height="100%" />
+                    <label height="100%" I18N="In the ui settings" text="Spectate AIs in singleplayer" word_wrap="true"/>
                 </div>
 
                 <spacer width="5" height="2%"/>
@@ -104,11 +111,9 @@
                     <checkbox id="story-mode-timer"/>
                     <spacer width="1%" height="100%" />
                     <label height="100%" I18N="In the ui settings" text="Enable the story mode timer" word_wrap="true"/>
-                </div>
 
-                <spacer width="5" height="2%"/>
+                    <spacer width="3%" height="100%" />
 
-                <div layout="horizontal-row" width="100%" height="fit">
                     <checkbox id="speedrun-timer"/>
                     <spacer width="1%" height="100%" />
                     <label id="speedrun-timer-text" height="100%" I18N="In the ui settings" text="Enable the speedrun timer" word_wrap="true"/>
