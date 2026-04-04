@@ -208,7 +208,7 @@ Track::~Track()
 
 bool Track::hasPitStops() {
     if (m_internal_pit_stop_support == -1) {
-        if (isInGroup("TME")) {
+        if (isInGroup("standard") || isInGroup("TME")) {
             m_internal_pit_stop_support = 1;
             return true;
         } else {
