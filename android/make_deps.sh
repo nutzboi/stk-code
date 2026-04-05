@@ -43,7 +43,7 @@ if [ -z "$NDK_PATH" ]; then
 fi
 
 if [ -z "$STK_NDK_VERSION" ]; then
-    export STK_NDK_VERSION="28.1.13356709"
+    export STK_NDK_VERSION="28.2.13676358"
 fi
 
 NDK_PATH="$(realpath "$NDK_PATH")/${STK_NDK_VERSION}"
