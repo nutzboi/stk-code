@@ -195,9 +195,17 @@ void ChatManager::handleNormalChatMessage(std::shared_ptr<STKPeer> peer,
         return;
     }
 
+    std::string dir_marker = "";
+    if(message.size() > 2){
+        if(message.substr(0,3) == "\u200F")
+            dir_marker = "\u200F";
+        else if(message.substr(0,3) == "\u200E")
+            dir_marker = "\u200E";
+    }
+
     std::string new_prefix = StringUtils::wideToUtf8(
         peer->getMainProfile()->getDecoratedName(decorator)) + ": ";
-    message = new_prefix + message.substr(prefix.length()); 
+    message = dir_marker + new_prefix + message.substr((dir_marker + prefix).length()); 
 
     if (message.size() == 0)
         return;
