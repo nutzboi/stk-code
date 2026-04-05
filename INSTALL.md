@@ -4,8 +4,7 @@ In order to build SuperTuxKart from source, you'll need both the code and the as
 
 ```bash
 git clone https://github.com/Nomagno/stk-code stk-code
-wget https://github.com/Nomagno/stk-code/releases/download/TME_2025_ST_VALENTINES/stk-assets.zip
-unzip stk-assets.zip
+git clone https://github.com/Nomagno/stk-assets stk-assets
 ```
 
 ## Building SuperTuxKart on Linux
