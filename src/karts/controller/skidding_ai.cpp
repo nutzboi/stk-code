@@ -2306,6 +2306,9 @@ void SkiddingAI::handleNitroAndZipper(float max_safe_speed)
     float nitro_max_active = m_kart->getKartProperties()->getNitroDuration();
     float nitro_max_fadeout = m_kart->getKartProperties()->getNitroFadeOutTime();
 
+    // >=5Hz blinking lights are uncomfortable and may trigger epilepsy.
+    bool antiblink = nitro_max_active < 0.3;
+
     //Nitro skill 0 : don't use
     //Nitro skill 1 : don't use if the kart is braking, is not on the ground, has finished the race, has no nitro,
     //                has a parachute or an anvil attached, or has a plunger in the face.
@@ -2456,6 +2459,16 @@ void SkiddingAI::handleNitroAndZipper(float max_safe_speed)
     //     m_kart->getIdent().c_str(), nitro_skill, m_kart->getEnergy(), energy_reserve,
     //     m_kart->getSpeed() + m_kart->getKartProperties()->getNitroMaxSpeedIncrease() > max_safe_speed*1.2, m_kart->getSpeed(),
     //     m_kart->getCurrentMaxSpeed());
+
+    // Completely override all other behaviour if antiblink triggered, i.e. optimal usage of nitro might
+    // trigger discomfort
+    if (antiblink && m_kart->getEnergy() > 0) {
+        if (m_kart->getSpeed() > 0.3f*m_kart->getCurrentMaxSpeed()) {
+            m_controls->setNitro(true);
+        } else {
+            m_controls->setNitro(false);  
+        }
+    }
 
     //TODO : for now we don't disable nitro use when close to bananas and gums,
     //       because it hurts more often than not (when the bad item is avoided)
