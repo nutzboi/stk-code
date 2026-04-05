@@ -24,7 +24,7 @@ if [ -z "$STK_TARGET_ANDROID_SDK" ]; then
 fi
 
 if [ -z "$STK_NDK_VERSION" ]; then
-    export STK_NDK_VERSION="28.1.13356709"
+    export STK_NDK_VERSION="28.2.13676358"
 fi
 
 export APP_NAME_RELEASE="SuperTuxKart"
