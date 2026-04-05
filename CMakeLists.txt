@@ -909,6 +909,7 @@ if(USE_WIIUSE)
 endif()
 
 if(MSVC OR MINGW)
+  add_definitions(-DWIN32)
   add_definitions(-DWIN_BUILD)
   target_link_libraries(supertuxkart iphlpapi.lib)
   add_custom_command(TARGET supertuxkart POST_BUILD
