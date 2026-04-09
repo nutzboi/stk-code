@@ -2936,10 +2936,20 @@ void ServerLobby::updatePlayerList(bool update_when_reset_server)
         std::string tyre_prefix = "CHEAT";
         std::string compound_name = TyreUtils::getStringFromCompound(profile->getStartingTyre(), false /*shortver*/);
         bool exclude = StringUtils::startsWith(compound_name, tyre_prefix);
+        std::vector<unsigned> tyre_mapping = TyreUtils::getAllActiveCompounds(ServerConfig::m_server_ban_cheat_tyre /*exclude_cheat*/);
         if (ServerConfig::m_server_ban_cheat_tyre && exclude) {
-            std::vector<unsigned> tyre_mapping = TyreUtils::getAllActiveCompounds(ServerConfig::m_server_ban_cheat_tyre /*exclude_cheat*/);
             if (tyre_mapping.size() > 0)
                 profile->setStartingTyre(tyre_mapping[0]);
+        }
+
+        RaceManager::TyreModRules *tme_rules = RaceManager::get()->getTyreModRules();
+        std::vector<int> tyre_alloc = tme_rules->tyre_allocation;
+        if (profile->getStartingTyre() < tyre_alloc.size() && tyre_alloc[profile->getStartingTyre()-1] == 0) {
+            for (unsigned i = 0; i < tyre_mapping.size(); i++) {
+                if (tyre_alloc[tyre_mapping[i]-1] != 0) {
+                    profile->setStartingTyre(tyre_mapping[i]);
+                }
+            }
         }
 
         profile_name = StringUtils::utf8ToWide(profile->getTyreCircle()) + profile_name;
