@@ -95,6 +95,12 @@
                     <checkbox id="ai_tv_mode"/>
                     <spacer width="1%" height="100%" />
                     <label height="100%" I18N="In the ui settings" text="Spectate AIs in singleplayer" word_wrap="true"/>
+
+                    <spacer width="3%" height="100%" />
+
+                    <checkbox id="enable_leader_ends_race"/>
+                    <spacer width="1%" height="100%" />
+                    <label height="100%" I18N="In the ui settings" text="Monoposto finish" word_wrap="true"/>
                 </div>
 
                 <spacer width="5" height="2%"/>

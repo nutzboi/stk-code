@@ -206,7 +206,7 @@ void LinearWorld::update(int ticks)
         m_finish_timeout != std::numeric_limits<float>::max())
     {
         m_finish_timeout -= STKConfig::get()->ticks2Time(ticks);
-        if (!STKConfig::get()->m_tme_enable_leader_ends_race && m_finish_timeout < 0.0f)
+        if (!UserConfigParams::m_tme_enable_leader_ends_race && m_finish_timeout < 0.0f)
         {
             endRaceEarly();
             m_finish_timeout = std::numeric_limits<float>::max();
@@ -511,7 +511,7 @@ void LinearWorld::newLap(unsigned int kart_index)
     // This way, even with poor framerate, we get a time significant to the ms
     if(raceHasLaps() &&
         (kart_info.m_finished_laps >= RaceManager::get()->getNumLaps()
-            || (STKConfig::get()->m_tme_enable_leader_ends_race && getKartAtPosition(1)->hasFinishedRace())))
+            || (UserConfigParams::m_tme_enable_leader_ends_race && getKartAtPosition(1)->hasFinishedRace())))
     {
         if (kart->isGhostKart())
         {
@@ -551,7 +551,7 @@ void LinearWorld::newLap(unsigned int kart_index)
                 m_worst_finish_time += finish_time;
             }
 
-            if (STKConfig::get()->m_tme_enable_leader_ends_race) {
+            if (UserConfigParams::m_tme_enable_leader_ends_race) {
                 m_finish_timeout = std::numeric_limits<float>::max();
             }
 
@@ -1077,7 +1077,7 @@ void LinearWorld::updateRacePosition()
             // - or is ahead
             // - or has the same distance (very unlikely) but started earlier
             // it is ahead --> increase position
-            if((!kart->hasFinishedRace() && m_karts[j]->hasFinishedRace() && !STKConfig::get()->m_tme_enable_leader_ends_race) ||
+            if((!kart->hasFinishedRace() && m_karts[j]->hasFinishedRace() && !UserConfigParams::m_tme_enable_leader_ends_race) ||
                 m_kart_info[j].m_overall_distance > my_distance            ||
                (m_kart_info[j].m_overall_distance == my_distance &&
                 m_karts[j]->getInitialPosition()<kart->getInitialPosition() ) )

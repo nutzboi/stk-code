@@ -44,7 +44,7 @@ bool StandardRace::isRaceOver()
     }
     // The race is over if all players have finished the race. Remaining
     // times for AI opponents will be estimated in enterRaceOverState
-    if (UserConfigParams::m_ai_tv_mode && RaceManager::get()->getNumPlayers() == 0 /*|| STKConfig::get()->m_tme_enable_leader_ends_race*/) {
+    if (UserConfigParams::m_ai_tv_mode && RaceManager::get()->getNumPlayers() == 0 /*|| UserConfigParams::m_tme_enable_leader_ends_race*/) {
         return getNumKarts() == RaceManager::get()->getFinishedKarts();
     } else {
         return RaceManager::get()->allPlayerFinished();    
