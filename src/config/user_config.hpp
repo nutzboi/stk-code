@@ -507,7 +507,7 @@ namespace UserConfigParams
             PARAM_DEFAULT(  BoolUserConfigParam(false, "override-kart-color",
             &m_race_setup_group, "Make kart color depend on tyre compound.") );
     PARAM_PREFIX BoolUserConfigParam          m_tme_enable_leader_ends_race
-            PARAM_DEFAULT( BoolUserConfigParam(true, "leader-ends-race",
+            PARAM_DEFAULT( BoolUserConfigParam(false, "leader-ends-race",
             &m_race_setup_group, "The leader's finish lap is the last lap for everyone.") );
     PARAM_PREFIX BoolUserConfigParam          m_ai_tv_mode
             PARAM_DEFAULT(  BoolUserConfigParam(false, "ai-tv-mode",
