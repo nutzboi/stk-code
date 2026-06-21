@@ -99,7 +99,6 @@ void TrackInfoScreen::buildRulesFileListAndSpinner() {
         m_rules_spinner->addLabel(label);
         std::string x = UserConfigParams::m_default_itempolicy_preset;
         if (file == x) {
-            printf("'%s' vs '%s'\n", file.c_str(), x.c_str());
             saved_idx = i;
         }
         i += 1;
