@@ -138,6 +138,9 @@ PlayerKartWidget::PlayerKartWidget(KartSelectionScreen* parent,
             std::string name = TyreUtils::getStringFromCompound(tyre_mapping[i], false);
             label2 = _("TYRE: %s", name.c_str());
             m_starting_tyre_spinner->addLabel(label2);
+            if (tyre_mapping[i] == UserConfigParams::m_default_player_tyre) {
+                m_starting_tyre_spinner->setValue(label2);
+            }
         }
 
         m_starting_tyre_spinner->setPlayerID(m_player_id);
