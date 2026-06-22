@@ -113,7 +113,7 @@
                min-life-traction-gui="650 650 1300 2000 2400 100 100 100 100 100"
                names-long="COMPOUND1 SOFT MEDIUM HARD COMPOUND5 COMPOUND6 COMPOUND7 COMPOUND8 COMPOUND9 CHEAT"
                names-short="C1 S M H C5 C6 C7 C8 C9 CHEAT"
-               change-kart-map="kiki tux pidgin"
+               change-kart-map="kiki tux pidgin kartillac-v-series-r"
                pit-speed-fraction="0.1"
                pit-time-multiplier="1.0"
                default-color="-1 1 12 63 -1 -1 -1 -1 -1 29"
@@ -660,6 +660,46 @@
             <slipstream length="*1.1" collect-time="*1.1"
                    duration-factor="*0.6" fade-out-time="*1" />
             <parachute lbound-fraction="0.55" ubound-fraction="0.35" />
+        </characteristic>
+        <characteristic name="hypercar">
+            <suspension stiffness="*1" />
+            <turn radius="-100:6.2 -1:6.2 0:3.15 5:4.6 12:11.75 20:27 30:55 38:100"
+                  time-full-steer="0:0.1 0.3:0.1 0.3:0.14 0.6:0.14 0.6:0.21 1.0:0.21"
+                  brake-multiplier="1.05" />
+            <engine power="975*1" max-speed="27.75*1.4"
+                    max-speed-reverse-ratio="0.48*1" brake-factor="15" time-full-brake="0.35" />
+            <gear switch-ratio="0.1 0.25 0.45 0.7 1 4"
+                  power-increase="1.85 1.54 1.33 1.22 1.16 1" />
+            <mass value="525" />
+            <virtualmass value="525" />
+            <fuel mass-real="0.4" mass-virtual="0.4" consumption="14" capacity="100" stop-rate="0.1" max-speed-decrease="0" turn-radius-increase="0.0009" lift-and-coast-factor="0.5" />
+
+            <skid enabled="false" />
+            <startup boost="*0.01 *0.01"
+                 engine-force="*0.01 *0.01"
+            />
+            <lean max="11.0" speed="14.0" />
+            <friction kart-friction="0.0" slowdown-factor="2.25" drag-coefficient="5.0" drag-exponent="1.5" game-engine-speed-uncap="false"/>
+            <trackzipperfactor value="0.0" />
+            <explosion duration="*0.6" radius="*0.6" />
+            <nitro
+                engine-force="350*0.8"
+                consumption="1"
+                small-container="1"
+                big-container="2.5"
+                max="5"
+                max-speed-increase="3"
+                duration="0.1"
+                min-burst="0.1"
+                fade-out-time="0.8" />
+            <slipstream length="*0.9" max-speed-increase="2" add-power="150" collect-time="*1.1"
+                   duration-factor="*0.6" fade-out-time="*1" />
+            <parachute lbound-fraction="0.55" ubound-fraction="0.35" />
+            <tyres
+                low-grip-topspeed-mult="1 1 1 1 1 1 1 1 1 1"
+                low-grip-engineforce-mult="0.85 0.85 0.85 0.85 0.85 0.85 0.85 0.85 0.85 0.85"
+                low-grip-turning-mult="0.7 0.7 0.7 0.7 0.7 0.7 0.7 0.7 0.7 0.7"
+            />
         </characteristic>
     </kart-types>
 
