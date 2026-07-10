@@ -274,6 +274,11 @@ void OptionsScreenUI::init()
     assert(override_kart_color_with_tyre != NULL);
     override_kart_color_with_tyre->setState(UserConfigParams::m_override_kart_color_with_tyre);
 
+    CheckBoxWidget* enable_leader_ends_race = getWidget<CheckBoxWidget>("enable_leader_ends_race");
+    assert(enable_leader_ends_race != NULL);
+    enable_leader_ends_race->setState(UserConfigParams::m_tme_enable_leader_ends_race);
+    enable_leader_ends_race->setTooltip(_("When the leader finishes, everyone (including lapped karts) will only get to complete their current lap."));
+
     CheckBoxWidget* ai_tv_mode = getWidget<CheckBoxWidget>("ai_tv_mode");
     assert(ai_tv_mode != NULL);
     ai_tv_mode->setState(UserConfigParams::m_ai_tv_mode);
@@ -529,6 +534,12 @@ void OptionsScreenUI::eventCallback(Widget* widget, const std::string& name, con
         CheckBoxWidget* override_kart_color_with_tyre = getWidget<CheckBoxWidget>("override_kart_color_with_tyre");
         assert(override_kart_color_with_tyre != NULL);
         UserConfigParams::m_override_kart_color_with_tyre = override_kart_color_with_tyre->getState();
+    }
+    else if (name == "enable_leader_ends_race")
+    {
+        CheckBoxWidget* enable_leader_ends_race = getWidget<CheckBoxWidget>("enable_leader_ends_race");
+        assert(enable_leader_ends_race != NULL);
+        UserConfigParams::m_tme_enable_leader_ends_race = enable_leader_ends_race->getState();
     }
     else if (name == "ai_tv_mode")
     {

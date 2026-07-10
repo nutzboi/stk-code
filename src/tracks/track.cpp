@@ -375,7 +375,7 @@ void Track::cleanup()
         {
             CPUParticleManager::getInstance()->cleanMaterialMap();
         }
-        
+
         SP::resetEmptyFogColor();
     }
     ParticleKindManager::get()->cleanUpTrackSpecificGfx();
@@ -663,6 +663,29 @@ void Track::loadTrackInfo()
         TrackMode tm;
         m_all_modes.push_back(tm);
     }
+
+    // Open and close the scene graph for a quick search for tyre changers
+    std::string path = m_root + m_all_modes[0].m_scene;
+    XMLNode *scene_root    = file_manager->createXMLTree(path);
+
+    // Make sure that the structure is correct
+    if (!scene_root || scene_root->getName()!="scene")
+    {
+        std::ostringstream msg;
+        msg<< "Root is not scene node in '"<<path
+           <<"', aborting.";
+        throw std::runtime_error(msg.str());
+    }
+
+    bool has_tyre_change = scene_root->getNode("tyre-change") != NULL;
+    // Having a tyre changer at this stage implies pit stop support,
+    // but the converse is not true as there's other mechanisms
+    // that imply pit stops support, namely the overlay database
+    if (has_tyre_change && m_internal_pit_stop_support == -1)
+        m_internal_pit_stop_support = 1;
+
+    delete scene_root;
+
 
     if(m_groups.size()==0) m_groups.push_back(FavoriteStatus::DEFAULT_FAVORITE_GROUP_NAME);
     const XMLNode *xml_node = root->getNode("curves");

@@ -104,8 +104,6 @@ public:
     bool m_tme_enable_tyre_changers; /**< If false, tyre changers will never spawn */
     bool m_tme_enable_tyre_degradation; /**< If false, tyres will never degrade*/
 
-    bool m_tme_enable_leader_ends_race; /**< If false, true, the lap after the leader ends will be the last lap*/
-
     /** If true, any time the pit state is active, pitting will be disabled */
     bool m_tme_enable_pit_autoghost;
     /** If true, any time the kart has finished, pitting will be disabled */

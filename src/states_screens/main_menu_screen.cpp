@@ -224,7 +224,8 @@ void MainMenuScreen::init()
 
             if (UserConfigParams::m_news_list_shown_id < id)
             {
-                online_icon->setBadge(REDDOT_BADGE);
+                // News list disabled in TME
+                //online_icon->setBadge(REDDOT_BADGE);
             }
         }
         

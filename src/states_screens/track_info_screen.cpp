@@ -80,12 +80,32 @@ void TrackInfoScreen::buildRulesFileListAndSpinner() {
 
     if (!m_rules_spinner) return;
 
+    m_rules_spinner->setVisible(true);
+
     m_rules_spinner->clearLabels();
-    m_rules_spinner->addLabel(_("None"));
+
+    unsigned saved_idx = 0;
+    unsigned i = 0;
+    m_rules_spinner->setMin(0);
+
+    irr::core::stringw label = "None";
+    m_rules_spinner->addLabel(label);
+
+    i += 1;
+
     for(std::string file : m_rule_files)
     {
-        m_rules_spinner->addLabel(irr::core::stringw(file.c_str()));
+        label = irr::core::stringw(file.c_str());
+        m_rules_spinner->addLabel(label);
+        std::string x = UserConfigParams::m_default_itempolicy_preset;
+        if (file == x) {
+            saved_idx = i;
+        }
+        i += 1;
     }   // for all files in the currently handled directory
+    m_rules_spinner->setMax(i);
+    m_rules_spinner->setValue(saved_idx);
+
 }
 
 // ----------------------------------------------------------------------------
@@ -229,8 +249,6 @@ void TrackInfoScreen::init()
 
     RaceManager::get()->setItemPolicy("normal");
     buildRulesFileListAndSpinner();
-    m_rules_spinner->setValue(0);
-    m_rules_spinner->setVisible(true);
     m_rules_label->setVisible(true);
     m_rules_label->setText(_("Rules") , false);
 

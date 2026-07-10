@@ -506,12 +506,21 @@ namespace UserConfigParams
     PARAM_PREFIX BoolUserConfigParam          m_override_kart_color_with_tyre
             PARAM_DEFAULT(  BoolUserConfigParam(false, "override-kart-color",
             &m_race_setup_group, "Make kart color depend on tyre compound.") );
+    PARAM_PREFIX BoolUserConfigParam          m_tme_enable_leader_ends_race
+            PARAM_DEFAULT( BoolUserConfigParam(false, "leader-ends-race",
+            &m_race_setup_group, "The leader's finish lap is the last lap for everyone.") );
     PARAM_PREFIX BoolUserConfigParam          m_ai_tv_mode
             PARAM_DEFAULT(  BoolUserConfigParam(false, "ai-tv-mode",
             &m_race_setup_group, "Spectate AIs in singleplayer") );
     PARAM_PREFIX IntUserConfigParam          m_tyre_selection_mode
             PARAM_DEFAULT(  IntUserConfigParam(0, "ai-tyre-selection-mode",
             &m_race_setup_group, "The starting tyre selection mode for AIs") );
+    PARAM_PREFIX IntUserConfigParam          m_default_player_tyre
+            PARAM_DEFAULT( IntUserConfigParam(0, "default-player-tyre",
+            &m_race_setup_group, "The tyre id of the kart selection spinner"));
+    PARAM_PREFIX StringUserConfigParam          m_default_itempolicy_preset
+            PARAM_DEFAULT( StringUserConfigParam("None", "default-itempolicy-preset",
+            &m_race_setup_group, "The default itempolicy preset xml file of the race rules spinner. 'None' for none."));
     PARAM_PREFIX BoolUserConfigParam          m_soccer_player_list
             PARAM_DEFAULT(  BoolUserConfigParam(false, "soccer-player-list",
             &m_race_setup_group, "Show player list icon in soccer mode.") );
