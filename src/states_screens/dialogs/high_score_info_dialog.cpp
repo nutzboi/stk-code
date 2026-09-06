@@ -22,6 +22,10 @@
 #include "config/user_config.hpp"
 #include "guiengine/CGUISpriteBank.hpp"
 #include "graphics/stk_tex_manager.hpp"
+#include "guiengine/widgets/icon_button_widget.hpp"
+#include "guiengine/widgets/label_widget.hpp"
+#include "guiengine/widgets/list_widget.hpp"
+#include "guiengine/widgets/ribbon_widget.hpp"
 #include "input/device_manager.hpp"
 #include "input/input_manager.hpp"
 #include "karts/kart_properties.hpp"
@@ -64,16 +68,19 @@ HighScoreInfoDialog::HighScoreInfoDialog(Highscores* highscore, bool is_linear, 
 
     if (m_major_mode == RaceManager::MAJOR_MODE_GRAND_PRIX)
     {
-        m_gp = grand_prix_manager->getGrandPrix(m_hs->m_track);
-        track = track_manager->getTrack(m_gp->getTrackId(0));
-        track_name = m_gp->getName();
+        m_gp = *grand_prix_manager->getGrandPrix(m_hs->m_track);
+        m_gp.checkConsistency();
+        track = track_manager->getTrack(m_gp.getTrackId(0));
+        track_name = m_gp.getName();
         track_type_name = _("Grand Prix");
+        m_minor_mode = (RaceManager::MinorRaceModeType)m_hs->m_gp_minor_mode;
     }
     else
     {
         track = track_manager->getTrack(m_hs->m_track);
         track_name = track->getName();
         track_type_name = _("Track");
+        m_minor_mode = HighScoreSelection::getInstance()->getActiveMode();
     }
 
     irr::video::ITexture* image = STKTexManager::getInstance()
@@ -94,11 +101,11 @@ HighScoreInfoDialog::HighScoreInfoDialog(Highscores* highscore, bool is_linear, 
 
     /* Used to display kart icons for the entries */
     irr::gui::STKModifiedSpriteBank *icon_bank = HighScoreSelection::getInstance()->getIconBank();
-    int icon_height = GUIEngine::getFontHeight() * 3 / 2;
 
-    icon_bank->setScale(icon_height/128.0f);
+    icon_bank->setScale(1.5f / 128.0f);
     icon_bank->setTargetIconSize(128, 128);
-    m_high_score_list->setIcons(icon_bank, (int)icon_height);
+    m_high_score_list->setIcons(icon_bank, 1.5f);
+    m_high_score_list->setActive(false); // Improve keyboard navigation
 
     updateHighscoreEntries();
 
@@ -121,19 +128,20 @@ HighScoreInfoDialog::HighScoreInfoDialog(Highscores* highscore, bool is_linear, 
         m_num_karts_label->setVisible(true);
         m_num_karts_label->setText(_("Number of karts: %d", m_hs->m_number_of_karts), true);
 
-        if (m_major_mode != RaceManager::MAJOR_MODE_GRAND_PRIX)
-        {
-            m_num_laps_label->setVisible(true);
-            m_num_laps_label->setText(_("Laps: %d", m_hs->m_number_of_laps), true);
-        }
         stringw is_reverse;
         if (m_major_mode == RaceManager::MAJOR_MODE_GRAND_PRIX)
         {
             is_reverse = GrandPrixData::reverseTypeToString((GrandPrixData::GPReverseType)m_hs->m_gp_reverse_type);
+            m_num_laps_label->setText(_("Game mode: %s", RaceManager::getNameOf(m_minor_mode)), true);
         }
         else
         {
             is_reverse = m_hs->m_reverse ? _("Yes") : _("No");
+            if (m_minor_mode == RaceManager::MINOR_MODE_LAP_TRIAL)
+                m_num_karts_label->setText(_("Time target: %s",StringUtils::toWString(StringUtils::timeToString(m_hs->m_number_of_laps))),true);
+            else
+                m_num_laps_label->setText(_("Laps: %d", m_hs->m_number_of_laps), true);
+
         }
         m_reverse_label->setVisible(true);
         m_reverse_label->setText(_("Reverse: %s", is_reverse), true);
@@ -147,9 +155,8 @@ HighScoreInfoDialog::HighScoreInfoDialog(Highscores* highscore, bool is_linear, 
 
     m_start_widget = getWidget<IconButtonWidget>("start");
 
-    // Disable starting a grand prix, as there is currently no way to tell the minor mode used
     if (m_major_mode == RaceManager::MAJOR_MODE_GRAND_PRIX)
-        m_start_widget->setActive(false);
+        m_start_widget->setActive(!PlayerManager::getCurrentPlayer()->isLocked(m_gp.getId()));
     else
         m_start_widget->setActive(!PlayerManager::getCurrentPlayer()->isLocked(track->getIdent()));
 
@@ -187,7 +194,23 @@ void HighScoreInfoDialog::updateHighscoreEntries()
         {
             m_hs->getEntry(n, kart_name, name, &time);
 
-            std::string time_string = StringUtils::timeToString(time, time_precision);
+            std::string highscore_string;
+            if (m_minor_mode == RaceManager::MINOR_MODE_LAP_TRIAL)
+            {
+                highscore_string = std::to_string(static_cast<int>(time));
+            }
+            else
+            {
+                if (time > 60.0f * 60.0f)
+                {
+                    highscore_string = StringUtils::timeToString(time, time_precision,
+                        /*display_minutes_if_zero*/true, /*display_hours*/true);
+                }
+                else
+                {
+                    highscore_string = StringUtils::timeToString(time, time_precision);
+                }
+            }
 
             for(unsigned int i=0; i<kart_properties_manager->getNumberOfKarts(); i++)
             {
@@ -199,7 +222,7 @@ void HighScoreInfoDialog::updateHighscoreEntries()
                 }
             }
 
-            line = name + "    " + core::stringw(time_string.c_str());
+            line = name + "    " + core::stringw(highscore_string.c_str());
         }
         else
         {
@@ -235,13 +258,8 @@ GUIEngine::EventPropagation
             // Create player and associate player with device
             StateManager::get()->createActivePlayer(PlayerManager::getCurrentPlayer(), device);
 
-            RaceManager::get()->setMinorMode(HighScoreSelection::getInstance()->getActiveMode());
-
-            bool reverse = m_hs->m_reverse;
-            std::string track_name = m_hs->m_track;
-            int laps = m_hs->m_number_of_laps;
-
-            RaceManager::get()->setDifficulty((RaceManager::Difficulty) m_hs->m_difficulty);
+            RaceManager::get()->setMinorMode(m_minor_mode);
+            RaceManager::get()->setDifficulty((RaceManager::Difficulty)m_hs->m_difficulty);
 
             RaceManager::get()->setNumKarts(m_hs->m_number_of_karts);
             RaceManager::get()->setNumPlayers(1);
@@ -257,16 +275,35 @@ GUIEngine::EventPropagation
             // Disable accidentally unlocking of a challenge
             PlayerManager::getCurrentPlayer()->setCurrentChallenge("");
 
-            RaceManager::get()->setReverseTrack(reverse);
-
             // ASSIGN should make sure that only input from assigned devices is read
             input_manager->getDeviceManager()->setAssignMode(ASSIGN);
             input_manager->getDeviceManager()
                 ->setSinglePlayer( StateManager::get()->getActivePlayer(0) );
 
+            bool reverse = m_hs->m_reverse;
+            GrandPrixData::GPReverseType gp_reverse = (GrandPrixData::GPReverseType)m_hs->m_gp_reverse_type;
+            std::string track_name = m_hs->m_track;
+            int laps = m_hs->m_number_of_laps;
+            RaceManager::MajorRaceModeType major_mode = m_major_mode;
+
+            if (RaceManager::get()->isLapTrialMode())
+            {
+                RaceManager::get()->setTimeTarget(static_cast<float>(m_hs->m_number_of_laps));
+            }
+
             ModalDialog::dismiss();
 
-            RaceManager::get()->startSingleRace(track_name, laps, false);
+            if (major_mode == RaceManager::MAJOR_MODE_GRAND_PRIX)
+            {
+                GrandPrixData gp = *grand_prix_manager->getGrandPrix(track_name);
+                gp.changeReverse(gp_reverse);
+                RaceManager::get()->startGP(gp, false, false);
+            }
+            else
+            {
+                RaceManager::get()->setReverseTrack(reverse);
+                RaceManager::get()->startSingleRace(track_name, RaceManager::get()->isLapTrialMode() ? -1 : laps, false);
+            }
             return GUIEngine::EVENT_BLOCK;
         }
         else if (selection == "remove")
@@ -300,7 +337,7 @@ void HighScoreInfoDialog::onUpdate(float dt)
         m_curr_time += dt;
         int frame_after = (int)(m_curr_time / 1.5f);
 
-        const std::vector<std::string> tracks = m_gp->getTrackNames();
+        const std::vector<std::string> tracks = m_gp.getTrackNames();
         if (frame_after >= (int)tracks.size())
         {
             frame_after = 0;

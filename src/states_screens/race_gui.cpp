@@ -28,7 +28,7 @@ using namespace irr;
 #include "challenges/unlock_manager.hpp"
 #include "config/user_config.hpp"
 #include "font/font_drawer.hpp"
-#include "graphics/camera.hpp"
+#include "graphics/camera/camera.hpp"
 #include "graphics/central_settings.hpp"
 #include "graphics/2dutils.hpp"
 #ifndef SERVER_ONLY
@@ -63,6 +63,8 @@ using namespace irr;
 #include "utils/translation.hpp"
 
 #include <algorithm>
+
+#include <IrrlichtDevice.h>
 
 /** The constructor is called before anything is attached to the scene node.
  *  So rendering to a texture can be done here. But world is not yet fully
@@ -146,13 +148,10 @@ RaceGUI::~RaceGUI()
 void RaceGUI::init()
 {
     RaceGUIBase::init();
-    // Technically we only need getNumLocalPlayers, but using the
-    // global kart id to find the data for a specific kart.
-    int n = RaceManager::get()->getNumberOfKarts();
 
-    m_animation_states.resize(n);
-    m_rank_animation_duration.resize(n);
-    m_last_ranks.resize(n);
+    m_animation_states.clear();
+    m_animation_duration.clear();
+    m_last_digit.clear();
 }   // init
 
 //-----------------------------------------------------------------------------
@@ -162,11 +161,10 @@ void RaceGUI::init()
 void RaceGUI::reset()
 {
     RaceGUIBase::reset();
-    for(unsigned int i=0; i<RaceManager::get()->getNumberOfKarts(); i++)
-    {
-        m_animation_states[i] = AS_NONE;
-        m_last_ranks[i]       = i+1;
-    }
+
+    m_animation_states.clear();
+    m_animation_duration.clear();
+    m_last_digit.clear();
 }  // reset
 
 //-----------------------------------------------------------------------------
@@ -195,7 +193,7 @@ void RaceGUI::calculateMinimapSize()
     // Originally m_map_height was 100, and we take 480 as minimum res
     float scaling = std::min(irr_driver->getFrameSize().Height,  
                              irr_driver->getFrameSize().Width) / 480.0f;
-    const float map_size = stk_config->m_minimap_size * map_size_splitscreen;
+    const float map_size = UserConfigParams::m_minimap_size * map_size_splitscreen;
     const float top_margin = 3.5f * m_font_height;
     
     // Check if we have enough space for minimap when touch steering is enabled
@@ -218,8 +216,8 @@ void RaceGUI::calculateMinimapSize()
     
     // Marker texture has to be power-of-two for (old) OpenGL compliance
     //m_marker_rendered_size  =  2 << ((int) ceil(1.0 + log(32.0 * scaling)));
-    m_minimap_ai_size       = (int)( stk_config->m_minimap_ai_icon     * scaling);
-    m_minimap_player_size   = (int)( stk_config->m_minimap_player_icon * scaling);
+    m_minimap_ai_size       = (int)(UserConfigParams::m_minimap_ai_icon_size * scaling);
+    m_minimap_player_size   = (int)(UserConfigParams::m_minimap_player_icon_size * scaling);
     m_map_width             = (int)(map_size * scaling);
     m_map_height            = (int)(map_size * scaling);
 
@@ -376,10 +374,11 @@ void RaceGUI::renderPlayerView(const Camera *camera, float dt)
 
     if (!isSpectatorCam) drawPlungerInFace(camera, dt);
 
-    if (viewport.getWidth() != (int)irr_driver->getActualScreenSize().Width &&
+    if (viewport.getWidth() != (int)irr_driver->getActualScreenSize().Width ||
         viewport.getHeight() != (int)irr_driver->getActualScreenSize().Height)
     {
-        scaling *= float(viewport.getWidth()) / float(irr_driver->getActualScreenSize().Width); // scale race GUI along screen size
+        scaling.X *= float(viewport.getWidth()) / float(irr_driver->getActualScreenSize().Width); // scale race GUI along screen size
+        scaling.Y *= float(viewport.getHeight()) / float(irr_driver->getActualScreenSize().Height); // scale race GUI along screen size
     }
     else
     {
@@ -436,6 +435,7 @@ void RaceGUI::drawGlobalTimer()
 
     sw = core::stringw (StringUtils::timeToString(elapsed_time).c_str() );
 
+    // Use colors to draw player attention to countdowns in challenges and FTL
     if (RaceManager::get()->hasTimeTarget())
     {
         // This assumes only challenges have a time target
@@ -451,6 +451,13 @@ void RaceGUI::drawGlobalTimer()
         else if (elapsed_time <= 5)
             time_color = video::SColor(255,255,160,0);
         else if (elapsed_time <= 15)
+            time_color = video::SColor(255,255,255,0);
+    }
+    else if(RaceManager::get()->isFollowMode())
+    {
+        if (elapsed_time <= 3)
+            time_color = video::SColor(255,255,160,0);
+        else if (elapsed_time <= 8)
             time_color = video::SColor(255,255,255,0);
     }
 
@@ -512,14 +519,22 @@ void RaceGUI::drawLiveDifference()
     video::SColor time_color;
 
     // Change color depending on value
-    if (live_difference > 1.0f)
+    if (live_difference > 2.5f)
         time_color = video::SColor(255, 255, 0, 0);
+    else if (live_difference > 1.0f)
+        time_color = video::SColor(255, 255, 60, 0);
+    else if (live_difference > 0.3f)
+        time_color = video::SColor(255, 255, 120, 0);
     else if (live_difference > 0.0f)
-        time_color = video::SColor(255, 255, 160, 0);
+        time_color = video::SColor(255, 255, 180, 0);
+    else if (live_difference > -0.3f)
+        time_color = video::SColor(255, 210, 230, 0);
     else if (live_difference > -1.0f)
-        time_color = video::SColor(255, 160, 255, 0);
+        time_color = video::SColor(255, 105, 255, 0);
+    else if (live_difference > -2.5f)
+        time_color = video::SColor(255, 0, 210, 30);
     else
-        time_color = video::SColor(255, 0, 255, 0);
+        time_color = video::SColor(255, 0, 160, 60);
 
     int dist_from_right = 10 + timer_width;
 
@@ -577,6 +592,8 @@ void RaceGUI::drawGlobalMiniMap()
     if (ctf_world)
     {
         Vec3 draw_at;
+        video::SColor translucence((unsigned)-1);
+        translucence.setAlpha(128);
         if (!ctf_world->isRedFlagInBase())
         {
             track->mapPoint2MiniMap(Track::getCurrentTrack()->getRedFlag().getOrigin(),
@@ -586,7 +603,7 @@ void RaceGUI::drawGlobalMiniMap()
                 lower_y   -(int)(draw_at.getY()+(m_minimap_player_size/2.2f)),
                 m_map_left+(int)(draw_at.getX()+(m_minimap_player_size/1.4f)),
                 lower_y   -(int)(draw_at.getY()-(m_minimap_player_size/2.2f)));
-            draw2DImage(m_red_flag, rp, rs, NULL, NULL, true, true);
+            draw2DImage(m_red_flag, rp, rs, NULL, translucence, true);
         }
         Vec3 pos = ctf_world->getRedHolder() == -1 ? ctf_world->getRedFlag() :
             ctf_world->getKart(ctf_world->getRedHolder())->getSmoothedTrans().getOrigin();
@@ -608,7 +625,7 @@ void RaceGUI::drawGlobalMiniMap()
                 lower_y   -(int)(draw_at.getY()+(m_minimap_player_size/2.2f)),
                 m_map_left+(int)(draw_at.getX()+(m_minimap_player_size/1.4f)),
                 lower_y   -(int)(draw_at.getY()-(m_minimap_player_size/2.2f)));
-            draw2DImage(m_blue_flag, rp, rs, NULL, NULL, true, true);
+            draw2DImage(m_blue_flag, rp, rs, NULL, translucence, true);
         }
 
         pos = ctf_world->getBlueHolder() == -1 ? ctf_world->getBlueFlag() :
@@ -715,7 +732,7 @@ void RaceGUI::drawGlobalMiniMap()
                     rotation = rotation + M_PI;
                 }
                 rotation = -1.0f * rotation + 0.25f * M_PI; // icons-frame_arrow.png was rotated by 45 degrees
-                draw2DImage(m_icons_frame, position, rect, NULL, colors, true, false, rotation);
+                draw2DImageRotationColor(m_icons_frame, position, rect, NULL, rotation, color);
             }
             else
             {
@@ -895,49 +912,59 @@ void RaceGUI::drawRank(const AbstractKart *kart,
                       float min_ratio, int meter_width,
                       int meter_height, float dt)
 {
-    static video::SColor color = video::SColor(255, 255, 255, 255);
-
     // Draw rank
-    WorldWithRank *world = dynamic_cast<WorldWithRank*>(World::getWorld());
-    if (!world || !world->displayRank())
+    World *world = World::getWorld();
+    if (!world || !world->shouldDrawSpeedometerDigit())
         return;
+
+    std::pair<int, video::SColor> digit_data = world->getSpeedometerDigit(kart);
+
+    int number = digit_data.first;
+    video::SColor color = digit_data.second;
 
     int id = kart->getWorldKartId();
 
+    if (m_animation_states.find(id) == m_animation_states.end())
+    {
+        m_animation_duration[id] = 0.0f;
+        m_animation_states[id] = AS_NONE;
+        m_last_digit[id] = number;
+    }
+
     if (m_animation_states[id] == AS_NONE)
     {
-        if (m_last_ranks[id] != kart->getPosition())
+        if (m_last_digit[id] != number)
         {
-            m_rank_animation_duration[id] = 0.0f;
+            m_animation_duration[id] = 0.0f;
             m_animation_states[id] = AS_SMALLER;
         }
     }
     else
     {
-        m_rank_animation_duration[id] += dt;
+        m_animation_duration[id] += dt;
     }
 
     float scale = 1.0f;
-    int rank = kart->getPosition();
+    int shown_number = number;
     const float DURATION = 0.4f;
     const float MIN_SHRINK = 0.3f;
     if (m_animation_states[id] == AS_SMALLER)
     {
-        scale = 1.0f - m_rank_animation_duration[id]/ DURATION;
-        rank = m_last_ranks[id];
+        scale = 1.0f - m_animation_duration[id]/ DURATION;
+        shown_number = m_last_digit[id];
         if (scale < MIN_SHRINK)
         {
             m_animation_states[id] = AS_BIGGER;
-            m_rank_animation_duration[id] = 0.0f;
+            m_animation_duration[id] = 0.0f;
             // Store the new rank
-            m_last_ranks[id] = kart->getPosition();
+            m_last_digit[id] = number;
             scale = MIN_SHRINK;
         }
     }
     else if (m_animation_states[id] == AS_BIGGER)
     {
-        scale = m_rank_animation_duration[id] / DURATION + MIN_SHRINK;
-        rank = m_last_ranks[id];
+        scale = m_animation_duration[id] / DURATION + MIN_SHRINK;
+        shown_number = m_last_digit[id];
         if (scale > 1.0f)
         {
             m_animation_states[id] = AS_NONE;
@@ -947,7 +974,7 @@ void RaceGUI::drawRank(const AbstractKart *kart,
     }
     else
     {
-        m_last_ranks[id] = kart->getPosition();
+        m_last_digit[id] = number;
     }
 
     gui::ScalableFont* font = GUIEngine::getHighresDigitFont();
@@ -955,7 +982,7 @@ void RaceGUI::drawRank(const AbstractKart *kart,
     int font_height = font->getDimension(L"X").Height;
     font->setScale((float)meter_height / font_height * 0.4f * scale);
     std::ostringstream oss;
-    oss << rank; // the current font has no . :(   << ".";
+    oss << shown_number; // the current font has no . :(   << ".";
 
     core::recti pos;
     pos.LowerRightCorner = core::vector2di(int(offset.X + 0.64f*meter_width),
@@ -1369,7 +1396,10 @@ void RaceGUI::drawLap(const AbstractKart* kart,
     pos.LowerRightCorner.X -= icon_width;
 
     std::ostringstream out;
-    out << lap + 1 << "/" << RaceManager::get()->getNumLaps();
+    if (world->showLapsTarget())
+        out << lap + 1 << "/" << RaceManager::get()->getNumLaps();
+    else
+        out << lap;
 
     gui::ScalableFont* font = GUIEngine::getHighresDigitFont();
     font->setBlackBorder(true);
@@ -1378,4 +1408,3 @@ void RaceGUI::drawLap(const AbstractKart* kart,
     font->setScale(1.0f);
 #endif
 } // drawLap
-

@@ -42,14 +42,13 @@ MusicInformation *MusicInformation::create(const std::string &filename)
 {
     assert(filename.size() > 0);
 
-    XMLNode* root = file_manager->createXMLTree(filename);
+    auto root = std::unique_ptr<XMLNode>(file_manager->createXMLTree(filename));
     if (!root) return NULL;
     if(root->getName()!="music")
     {
         Log::error("MusicInformation",
                    "Music file '%s' does not contain music node.\n",
                    filename.c_str());
-        delete root;
         return NULL;
     }
     std::string s;
@@ -61,11 +60,9 @@ MusicInformation *MusicInformation::create(const std::string &filename)
                     "One of 'title' or 'file' attribute "
                     "is missing in the music XML file '%s'!\n",
                     filename.c_str());
-        delete root;
         return NULL;
     }
-    MusicInformation *mi = new MusicInformation(root, filename);
-    delete root;
+    MusicInformation *mi = new MusicInformation(root.get(), filename);
     return mi;
 }   // create()
 
@@ -88,8 +85,7 @@ MusicInformation::MusicInformation(const XMLNode *root,
     m_fast_loop_end     = -1.0f;
     m_enable_fast       = false;
     m_music_waiting     = false;
-    m_faster_time       = 1.0f;
-    m_max_pitch         = 0.1f;
+    m_faster_time       = 1.5f;
     m_gain              = 1.0f;
 
 
@@ -110,6 +106,8 @@ MusicInformation::MusicInformation(const XMLNode *root,
     root->get("loop-end",        &m_normal_loop_end  );
     root->get("fast-loop-start", &m_fast_loop_start  );
     root->get("fast-loop-end",   &m_fast_loop_end    );
+
+    m_temporary_volume = m_gain;
 
     // Get the path from the filename and add it to the ogg filename
     std::string path  = StringUtils::getPath(filename);
@@ -277,31 +275,15 @@ void MusicInformation::update(float dt)
         {
             m_mode=SOUND_FAST;
             m_normal_music->stopMusic();
+            m_fast_music->setVolume(m_temporary_volume);
             m_fast_music->update();
             return;
         }
         float fraction=m_time_since_faster/m_faster_time;
-        m_normal_music->setVolume(1-fraction);
-        m_fast_music->setVolume(fraction);
+        m_normal_music->setVolume(m_temporary_volume * (1-fraction));
+        m_fast_music->setVolume(m_temporary_volume * fraction);
         m_normal_music->update();
         m_fast_music->update();
-        break;
-                       }
-    case SOUND_FASTER: {
-        if ( m_normal_music == NULL ) break;
-
-        m_time_since_faster +=dt;
-        if(m_time_since_faster>=m_faster_time)
-        {
-            // Once the pitch is adjusted, just switch back to normal
-            // mode. We can't switch to fast music mode, since this would
-            // play m_fast_music, which isn't available.
-            m_mode=SOUND_NORMAL;
-            return;
-        }
-        float fraction=m_time_since_faster/m_faster_time;
-        m_normal_music->updateFaster(fraction, m_max_pitch);
-
         break;
                        }
     case SOUND_NORMAL:
@@ -358,6 +340,7 @@ void MusicInformation::resumeMusic()
 //-----------------------------------------------------------------------------
 void MusicInformation::setDefaultVolume()
 {
+    m_temporary_volume = m_gain;
     if (m_normal_music && m_normal_music->isPlaying())
         m_normal_music->setVolume(m_gain);
     if (m_fast_music && m_fast_music->isPlaying())
@@ -370,11 +353,14 @@ void MusicInformation::setDefaultVolume()
  */
 void MusicInformation::setTemporaryVolume(float volume)
 {
-    if (m_normal_music != NULL) m_normal_music->setVolume(volume);
-    if (m_fast_music   != NULL) m_fast_music->setVolume(volume);
+    m_temporary_volume = m_gain * volume;
+    if (m_normal_music != NULL) m_normal_music->setVolume(m_temporary_volume);
+    if (m_fast_music   != NULL) m_fast_music->setVolume(m_temporary_volume);
 }
 
 //-----------------------------------------------------------------------------
+/** If there is a fast music available, switch to it.
+ *  */
 void MusicInformation::switchToFastMusic()
 {
     if(!m_enable_fast) return;
@@ -384,11 +370,6 @@ void MusicInformation::switchToFastMusic()
         m_mode = SOUND_FADING;
         m_fast_music->playMusic();
         m_fast_music->setVolume(0);
-    }
-    else
-    {
-        // FIXME: for now this music is too annoying,
-        m_mode = SOUND_FASTER;
     }
 }   // switchToFastMusic
 

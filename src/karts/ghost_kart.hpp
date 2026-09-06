@@ -20,7 +20,7 @@
 #define HEADER_GHOST_KART_HPP
 
 #include "karts/kart.hpp"
-#include "replay/replay_base.hpp"
+#include "replay/replay_play.hpp"
 #include "utils/cpp2011.hpp"
 
 #include "LinearMath/btTransform.h"
@@ -46,15 +46,23 @@ private:
 
     std::vector<ReplayBase::KartReplayEvent> m_all_replay_events;
 
-    unsigned int                             m_last_egg_idx = 0;
+    ReplayPlay::ReplayData m_replay_data;
+
+    unsigned int                             m_last_egg_idx;
+
+    bool m_finish_computed;
 
     // ----------------------------------------------------------------------------
     /** Compute the time at which the ghost finished the race */
     void          computeFinishTime();
+    // ----------------------------------------------------------------------------
+    /** Update sound effect upon ghost replay data */
+    void          updateSound(float dt);
 
 public:
                   GhostKart(const std::string& ident, unsigned int world_kart_id,
-                            int position, float color_hue);
+                            int position, float color_hue,
+                            const ReplayPlay::ReplayData& rd);
     virtual void  update(int ticks) OVERRIDE;
     virtual void  updateGraphics(float dt) OVERRIDE;
     virtual void  reset() OVERRIDE;
@@ -80,13 +88,14 @@ public:
     /** Ghost can't be hunted. */
     virtual bool  isInvulnerable() const OVERRIDE { return true; }
     // ------------------------------------------------------------------------
+    /** Ghost are not on the ground if flying. */
+    virtual bool  isOnGround() const OVERRIDE { return !m_flying; }
+    // ------------------------------------------------------------------------
     /** Returns the speed of the kart in meters/second. */
     virtual float getSpeed() const OVERRIDE;
-
     // ------------------------------------------------------------------------
     /** Returns the finished time for a ghost kart. */
-    float  getGhostFinishTime() { computeFinishTime(); return m_finish_time; }
-
+    float  getGhostFinishTime();
     // ------------------------------------------------------------------------
     /** Returns the time at which the kart was at a given distance.
       * Returns -1.0f if none */
@@ -101,6 +110,9 @@ public:
     virtual void kartIsInRestNow() OVERRIDE {}
     // ------------------------------------------------------------------------
     virtual void makeKartRest() OVERRIDE {}
+    // ------------------------------------------------------------------------
+    const ReplayPlay::ReplayData& getReplayData() const
+                                                     { return m_replay_data; }
 };   // GhostKart
 #endif
 

@@ -23,7 +23,7 @@
 #include "audio/music_manager.hpp"
 #include "config/user_config.hpp"
 #include "graphics/2dutils.hpp"
-#include "graphics/camera.hpp"
+#include "graphics/camera/camera.hpp"
 #include "graphics/central_settings.hpp"
 #include "graphics/irr_driver.hpp"
 #include "graphics/material.hpp"
@@ -53,6 +53,7 @@
 #include "utils/translation.hpp"
 
 #include <GlyphLayout.h>
+#include <IrrlichtDevice.h>
 #include <ICameraSceneNode.h>
 
 namespace irr
@@ -381,6 +382,8 @@ void RaceGUIBase::drawPowerupIcons(const AbstractKart* kart,
                                    const core::vector2df &scaling)
 {
 #ifndef SERVER_ONLY
+    if (UserConfigParams::m_powerup_display == 2) return;
+
     // If player doesn't have any powerups or has completed race, do nothing.
     const Powerup* powerup = kart->getPowerup();
     if (powerup->getType() == PowerupManager::POWERUP_NOTHING
@@ -397,14 +400,15 @@ void RaceGUIBase::drawPowerupIcons(const AbstractKart* kart,
 
     float scale = (float)(std::min(scaling.X, scaling.Y));
 
-    int nSize = (int)(64.0f * scale);
+    int nSize = (int)(UserConfigParams::m_powerup_size * scale);
 
-    int itemSpacing = (int)(scale * 32.0f);
+    int itemSpacing = (int)(scale * UserConfigParams::m_powerup_size / 2);
 
     int x1, y1;
 
-    // When there is not much height, move items on the side
-    if ((float) viewport.getWidth() / (float) viewport.getHeight() > 2.0f)
+    // When there is not much height or set by user, move items on the side
+    if ((UserConfigParams::m_powerup_display == 1) || 
+        ((float) viewport.getWidth() / (float) viewport.getHeight() > 2.0f))
     {
         x1 = viewport.UpperLeftCorner.X  + 3*(viewport.getWidth()/4)
            - ((n * itemSpacing)/2);
@@ -1030,35 +1034,21 @@ void RaceGUIBase::drawPlayerIcon(AbstractKart *kart, int x, int y, int w,
                                  bool is_local)
 {
 #ifndef SERVER_ONLY
-    video::ITexture *icon =
-    kart->getKartProperties()->getIconMaterial()->getTexture();
+    video::ITexture *icon = kart->getKartProperties()->getIconMaterial()->getTexture();
 
     CaptureTheFlag* ctf = dynamic_cast<CaptureTheFlag*>(World::getWorld());
     unsigned int kart_id = kart->getWorldKartId();
 
     // CTF
-    if (ctf)
+    if (ctf && (ctf->getRedHolder()  == (int)kart_id ||
+                ctf->getBlueHolder() == (int)kart_id))
     {
-        if (ctf->getRedHolder() == (int)kart_id)
-        {
-            video::ITexture* red =
-                irr_driver->getTexture(FileManager::GUI_ICON, "red_flag.png");
-            const core::rect<s32> rect(core::position2d<s32>(0, 0),
-                red->getSize());
-            const core::rect<s32> pos1
-                (x - 20, y - 10, x + w - 20, y + w - 30);
-            draw2DImage(red, pos1, rect, NULL, NULL, true);
-        }
-        else if (ctf->getBlueHolder() == (int)kart_id)
-        {
-            video::ITexture* blue =
-                irr_driver->getTexture(FileManager::GUI_ICON, "blue_flag.png");
-            const core::rect<s32> rect(core::position2d<s32>(0, 0),
-                blue->getSize());
-            const core::rect<s32> pos1
-                (x - 20, y - 10, x + w - 20, y + w - 30);
-            draw2DImage(blue, pos1, rect, NULL, NULL, true);
-        }
+        video::ITexture* flag = irr_driver->getTexture(FileManager::GUI_ICON,
+            (ctf->getRedHolder() == (int)kart_id) ? "red_flag.png" : "blue_flag.png");
+
+        const core::rect<s32> rect(core::position2d<s32>(0, 0), flag->getSize());
+        const core::rect<s32> pos1(x - 20, y - 10, x + w - 20, y + w - 30);
+        draw2DImage(flag, pos1, rect, NULL, NULL, true);
     }
 
     const core::rect<s32> pos(x, y, x+w, y+w);
@@ -1125,7 +1115,12 @@ void RaceGUIBase::drawPlayerIcon(AbstractKart *kart, int x, int y, int w,
     {
         const core::rect<s32> rect(core::position2d<s32>(0,0),
                                    icon->getSize());
-        draw2DImage(icon, pos, rect, NULL, NULL, true, kart->isGhostKart());
+        video::SColor translucence((unsigned)-1);
+        translucence.setAlpha(128);
+        if (kart->isGhostKart())
+            draw2DImage(icon, pos, rect, NULL, translucence, true);
+        else
+            draw2DImage(icon, pos, rect, NULL, NULL, true);
     }
 
     //draw status info - icon fade out in case of rescue/explode
@@ -1155,40 +1150,18 @@ void RaceGUIBase::drawPlayerIcon(AbstractKart *kart, int x, int y, int w,
                                                   true);
     }
 
-    if (icon  &&
-        dynamic_cast<ExplosionAnimation*>(kart->getKartAnimation()) )
+    // "Explodes" by animating the cart spinning
+    if (icon && dynamic_cast<ExplosionAnimation*>(kart->getKartAnimation()))
     {
-        //exploses into 4 parts
-        float t = kart->getKartAnimation()->getAnimationTimer();
-        float t_anim=50.0f*sinf(0.5f*M_PI*t);
-        u16 icon_size_x=icon->getSize().Width;
-        u16 icon_size_y=icon->getSize().Height;
+        float a = kart->getKartAnimation()->getAlpha();
 
-        const core::rect<s32> rect1(0, 0, icon_size_x/2,icon_size_y/2);
-        const core::rect<s32> pos1((int)(x-t_anim), (int)(y-t_anim),
-                                   (int)(x+w/2-t_anim),
-                                   (int)(y+w/2-t_anim));
-        draw2DImage(icon, pos1, rect1,
-                                                  NULL, NULL, true);
+        // Use quadratic ease-out
+        float eased = 1.0f - powf(2.0f, -10.0f * a);
 
-        const core::rect<s32> rect2(icon_size_x/2,0,
-                                    icon_size_x,icon_size_y/2);
-        const core::rect<s32> pos2((int)(x+w/2+t_anim),
-                                   (int)(y-t_anim),
-                                   (int)(x+w+t_anim),
-                                   (int)(y+w/2-t_anim));
-        draw2DImage(icon, pos2, rect2,
-                                                  NULL, NULL, true);
+        const core::rect<s32> sourceRect(core::position2d<s32>(0, 0),
+            icon->getSize());
 
-        const core::rect<s32> rect3(0, icon_size_y/2, icon_size_x/2,icon_size_y);
-        const core::rect<s32> pos3((int)(x-t_anim), (int)(y+w/2+t_anim),
-                                   (int)(x+w/2-t_anim), (int)(y+w+t_anim));
-        draw2DImage(icon, pos3, rect3, NULL, NULL, true);
-
-        const core::rect<s32> rect4(icon_size_x/2,icon_size_y/2,icon_size_x,icon_size_y);
-        const core::rect<s32> pos4((int)(x+w/2+t_anim), (int)(y+w/2+t_anim),
-                                   (int)(x+w+t_anim), (int)(y+w+t_anim));
-        draw2DImage(icon, pos4, rect4, NULL, NULL, true);
+        draw2DImageRotationColor(icon, pos, sourceRect, NULL, M_PI * 4.0f * eased, video::SColor((unsigned)-1));
     }
 
     // Current item(s) and how many if > 1

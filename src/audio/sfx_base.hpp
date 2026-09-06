@@ -82,7 +82,7 @@ public:
     virtual void       reallySetVolume(float gain)          = 0;
     virtual void       setMasterVolume(float gain)          = 0;
     virtual void       reallySetMasterVolumeNow(float gain) = 0;
-    virtual void       onSoundEnabledBack()                 = 0;
+    virtual void       onSoundEnabledBack(bool resume_later)= 0;
     virtual void       setRolloff(float rolloff)            = 0;
     virtual SFXBuffer* getBuffer() const                    = 0;
     virtual SFXStatus  getStatus() const                    = 0;

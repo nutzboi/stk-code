@@ -21,8 +21,6 @@
 #include <cinttypes>
 #include <stdexcept>
 
-#include <irrlicht.h>
-
 #include "config/stk_config.hpp"
 #include "graphics/irr_driver.hpp"
 #include "graphics/sp/sp_base.hpp"
@@ -40,6 +38,8 @@
 #include "race/race_manager.hpp"
 #include "utils/constants.hpp"
 #include "utils/string_utils.hpp"
+
+#include <IMesh.h>
 
 PowerupManager* powerup_manager=0;
 
@@ -524,6 +524,7 @@ void PowerupManager::computeWeightsForRace(int num_karts)
     switch (RaceManager::get()->getMinorMode())
     {
     case RaceManager::MINOR_MODE_TIME_TRIAL:       /* fall through */
+    case RaceManager::MINOR_MODE_LAP_TRIAL:       /* fall through */
     case RaceManager::MINOR_MODE_NORMAL_RACE:      class_name="race";     break;
     case RaceManager::MINOR_MODE_FOLLOW_LEADER:    class_name="ftl";      break;
     case RaceManager::MINOR_MODE_3_STRIKES:        class_name="battle";   break;

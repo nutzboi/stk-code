@@ -63,7 +63,9 @@ public:
     Highscores *getGPHighscores(int num_karts,
                                 const RaceManager::Difficulty difficulty,
                                 const std::string &trackName,
-                                GrandPrixData::GPReverseType reverse_type);
+                                const int target,
+                                GrandPrixData::GPReverseType reverse_type,
+                                RaceManager::MinorRaceModeType minor_mode);
     // ------------------------------------------------------------------------
     void deleteHighscores(int i)        { m_all_scores.erase
                                         (m_all_scores.begin() + i); }

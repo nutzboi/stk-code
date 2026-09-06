@@ -46,6 +46,14 @@
                         <spacer width="3%"/>
                         <label id="group-text" width="52%" height="fit" I18N="In the grand prix info screen" text="Track group" text_align="left"/>
                     </div>
+                    <spacer width="1" height="1%"/>
+                    <div width="100%" height="fit" layout="horizontal-row">
+                        <div width="45%" height="fit" layout="horizontal-row">
+                            <spinner id="time-target-spinner" width="100%" min_value="1" max_value="20" align="center" wrap_around="true" />
+                        </div>
+                        <spacer width="3%"/>
+                        <label id="time-target-text" width="52%" height="fit" I18N="In the grand prix info screen" text="Maximum time (min.)" text_align="left"/>
+                    </div>
                 </div>
             </box>
             <spacer width="2%" height="1"/>
@@ -63,11 +71,11 @@
 
         <spacer width="1" height="1%"/>
         <buttonbar id="buttons" height="17%" width="100%" align="center">
-            <icon-button id="start" width="64" height="64" icon="gui/icons/green_check.png"
-                    I18N="In the grand prix info screen" text="Start Race"/>
-
             <icon-button id="continue" width="64" height="64" icon="gui/icons/green_check.png"
                     I18N="In the grand prix info screen" text="Continue saved GP"/>
+
+            <icon-button id="start" width="64" height="64" icon="gui/icons/green_check.png"
+                    I18N="In the grand prix info screen" text="Start Race"/>
         </buttonbar>
 
     </div>

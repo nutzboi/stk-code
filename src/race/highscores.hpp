@@ -61,6 +61,7 @@ public:
     int                 m_number_of_laps;
     bool                m_reverse;
     int                 m_gp_reverse_type;
+    int                 m_gp_minor_mode;
 
 private:
     std::array<std::string, HIGHSCORE_LEN> m_kart_name;
@@ -84,8 +85,8 @@ public:
                 const bool reverse);
     /** Constructor for grandprix highscores */
     Highscores (int num_karts, const RaceManager::Difficulty &difficulty,
-                const std::string &trackName,
-                const GrandPrixData::GPReverseType reverse_type);
+                const std::string &trackName, const int target,
+                const GrandPrixData::GPReverseType reverse_type, RaceManager::MinorRaceModeType minor_mode);
     /** Creates an entry from a file
      */
     Highscores (const XMLNode &node);
@@ -102,8 +103,8 @@ public:
     /** matches method for grandprix highscores */
     int matches(int num_karts,
                 const RaceManager::Difficulty &difficulty,
-                const std::string &track,
-                const GrandPrixData::GPReverseType reverse_type);
+                const std::string &track, const int target,
+                const GrandPrixData::GPReverseType reverse_type, RaceManager::MinorRaceModeType minor_mode);
     // ------------------------------------------------------------------------
     int  addData   (const std::string& kart_name,
                     const irr::core::stringw& name, const float time);

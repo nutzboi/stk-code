@@ -16,6 +16,8 @@
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+#ifndef SERVER_ONLY
+
 #ifndef HEADER_SMOKE_HPP
 #define HEADER_SMOKE_HPP
 
@@ -99,7 +101,9 @@ public:
     void         addHeightMapAffector(Track* t);
 
     bool         randomizeInitialY() const { return m_randomize_initial_y; }
-
-    const Vec3& getPosition() const noexcept { return m_position; }
 };
-#endif
+#endif // HEADER_SMOKE_HPP
+
+#endif // !SERVER_ONLY
+
+

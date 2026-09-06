@@ -68,6 +68,8 @@ private:
     /** Pointer to the texture. */
     video::ITexture *m_texture;
 
+    std::array<video::ITexture*, 4> m_vk_textures;
+
     /** Name of the texture. */
     std::string      m_texname;
 
@@ -202,7 +204,8 @@ private:
     std::string      m_colorization_mask;
 
     void  init    ();
-    void  install (std::function<void(video::IImage*)> image_mani = nullptr);
+    void  install (std::function<void(video::IImage*)> image_mani = nullptr,
+                   video::SMaterial* m = NULL);
     void  initCustomSFX(const XMLNode *sfx);
     void  initParticlesEffect(const XMLNode *node);
 
@@ -210,7 +213,7 @@ private:
     std::string      m_shader_name;
     std::string      m_uv_two_tex;
     // Full path for textures in sp shader
-    std::string      m_sampler_path[6];
+    std::array<std::string, 6> m_sampler_path;
     std::string      m_container_id;
     void loadContainerId();
 
@@ -261,8 +264,6 @@ public:
         return m_hue_settings[hue];
     }
     // ------------------------------------------------------------------------
-    const std::vector<float>& getHueSettings() const noexcept { return m_hue_settings; };
-    // ------------------------------------------------------------------------
     /** Returns if this material should trigger a rescue if a kart
      *  crashes against it. */
     CollisionReaction  getCollisionReaction() const { return m_collision_reaction; }
@@ -284,6 +285,13 @@ public:
     {
         return m_shader_name == "additive" || m_shader_name == "alphablend" ||
                m_shader_name == "displace";
+    }
+
+    // ------------------------------------------------------------------------
+    bool  useAlphaChannel    () const
+    {
+        return isTransparent() || m_shader_name == "alphatest" ||
+               m_shader_name == "unlit" || m_shader_name == "grass";
     }
 
     // ------------------------------------------------------------------------
@@ -309,16 +317,6 @@ public:
     /** Returns the name of a special sfx to play while a kart is on this
      *  terrain. The string will be "" if no special sfx exists. */
     const std::string &getSFXName() const { return m_sfx_name; }
-    // ------------------------------------------------------------------------
-    float getSfxMinSpeed() const noexcept {return m_sfx_min_speed; }
-    // ------------------------------------------------------------------------
-    float getSfxMaxSpeed() const noexcept {return m_sfx_max_speed; }
-    // ------------------------------------------------------------------------
-    float getSfxMinPitch() const noexcept {return m_sfx_min_pitch; }
-    // ------------------------------------------------------------------------
-    float getSfxMaxPitch() const noexcept {return m_sfx_max_pitch; }
-    // ------------------------------------------------------------------------
-    float getSfxPitchPerSpeed() const noexcept {return m_sfx_pitch_per_speed; }
     // ------------------------------------------------------------------------
     /** \brief Get the kind of particles that are to be used on this material,
      *  in the given conditions.
@@ -395,14 +393,11 @@ public:
         return m_container_id;
     }
     // ------------------------------------------------------------------------
-    bool hasTextureCompression() const noexcept { return m_tex_compression; }
-    // ------------------------------------------------------------------------
-    bool hasUClamp() const noexcept;
-    // ------------------------------------------------------------------------
-    bool hasVClamp() const noexcept;
+    std::function<void(irr::video::IImage*)> getMaskImageMani() const;
 };
 
 
 #endif
 
 /* EOF */
+

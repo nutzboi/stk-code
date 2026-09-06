@@ -38,6 +38,10 @@
 #include "tracks/track.hpp"
 #include "tracks/track_object_manager.hpp"
 
+#ifdef ANDROID
+#include <SDL_system.h>
+#endif
+
 //-----------------------------------------------------------------------------
 OverWorld::OverWorld() : World()
 {
@@ -124,10 +128,11 @@ void OverWorld::update(int ticks)
         setPhase(RACE_PHASE);
         // Normally done in WorldStatus::update(), during phase SET_PHASE,
         // so we have to start music 'manually', since we skip all phases.
+        MusicInformation* mi = Track::getCurrentTrack()->getTrackMusic();
         Track::getCurrentTrack()->startMusic();
 
         if (UserConfigParams::m_music)
-            music_manager->startMusic();
+            music_manager->startMusic(mi);
         m_karts[0]->startEngineSFX();
     }
     World::update(ticks);
@@ -241,6 +246,11 @@ void OverWorld::onFirePressed(Controller* who)
         {
             if (challenges[n].m_challenge_id == "tutorial")
             {
+#ifdef ANDROID
+                if (SDL_IsAndroidTV())
+                    return;
+#endif
+
                 scheduleTutorial();
                 return;
             }

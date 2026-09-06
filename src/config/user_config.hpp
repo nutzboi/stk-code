@@ -414,13 +414,24 @@ namespace UserConfigParams
             PARAM_DEFAULT(  BoolUserConfigParam(true, "music_on",
             &m_audio_group,
             "Whether musics are enabled or not (true or false)") );
+    PARAM_PREFIX IntUserConfigParam         m_sfx_numerator
+            PARAM_DEFAULT(  IntUserConfigParam(10, "sfx_numerator",
+            &m_audio_group, "The value in the audio options SFX spinner") );
     PARAM_PREFIX FloatUserConfigParam       m_sfx_volume
-            PARAM_DEFAULT(  FloatUserConfigParam(0.6f, "sfx_volume",
+            PARAM_DEFAULT(  FloatUserConfigParam(0.2678f, "sfx_volume",
             &m_audio_group, "Volume for sound effects, see openal AL_GAIN "
                             "for interpretation") );
+    PARAM_PREFIX IntUserConfigParam         m_music_numerator
+            PARAM_DEFAULT(  IntUserConfigParam(10, "music_numerator",
+            &m_audio_group, "The value in the audio options music spinner") );
     PARAM_PREFIX FloatUserConfigParam       m_music_volume
-            PARAM_DEFAULT(  FloatUserConfigParam(0.5f, "music_volume",
+            PARAM_DEFAULT(  FloatUserConfigParam(0.2678f, "music_volume",
             &m_audio_group, "Music volume from 0.0 to 1.0") );
+
+    PARAM_PREFIX IntUserConfigParam          m_volume_denominator
+            PARAM_DEFAULT(  IntUserConfigParam(15, "volume_denominator",
+                            &m_audio_group,
+                            "Number of steps for volume adjustment") );
 
     // ---- Race setup
     PARAM_PREFIX GroupUserConfigParam        m_race_setup_group
@@ -434,12 +445,21 @@ namespace UserConfigParams
     PARAM_PREFIX IntUserConfigParam          m_num_laps
             PARAM_DEFAULT(  IntUserConfigParam(4, "numlaps",
             &m_race_setup_group, "Default number of laps.") );
+    PARAM_PREFIX IntUserConfigParam          m_gp_reverse
+            PARAM_DEFAULT(  IntUserConfigParam(0, "gp-reverse",
+            &m_race_setup_group, "Default direction of GP tracks. 0=default, 1=no reverse, 2=all reverse, 3=Random") );
+    PARAM_PREFIX IntUserConfigParam          m_rand_gp_num_tracks
+            PARAM_DEFAULT(  IntUserConfigParam(1, "random-gp-num-tracks",
+            &m_race_setup_group, "Default number of tracks for random GP.") );            
     PARAM_PREFIX IntUserConfigParam          m_ffa_time_limit
         PARAM_DEFAULT(IntUserConfigParam(3, "ffa-time-limit",
             &m_race_setup_group, "Time limit in ffa mode."));
     PARAM_PREFIX BoolUserConfigParam         m_use_ffa_mode
         PARAM_DEFAULT(BoolUserConfigParam(false, "use-ffa-mode",
             &m_race_setup_group, "Use ffa mode instead of 3 strikes battle."));
+    PARAM_PREFIX IntUserConfigParam          m_lap_trial_time_limit
+        PARAM_DEFAULT(IntUserConfigParam(3, "lap-trial-time-limit",
+            &m_race_setup_group, "Time limit in lap trial mode."));
     PARAM_PREFIX IntUserConfigParam          m_num_goals
             PARAM_DEFAULT(  IntUserConfigParam(3, "numgoals",
             &m_race_setup_group, "Default number of goals in soccer mode.") );
@@ -486,6 +506,9 @@ namespace UserConfigParams
     PARAM_PREFIX BoolUserConfigParam          m_addon_tux_online
             PARAM_DEFAULT(  BoolUserConfigParam(false, "addon-tux-online",
             &m_race_setup_group, "Always show online addon karts as tux when live join is on.") );
+    PARAM_PREFIX BoolUserConfigParam          m_random_player_pos
+            PARAM_DEFAULT(  BoolUserConfigParam(false, "random-player-pos",
+            &m_race_setup_group, "Randomize the position of the players at the start of a race. Doesn't apply to story mode.") );
 
     // ---- Wiimote data
     PARAM_PREFIX GroupUserConfigParam        m_wiimote_group
@@ -599,21 +622,27 @@ namespace UserConfigParams
     PARAM_PREFIX GroupUserConfigParam        m_video_group
         PARAM_DEFAULT( GroupUserConfigParam("Video", "Video Settings") );
 
+    PARAM_PREFIX IntUserConfigParam         m_real_width
+            PARAM_DEFAULT(  IntUserConfigParam(1024, "real_width", &m_video_group,
+                                            "Screen/window real width in pixels before high dpi is applied") );
+    PARAM_PREFIX IntUserConfigParam         m_real_height
+            PARAM_DEFAULT(  IntUserConfigParam(768, "real_height", &m_video_group,
+                                           "Screen/window real height in pixels before high dpi is applied") );
     PARAM_PREFIX IntUserConfigParam         m_width
             PARAM_DEFAULT(  IntUserConfigParam(1024, "width", &m_video_group,
-                                            "Screen/window width in pixels") );
+                                            "Screen/window width in pixels, this value should not be edited") );
     PARAM_PREFIX IntUserConfigParam         m_height
             PARAM_DEFAULT(  IntUserConfigParam(768, "height", &m_video_group,
-                                           "Screen/window height in pixels") );
+                                           "Screen/window height in pixels, this value should not be edited") );
     PARAM_PREFIX BoolUserConfigParam        m_fullscreen
             PARAM_DEFAULT(  BoolUserConfigParam(false, "fullscreen",
                                                 &m_video_group) );
-    PARAM_PREFIX IntUserConfigParam         m_prev_width
-            PARAM_DEFAULT(  IntUserConfigParam(1024, "prev_width",
-                            &m_video_group, "Previous screen/window width") );
-    PARAM_PREFIX IntUserConfigParam         m_prev_height
-            PARAM_DEFAULT(  IntUserConfigParam(768, "prev_height",
-                            &m_video_group,"Previous screen/window height") );
+    PARAM_PREFIX IntUserConfigParam         m_prev_real_width
+            PARAM_DEFAULT(  IntUserConfigParam(1024, "prev_real_width",
+                            &m_video_group, "Previous real screen/window width") );
+    PARAM_PREFIX IntUserConfigParam         m_prev_real_height
+            PARAM_DEFAULT(  IntUserConfigParam(768, "prev_real_height",
+                            &m_video_group,"Previous real screen/window height") );
     PARAM_PREFIX BoolUserConfigParam        m_prev_fullscreen
             PARAM_DEFAULT(  BoolUserConfigParam(false, "prev_fullscreen",
                             &m_video_group) );
@@ -644,7 +673,7 @@ namespace UserConfigParams
     PARAM_PREFIX BoolUserConfigParam        m_force_legacy_device
         PARAM_DEFAULT(BoolUserConfigParam(false, "force_legacy_device",
         &m_video_group, "Force OpenGL 2 context, even if OpenGL 3 is available."));
-    PARAM_PREFIX BoolUserConfigParam        split_screen_horizontally
+    PARAM_PREFIX BoolUserConfigParam        m_split_screen_horizontally
         PARAM_DEFAULT(BoolUserConfigParam(true, "split_screen_horizontally",
             &m_video_group, "When playing a non-square amount of players (e.g. 2),"
             " should it split horizontally (top/bottom)"));
@@ -694,15 +723,29 @@ namespace UserConfigParams
         PARAM_DEFAULT(  FloatUserConfigParam(3, "font_size",
         &m_video_group, "The size of fonts. 0 is the smallest and 6 is the biggest") );
 
-#if defined(_IRR_COMPILE_WITH_DIRECT3D_9_) && defined(_M_ARM64)
+#if defined(_IRR_COMPILE_WITH_DIRECT3D_9_) && defined(_M_ARM)
     PARAM_PREFIX StringUserConfigParam         m_render_driver
         PARAM_DEFAULT(  StringUserConfigParam("directx9", "render_driver",
-        &m_video_group, "Render video driver to use, at the moment gl or directx9 is supported.") );
+        &m_video_group, "Render video driver to use, at the moment gl, vulkan or directx9 is supported.") );
 #else
     PARAM_PREFIX StringUserConfigParam         m_render_driver
         PARAM_DEFAULT(  StringUserConfigParam("gl", "render_driver",
-        &m_video_group, "Render video driver to use, at the moment gl or directx9 is supported.") );
+        &m_video_group, "Render video driver to use, at the moment gl, vulkan or directx9 is supported.") );
 #endif
+
+#if defined(MOBILE_STK)
+    PARAM_PREFIX BoolUserConfigParam        m_vulkan_fullscreen_desktop
+        PARAM_DEFAULT(BoolUserConfigParam(false, "vulkan_fullscreen_desktop",
+        &m_video_group, "Use SDL_WINDOW_FULLSCREEN_DESKTOP for vulkan device"));
+#else
+    PARAM_PREFIX BoolUserConfigParam        m_vulkan_fullscreen_desktop
+        PARAM_DEFAULT(BoolUserConfigParam(true, "vulkan_fullscreen_desktop",
+        &m_video_group, "Use SDL_WINDOW_FULLSCREEN_DESKTOP for vulkan device"));
+#endif
+
+    PARAM_PREFIX BoolUserConfigParam        m_non_ge_fullscreen_desktop
+        PARAM_DEFAULT(BoolUserConfigParam(false, "non_ge_fullscreen_desktop",
+        &m_video_group, "Use SDL_WINDOW_FULLSCREEN_DESKTOP for non-ge device"));
 
     // ---- Recording
     PARAM_PREFIX GroupUserConfigParam        m_recording_group
@@ -791,6 +834,10 @@ namespace UserConfigParams
 
     PARAM_PREFIX bool m_race_now          PARAM_DEFAULT( false );
 
+    PARAM_PREFIX int m_default_keyboard   PARAM_DEFAULT( -1 );
+
+    PARAM_PREFIX int m_default_gamepad    PARAM_DEFAULT( -1 );
+
     PARAM_PREFIX bool m_enforce_current_player PARAM_DEFAULT( false );
 
     PARAM_PREFIX bool m_enable_sound PARAM_DEFAULT( true );
@@ -802,11 +849,22 @@ namespace UserConfigParams
     /** True if graphical profiler should be displayed */
     PARAM_PREFIX bool m_profiler_enabled  PARAM_DEFAULT( false );
 
+    PARAM_PREFIX bool m_disable_addon_karts  PARAM_DEFAULT( false );
+
+    PARAM_PREFIX bool m_disable_addon_tracks  PARAM_DEFAULT( false );
+
+    PARAM_PREFIX bool m_benchmark  PARAM_DEFAULT( false );
+
     // ---- Networking
     PARAM_PREFIX StringToUIntUserConfigParam    m_server_bookmarks
         PARAM_DEFAULT(StringToUIntUserConfigParam("server-bookmarks",
         "Wan server bookmarks",
         {{ "server-bookmarks", "server-name", "last-online" }}, {}));
+
+    PARAM_PREFIX StringToUIntUserConfigParam    m_server_bookmarks_order
+        PARAM_DEFAULT(StringToUIntUserConfigParam("server-bookmarks-order",
+        "Wan server bookmarks order",
+        {{ "server-bookmarks", "server-name", "id" }}, {}));
 
     PARAM_PREFIX StringToUIntUserConfigParam    m_address_history
         PARAM_DEFAULT(StringToUIntUserConfigParam("address-history",
@@ -870,11 +928,20 @@ namespace UserConfigParams
         "(for gui server creation."));
      PARAM_PREFIX IntUserConfigParam m_timer_sync_difference_tolerance
         PARAM_DEFAULT(IntUserConfigParam(5, "timer-sync-difference-tolerance",
-        &m_network_group, "Max time difference tolerance (in ms) to synchronize timer with server."));
+        &m_network_group, "Max time difference tolerance (in ms) to "
+        "synchronize timer with server."));
     PARAM_PREFIX IntUserConfigParam m_default_ip_type
         PARAM_DEFAULT(IntUserConfigParam(0, "default-ip-type",
         &m_network_group, "Default IP type of this machine, "
         "0 detect every time, 1 IPv4, 2 IPv6, 3 IPv6 NAT64, 4 Dual stack."));
+    PARAM_PREFIX BoolUserConfigParam m_lan_server_gp
+        PARAM_DEFAULT(BoolUserConfigParam(false, "lan-server-gp",
+        &m_network_group, "Show grand prix option in create LAN server "
+        "screen, false will show AI option."));
+    PARAM_PREFIX BoolUserConfigParam m_wan_server_gp
+        PARAM_DEFAULT(BoolUserConfigParam(true, "wan-server-gp",
+        &m_network_group, "Show grand prix option in create WAN server "
+        "screen, false will show AI option."));
 
     // ---- Gamemode setup
     PARAM_PREFIX UIntToUIntUserConfigParam m_num_karts_per_gamemode
@@ -927,7 +994,7 @@ namespace UserConfigParams
                            "Quality of anisotropic filtering (usual values include 2-4-8-16; 0 to disable)") );
 
     PARAM_PREFIX IntUserConfigParam         m_swap_interval
-            PARAM_DEFAULT( IntUserConfigParam(0, "swap-interval",
+            PARAM_DEFAULT( IntUserConfigParam(1, "swap-interval-vsync",
                            &m_graphics_quality,
                            "Swap interval for vsync: 0 = disabled, 1 = full") );
     PARAM_PREFIX BoolUserConfigParam         m_motionblur
@@ -950,6 +1017,10 @@ namespace UserConfigParams
             PARAM_DEFAULT( IntUserConfigParam(0,
                            "shadows_resolution", &m_graphics_quality,
                            "Shadow resolution (0 = disabled") );
+    PARAM_PREFIX IntUserConfigParam          m_pcss_threshold
+            PARAM_DEFAULT( IntUserConfigParam(2048,
+                           "pcss_threshold", &m_graphics_quality,
+                           "Enable Percentage Closer Soft Shadows when shadow resolution is higher than this value") );
     PARAM_PREFIX BoolUserConfigParam          m_degraded_IBL
         PARAM_DEFAULT(BoolUserConfigParam(true,
         "Degraded_IBL", &m_graphics_quality,
@@ -979,10 +1050,15 @@ namespace UserConfigParams
             &m_camera_normal,
             "Angle between camera and plane of kart (pitch) when the camera is pointing forward"));
 
-    PARAM_PREFIX BoolUserConfigParam         m_camera_forward_smoothing
-            PARAM_DEFAULT(  BoolUserConfigParam(true, "forward-smoothing",
+    PARAM_PREFIX FloatUserConfigParam         m_camera_forward_smooth_position
+            PARAM_DEFAULT(  FloatUserConfigParam(0.2, "forward-smooth-position",
             &m_camera_normal,
-            "if true, use smoothing (forward-up-angle become relative to speed) when pointing forward"));
+            "The strength of smoothness of the position of the camera"));
+
+    PARAM_PREFIX FloatUserConfigParam         m_camera_forward_smooth_rotation
+            PARAM_DEFAULT(  FloatUserConfigParam(0.125, "forward-smooth-rotation",
+            &m_camera_normal,
+            "The strength of smoothness of the rotation of the camera"));
 
     PARAM_PREFIX FloatUserConfigParam         m_camera_backward_distance
             PARAM_DEFAULT(  FloatUserConfigParam(2.0, "backward-distance",
@@ -1024,10 +1100,15 @@ namespace UserConfigParams
             &m_standard_camera_settings,
             "Angle between camera and plane of kart (pitch) when the camera is pointing forward"));
 
-    PARAM_PREFIX BoolUserConfigParam         m_standard_camera_forward_smoothing
-            PARAM_DEFAULT(  BoolUserConfigParam(true, "forward-smoothing",
+    PARAM_PREFIX FloatUserConfigParam         m_standard_camera_forward_smooth_position
+            PARAM_DEFAULT(  FloatUserConfigParam(0.2, "forward-smooth-position",
             &m_standard_camera_settings,
-            "if true, use smoothing (forward-up-angle become relative to speed) when pointing forward"));
+            "The strength of smoothness of the position of the camera"));
+
+    PARAM_PREFIX FloatUserConfigParam         m_standard_camera_forward_smooth_rotation
+            PARAM_DEFAULT(  FloatUserConfigParam(0.125, "forward-smooth-rotation",
+            &m_standard_camera_settings,
+            "The strength of smoothness of the rotation of the camera"));
 
     PARAM_PREFIX FloatUserConfigParam         m_standard_camera_backward_distance
             PARAM_DEFAULT(  FloatUserConfigParam(2.0, "backward-distance",
@@ -1065,10 +1146,15 @@ namespace UserConfigParams
             &m_drone_camera_settings,
             "Angle between camera and plane of kart (pitch) when the camera is pointing forward"));
 
-    PARAM_PREFIX BoolUserConfigParam         m_drone_camera_forward_smoothing
-            PARAM_DEFAULT(  BoolUserConfigParam(false, "forward-smoothing",
+    PARAM_PREFIX FloatUserConfigParam         m_drone_camera_forward_smooth_position
+            PARAM_DEFAULT(  FloatUserConfigParam(0.0, "forward-smooth-position",
             &m_drone_camera_settings,
-            "if true, use smoothing (forward-up-angle become relative to speed) when pointing forward"));
+            "The strength of smoothness of the position of the camera"));
+
+    PARAM_PREFIX FloatUserConfigParam         m_drone_camera_forward_smooth_rotation
+            PARAM_DEFAULT(  FloatUserConfigParam(0.0, "forward-smooth-rotation",
+            &m_drone_camera_settings,
+            "The strength of smoothness of the rotation of the camera"));
 
     PARAM_PREFIX FloatUserConfigParam         m_drone_camera_backward_distance
             PARAM_DEFAULT(  FloatUserConfigParam(2.0, "backward-distance",
@@ -1097,19 +1183,24 @@ namespace UserConfigParams
                         "Saved custom camera settings for player.") );
 
     PARAM_PREFIX FloatUserConfigParam         m_saved_camera_distance
-            PARAM_DEFAULT(  FloatUserConfigParam(1.0, "distance",
+            PARAM_DEFAULT(  FloatUserConfigParam(1.8, "distance",
             &m_saved_camera_settings,
             "Distance between kart and camera"));
 
     PARAM_PREFIX FloatUserConfigParam         m_saved_camera_forward_up_angle
-            PARAM_DEFAULT(  FloatUserConfigParam(0, "forward-up-angle",
+            PARAM_DEFAULT(  FloatUserConfigParam(20, "forward-up-angle",
             &m_saved_camera_settings,
             "Angle between camera and plane of kart (pitch) when the camera is pointing forward"));
 
-    PARAM_PREFIX BoolUserConfigParam         m_saved_camera_forward_smoothing
-            PARAM_DEFAULT(  BoolUserConfigParam(true, "forward-smoothing",
+    PARAM_PREFIX FloatUserConfigParam         m_saved_camera_forward_smooth_position
+            PARAM_DEFAULT(  FloatUserConfigParam(0.1, "forward-smooth-position",
             &m_saved_camera_settings,
-            "if true, use smoothing (forward-up-angle become relative to speed) when pointing forward"));
+            "The strength of smoothness of the position of the camera"));
+
+    PARAM_PREFIX FloatUserConfigParam         m_saved_camera_forward_smooth_rotation
+            PARAM_DEFAULT(  FloatUserConfigParam(0.125, "forward-smooth-rotation",
+            &m_saved_camera_settings,
+            "The strength of smoothness of the rotation of the camera"));
 
     PARAM_PREFIX FloatUserConfigParam         m_saved_camera_backward_distance
             PARAM_DEFAULT(  FloatUserConfigParam(2.0, "backward-distance",
@@ -1122,7 +1213,7 @@ namespace UserConfigParams
             "Angle between camera and plane of kart (pitch) when the camera is pointing backwards. This is usually larger than the forward-up-angle, since the kart itself otherwise obstricts too much of the view"));
 
     PARAM_PREFIX IntUserConfigParam         m_saved_camera_fov
-            PARAM_DEFAULT(  IntUserConfigParam(80, "fov",
+            PARAM_DEFAULT(  IntUserConfigParam(85, "fov",
             &m_saved_camera_settings,
             "Focal distance (single player)"));
 
@@ -1183,12 +1274,41 @@ namespace UserConfigParams
                            "If debug logging should be enabled for rich presence") );
 
     PARAM_PREFIX StringUserConfigParam      m_skin_file
-            PARAM_DEFAULT(  StringUserConfigParam("peach", "skin_name",
+            PARAM_DEFAULT(  StringUserConfigParam("classic", "skin_name",
                                                   "Name of the skin to use") );
 
+    // ---- settings for minimap display
+    PARAM_PREFIX GroupUserConfigParam        m_minimap_setup_group
+        PARAM_DEFAULT( GroupUserConfigParam("Minimap",
+                                            "Minimap Setup Settings") );
+
     PARAM_PREFIX IntUserConfigParam        m_minimap_display
-        PARAM_DEFAULT(IntUserConfigParam(0, "minimap_display",
-                      "Minimap: 0 bottom-left, 1 middle-right, 2 hidden, 3 center"));
+        PARAM_DEFAULT(IntUserConfigParam(0, "display",
+                     &m_minimap_setup_group, "display: 0 bottom-left, 1 middle-right, 2 hidden, 3 center"));
+
+    PARAM_PREFIX FloatUserConfigParam      m_minimap_size
+            PARAM_DEFAULT(  FloatUserConfigParam(180.0f, "size",
+            &m_minimap_setup_group, "Size of the the minimap (480 = full screen height; scaled afterwards)") );
+
+    PARAM_PREFIX FloatUserConfigParam      m_minimap_ai_icon_size
+            PARAM_DEFAULT(  FloatUserConfigParam(16.0f, "ai-icon",
+            &m_minimap_setup_group, "The size of the icons for the AI karts on the minimap.") );
+
+    PARAM_PREFIX FloatUserConfigParam      m_minimap_player_icon_size
+            PARAM_DEFAULT(  FloatUserConfigParam(20.0f, "player-icon",
+            &m_minimap_setup_group, "The size of the icons for the player kart.") );
+
+    // ---- settings for powerup display
+    PARAM_PREFIX GroupUserConfigParam      m_powerup_setup_group
+        PARAM_DEFAULT( GroupUserConfigParam("PowerUp",
+                                            "PowerUp Setup Settings") );
+
+    PARAM_PREFIX IntUserConfigParam        m_powerup_display
+        PARAM_DEFAULT(IntUserConfigParam(0, "display",
+            &m_powerup_setup_group, "display: 0 center, 1 right side, 2 hidden (see karts' held powerups)"));
+    PARAM_PREFIX FloatUserConfigParam      m_powerup_size
+            PARAM_DEFAULT(  FloatUserConfigParam(64.0f, "powerup-icon-size",
+            &m_powerup_setup_group, "Size of the powerup icon (scaled afterwards)") );
 
     // ---- Settings for spectator camera
     PARAM_PREFIX GroupUserConfigParam       m_spectator
@@ -1271,6 +1391,12 @@ namespace UserConfigParams
                                                &m_addon_group,
                                                "Don't show important message "
                                                "with this or a lower id again") );
+
+    PARAM_PREFIX IntUserConfigParam         m_news_list_shown_id
+            PARAM_DEFAULT(  IntUserConfigParam(0, "news_list_shown_id",
+                                               &m_addon_group,
+                                               "News before this id has been "
+                                               "shown once so no red dot") );      
 
     PARAM_PREFIX TimeUserConfigParam        m_addons_last_updated
             PARAM_DEFAULT(  TimeUserConfigParam(0, "addon_last_updated",

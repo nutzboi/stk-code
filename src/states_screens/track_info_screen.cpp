@@ -21,6 +21,7 @@
 #include "challenges/unlock_manager.hpp"
 #include "config/player_manager.hpp"
 #include "config/user_config.hpp"
+#include "graphics/irr_driver.hpp"
 #include "graphics/material.hpp"
 #include "graphics/stk_tex_manager.hpp"
 #include "guiengine/CGUISpriteBank.hpp"
@@ -30,6 +31,7 @@
 #include "guiengine/widgets/check_box_widget.hpp"
 #include "guiengine/widgets/icon_button_widget.hpp"
 #include "guiengine/widgets/label_widget.hpp"
+#include "guiengine/widgets/list_widget.hpp"
 #include "guiengine/widgets/ribbon_widget.hpp"
 #include "guiengine/widgets/spinner_widget.hpp"
 #include "io/file_manager.hpp"
@@ -93,11 +95,7 @@ void TrackInfoScreen::loadedFromFile()
     m_icon_unknown_kart = m_icon_bank->addTextureAsSprite(kart_not_found);
 
     m_highscore_label = getWidget<LabelWidget>("highscores");
-
-    for (unsigned int i=0;i<HIGHSCORE_COUNT;i++)
-    {
-        m_highscore_entries = getWidget<ListWidget>("highscore_entries");
-    }
+    m_highscore_entries = getWidget<ListWidget>("highscore_entries");
     
     GUIEngine::IconButtonWidget* screenshot = getWidget<IconButtonWidget>("screenshot");
     screenshot->setFocusable(false);
@@ -113,6 +111,7 @@ void TrackInfoScreen::loadedFromFile()
 void TrackInfoScreen::beforeAddingWidget()
 {
     m_is_soccer = RaceManager::get()->isSoccerMode();
+    m_is_lap_trial = RaceManager::get()->getMinorMode() == RaceManager::MINOR_MODE_LAP_TRIAL;
     m_show_ffa_spinner = RaceManager::get()->getMinorMode() == RaceManager::MINOR_MODE_3_STRIKES
                         || RaceManager::get()->getMinorMode() == RaceManager::MINOR_MODE_FREE_FOR_ALL;
 
@@ -136,7 +135,7 @@ void TrackInfoScreen::init()
 {
     m_record_this_race = false;
 
-    const int max_arena_players = m_track->getMaxArenaPlayers();
+    const int max_arena_players = std::min(m_track->getMaxArenaPlayers(), unsigned(stk_config->m_max_karts));
     const int local_players     = RaceManager::get()->getNumLocalPlayers();
     const bool has_laps         = RaceManager::get()->modeHasLaps();
     const bool has_highscores   = RaceManager::get()->modeHasHighscores();
@@ -275,6 +274,14 @@ void TrackInfoScreen::init()
         m_target_value_label->setText(_("Number of laps"), false);
     }
 
+    if (m_is_lap_trial)
+    {
+        m_target_value_spinner->setVisible(true);
+        m_target_value_label->setVisible(true);
+
+        m_target_value_label->setText(_("Maximum time (min.)"), false);
+        m_target_value_spinner->setValue(UserConfigParams::m_lap_trial_time_limit);
+    }
     // Reverse track or random item in arena
     // -------------
     const bool reverse_available =     m_track->reverseAvailable()
@@ -334,13 +341,11 @@ void TrackInfoScreen::init()
 
     if (has_highscores)
     {
-        int icon_height = GUIEngine::getFontHeight();
-        int row_height = GUIEngine::getFontHeight() * 1.2f;
-                                                    
-        m_icon_bank->setScale(icon_height/128.0f);
+        m_icon_bank->setScale(1.0f / 128.0f);
         m_icon_bank->setTargetIconSize(128, 128);
-        m_highscore_entries->setIcons(m_icon_bank, (int)row_height);
+        m_highscore_entries->setIcons(m_icon_bank, 1.2f);
         m_highscore_entries->setVisible(has_highscores);
+        m_highscore_entries->setActive(false); // Improve keyboard navigation
 
         updateHighScores();
     } //has_highscores
@@ -483,7 +488,7 @@ void TrackInfoScreen::updateHighScores()
                                          RaceManager::get()->getNumberOfKarts(),
                                          RaceManager::get()->getDifficulty(),
                                          m_track->getIdent(),
-                                         RaceManager::get()->getNumLaps(),
+                                         RaceManager::get()->isLapTrialMode() ? m_target_value_spinner->getValue() * 60 : RaceManager::get()->getNumLaps(),
                                          RaceManager::get()->getReverseTrack()  );
     const int amount = highscores->getNumberEntries();
 
@@ -506,7 +511,11 @@ void TrackInfoScreen::updateHighScores()
         {
             highscores->getEntry(n, kart_name, name, &time);
 
-            std::string time_string = StringUtils::timeToString(time, time_precision);
+            std::string highscore_string;
+            if (RaceManager::get()->isLapTrialMode())
+                highscore_string = std::to_string(static_cast<int>(time));
+            else
+                highscore_string = StringUtils::timeToString(time, time_precision);
 
             for(unsigned int i=0; i<kart_properties_manager->getNumberOfKarts(); i++)
             {
@@ -518,7 +527,7 @@ void TrackInfoScreen::updateHighScores()
                 }
             }
         
-            line = name + "    " + core::stringw(time_string.c_str());
+            line = name + "    " + core::stringw(highscore_string.c_str());
         }
         else
         {
@@ -596,6 +605,12 @@ void TrackInfoScreen::onEnterPressedInternal()
             RaceManager::get()->setMaxGoal(selected_target_value);
     }
 
+    if (m_is_lap_trial)
+    {
+        RaceManager::get()->setMinorMode(RaceManager::MINOR_MODE_LAP_TRIAL);
+        RaceManager::get()->setTimeTarget(static_cast<float>(selected_target_value) * 60);
+    }
+
     if (UserConfigParams::m_num_karts_per_gamemode
         [RaceManager::get()->getMinorMode()] != unsigned(local_players + num_ai))
     {
@@ -666,6 +681,11 @@ void TrackInfoScreen::eventCallback(Widget* widget, const std::string& name,
 
             if (enable_ffa)
                 UserConfigParams::m_ffa_time_limit = m_target_value_spinner->getValue();
+        }
+        else if (m_is_lap_trial)
+        {
+            UserConfigParams::m_lap_trial_time_limit = m_target_value_spinner->getValue();
+            updateHighScores();
         }
         else
         {

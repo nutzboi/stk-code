@@ -19,6 +19,7 @@
 
 #include "items/item.hpp"
 
+#include "SColor.h"
 #include "graphics/irr_driver.hpp"
 #include "graphics/lod_node.hpp"
 #include "graphics/sp/sp_mesh.hpp"
@@ -35,9 +36,14 @@
 #include "utils/constants.hpp"
 #include "utils/string_utils.hpp"
 
+#include <IBillboardSceneNode.h>
 #include <IMeshSceneNode.h>
 #include <ISceneManager.h>
 
+const float ICON_SIZE = 0.7f;
+const int SPARK_AMOUNT = 10;
+const float SPARK_SIZE = 0.4f;
+const float SPARK_SPEED_H = 1.0f;
 
 // ----------------------------------------------------------------------------
 /** Constructor.
@@ -52,8 +58,8 @@ ItemState::ItemState(ItemType type, const AbstractKart *owner, int id)
     m_item_id = id;
     m_previous_owner = owner;
     m_used_up_counter = -1;
-     if (owner)
-         setDeactivatedTicks(stk_config->time2Ticks(1.5f));
+    if (owner)
+        setDeactivatedTicks(stk_config->time2Ticks(1.5f));
     else
         setDeactivatedTicks(0);
 }   // ItemState(ItemType)
@@ -147,7 +153,26 @@ void ItemState::collected(const AbstractKart *kart)
     }
     else
     {
-        m_ticks_till_return = stk_config->time2Ticks(2.0f);
+        switch (m_type)
+        {
+            case ITEM_BONUS_BOX:
+                m_ticks_till_return = stk_config->m_bonusbox_item_return_ticks;
+                break;
+            case ITEM_NITRO_BIG:
+            case ITEM_NITRO_SMALL:
+                m_ticks_till_return = stk_config->m_nitro_item_return_ticks;
+                break;
+            case ITEM_BANANA:
+                m_ticks_till_return = stk_config->m_banana_item_return_ticks;
+                break;
+            case ITEM_BUBBLEGUM:
+            case ITEM_BUBBLEGUM_NOLOK:
+                m_ticks_till_return = stk_config->m_bubblegum_item_return_ticks;
+                break;
+            default:
+                m_ticks_till_return = stk_config->time2Ticks(2.0f);
+                break;
+        }
     }
 
     if (RaceManager::get()->isBattleMode())
@@ -193,10 +218,13 @@ void ItemState::saveCompleteState(BareNetworkString* buffer) const
  */
 Item::Item(ItemType type, const Vec3& xyz, const Vec3& normal,
            scene::IMesh* mesh, scene::IMesh* lowres_mesh,
-           const AbstractKart *owner)
+           const std::string& icon, const AbstractKart *owner)
     : ItemState(type, owner)
 {
+    m_icon_node = NULL;
     m_was_available_previously = true;
+    // Prevent appear animation at start
+    m_animation_start_ticks = -9999;
     m_distance_2        = 1.2f;
     initItem(type, xyz, normal);
     m_graphical_type    = getGrahpicalType();
@@ -210,19 +238,21 @@ Item::Item(ItemType type, const Vec3& xyz, const Vec3& normal,
         scene::ISceneNode* meshnode =
             irr_driver->addMesh(mesh, StringUtils::insertValues("item_%i", (int)type));
 
+        lodnode->add(1, meshnode, true);
         if (lowres_mesh != NULL)
         {
-            lodnode->add(35, meshnode, true);
             scene::ISceneNode* meshnode =
                 irr_driver->addMesh(lowres_mesh,
                 StringUtils::insertValues("item_lo_%i", (int)type));
-            lodnode->add(100, meshnode, true);
+            lodnode->add(2, meshnode, true);
         }
-        else
-        {
-            lodnode->add(100, meshnode, true);
-        }
+
+        // Auto-compute the rendering distance, but use a high scaling factor
+        // to ensure that even at low settings, on-track items only become invisible
+        // when already quite far.
+        lodnode->autoComputeLevel(24); // The distance grows with the square root of the scaling factor
         m_node = lodnode;
+        m_appear_anime_node = irr_driver->getSceneManager()->addEmptySceneNode(m_node);
     }
     setType(type);
     handleNewMesh(getGrahpicalType());
@@ -240,6 +270,20 @@ Item::Item(ItemType type, const Vec3& xyz, const Vec3& normal,
     hpr.setHPR(getOriginalRotation());
     m_node->setRotation(hpr.toIrrHPR());
     m_node->grab();
+
+    for (int n = 0; n < SPARK_AMOUNT; n++)
+    {
+        scene::ISceneNode* billboard =
+            irr_driver->addBillboard(core::dimension2df(SPARK_SIZE, SPARK_SIZE),
+                                     "item_spark.png", m_appear_anime_node);
+#ifdef DEBUG
+        billboard->setName("spark");
+#endif
+
+        billboard->setVisible(true);
+
+        m_spark_nodes.push_back(billboard);
+    }
 }   // Item(type, xyz, normal, mesh, lowres_mesh)
 
 //-----------------------------------------------------------------------------
@@ -318,6 +362,13 @@ Item::~Item()
 {
     if (m_node != NULL)
     {
+        for (auto* node : m_spark_nodes)
+            m_appear_anime_node->removeChild(node);
+        if (m_icon_node)
+            m_appear_anime_node->removeChild(m_icon_node);
+        
+        m_node->removeChild(m_appear_anime_node);
+
         irr_driver->removeNode(m_node);
         m_node->drop();
     }
@@ -333,6 +384,7 @@ Item::~Item()
 void Item::reset()
 {
     m_was_available_previously = true;
+    m_animation_start_ticks = -9999;
     ItemState::reset();
 
     if (m_node != NULL)
@@ -360,6 +412,22 @@ void Item::handleNewMesh(ItemType type)
     Vec3 hpr;
     hpr.setHPR(getOriginalRotation());
     m_node->setRotation(hpr.toIrrHPR());
+
+    if (m_icon_node)
+        m_appear_anime_node->removeChild(m_icon_node);
+    m_icon_node = NULL;
+    auto icon = ItemManager::getIcon(type);
+
+    if (!icon.empty())
+    {
+        m_icon_node = irr_driver->addBillboard(core::dimension2df(1.0f, 1.0f),
+                                        icon, m_appear_anime_node);
+
+        m_icon_node->setPosition(core::vector3df(0.0f, 0.5f, 0.0f));
+        m_icon_node->setVisible(false);
+        ((scene::IBillboardSceneNode*)m_icon_node)
+            ->setColor(ItemManager::getGlowColor(type).toSColor());
+    }
 #endif
 }   // handleNewMesh
 
@@ -389,32 +457,37 @@ void Item::updateGraphics(float dt)
 
     if (!m_was_available_previously && isAvailable())
     {
-        // This item is now available again - make sure it is not
-        // scaled anymore.
-        m_node->setScale(core::vector3df(1, 1, 1));
+        // Play animation when item respawns
+        m_animation_start_ticks = World::getWorld()->getTicksSinceStart();
+        m_node->setScale(core::vector3df(0.0f, 0.0f, 0.0f));
     }
 
-    if (!isAvailable() && time_till_return <= 1.0f)
+    float time_since_return = stk_config->ticks2Time(
+        World::getWorld()->getTicksSinceStart() - m_animation_start_ticks);
+
+    if (is_visible)
     {
-        // Make it visible by scaling it from 0 to 1:
-        if (rotating())
+        if (!isAvailable() && !(getType() == ITEM_BUBBLEGUM &&
+                getOriginalType() == ITEM_NONE && !isUsedUp()))
         {
-            float angle =
-                fmodf((float)(World::getWorld()->getTicksSinceStart() +
-                getTicksTillReturn()) / 40.0f, M_PI * 2);
-            btMatrix3x3 m;
-            m.setRotation(getOriginalRotation());
-            btQuaternion r = btQuaternion(m.getColumn(1), angle) *
-                getOriginalRotation();
-            Vec3 hpr;
-            hpr.setHPR(r);
-            m_node->setRotation(hpr.toIrrHPR());
+            // Keep it visible so particles work, but hide the model
+            m_node->setScale(core::vector3df(0.0f, 1.0f, 0.0f));
         }
-        m_node->setVisible(true);
-        m_node->setScale(core::vector3df(1, 1, 1)*(1 - time_till_return));
-    }
-    if (isAvailable())
-    {
+        else if (time_since_return <= 1.0f && m_animation_start_ticks)
+        {
+            float p = time_since_return, f = (1.0f - time_since_return);
+            float factor_v = sin(-13.0f * M_PI_2 * (p + 1.0f))
+                            * pow(2.0f, -10.0f * p) + 1.0f;
+            float factor_h = 1.0f - (f * f * f * f * f - f * f * f * sin(f * M_PI));
+
+            m_node->setScale(core::vector3df(factor_h, factor_v, factor_h));
+        }
+        else
+        {
+            m_node->setScale(core::vector3df(1.0f, 1.0f, 1.0f));
+        }
+
+        // Handle rotation of the item
         Vec3 hpr;
         if (rotating())
         {
@@ -432,6 +505,58 @@ void Item::updateGraphics(float dt)
         else
             hpr.setHPR(getOriginalRotation());
         m_node->setRotation(hpr.toIrrHPR());
-    }   // if item is available
+    } // if item is available
+
+    bool is_in_appear_anime = time_since_return < 1.0f
+                             || (!isAvailable() && time_till_return < 1.0f);
+    m_appear_anime_node->setVisible(is_in_appear_anime);
+
+    if (is_in_appear_anime)
+    {
+        for (size_t i = 0; i < SPARK_AMOUNT; i++)
+        {
+            float t = time_since_return + 0.5f;
+            float t2 = time_since_return + 1.0f;
+
+            float node_angle = !rotating() ? 0.0f :
+                    fmodf((float)World::getWorld()->getTicksSinceStart() / 40.0f,
+                    M_PI * 2);
+
+            float x = sin(float(i) / float(SPARK_AMOUNT) * 2.0f * M_PI - node_angle)
+                        * t * SPARK_SPEED_H;
+            float y = 2.0f * t2 - t2 * t2 - 0.5f;
+            float z = cos(float(i) / float(SPARK_AMOUNT) * 2.0f * M_PI - node_angle)
+                        * t * SPARK_SPEED_H;
+
+            m_spark_nodes[i]->setPosition(core::vector3df(x, y, z));
+
+            float factor = std::max(0.0f, 1.0f - t / 2.0f);
+
+            m_spark_nodes[i]->setVisible(true);
+
+            ((scene::IBillboardSceneNode*)m_spark_nodes[i])
+                    ->setSize(core::dimension2df(factor * SPARK_SIZE,
+                                                factor * SPARK_SIZE));
+        }
+
+        if (m_icon_node)
+        {
+            if (!isAvailable())
+            {
+                m_icon_node->setVisible(true);
+                float size = 1.0f / (pow(6.0f, -time_till_return - 0.2f) *
+                            (-time_till_return - 0.2f)) + 7.0f;
+
+                ((scene::IBillboardSceneNode*)m_icon_node)
+                        ->setSize(core::dimension2df(size * ICON_SIZE,
+                                                    size * ICON_SIZE));
+            }
+            else
+            {
+                m_icon_node->setVisible(false);
+            }
+        }
+    }
+
     m_was_available_previously = isAvailable();
 }   // updateGraphics

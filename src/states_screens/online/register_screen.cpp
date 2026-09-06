@@ -341,13 +341,33 @@ void RegisterScreen::doRegister()
     email_confirm.trim();
     m_info_widget->setErrorColor();
 
+    bool namecheck = false;
+    for (unsigned i = 0; i < username.size(); i++)
+    {
+        if (!((username[i] >= '0' && username[i] <= '9') ||
+            (username[i] >= 'a' && username[i] <= 'z') ||
+            (username[i] >= 'A' && username[i] <= 'Z') ||
+            username[i] == '.' || username[i] == '-' || username[i] == '_'))
+        {
+            namecheck = true;
+            break;
+        }
+    }
     if (password != password_confirm)
     {
         m_info_widget->setText(_("Passwords don't match!"), false);
     }
+    else if (username == password)
+    {
+        m_info_widget->setText(_("Online username and password must not be the same!"), false);
+    }
     else if (email != email_confirm)
     {
         m_info_widget->setText(_("Emails don't match!"), false);
+    }
+    else if (namecheck)
+    {
+        m_info_widget->setText(_("Online username can only contain alphanumeric (ASCII) characters, periods, dashes and underscores!"), false);
     }
     else if (username.size() < 3 || username.size() > 30)
     {
@@ -366,11 +386,12 @@ void RegisterScreen::doRegister()
         m_info_widget->setText(_("Email has to be between 5 and 254 characters long!"), false);
     }
     else if (  email.find(L"@")== -1 || email.find(L".")== -1 ||
-              (email.findLast(L'.') - email.findLast(L'@') <= 2 ) ||
-                email.findLast(L'@')==0 )
+              (email.findLast(L'.') - email.findLast(L'@') <= 1 ) ||
+                email.findLast(L'@')==0 || email[(email.size())-1]=='.')
     {
-       m_info_widget->setText(_("Email is invalid!"), false);
+        m_info_widget->setText(_("Email is invalid!"), false);
     }
+   
     else
     {
         m_info_widget->setDefaultColor();

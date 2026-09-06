@@ -26,6 +26,11 @@
 #include "karts/kart_properties.hpp"
 #include "karts/kart_properties_manager.hpp"
 #include "guiengine/message_queue.hpp"
+#include "guiengine/widgets/bubble_widget.hpp"
+#include "guiengine/widgets/icon_button_widget.hpp"
+#include "guiengine/widgets/label_widget.hpp"
+#include "guiengine/widgets/progress_bar_widget.hpp"
+#include "guiengine/widgets/ribbon_widget.hpp"
 #include "network/protocols/client_lobby.hpp"
 #include "online/http_request.hpp"
 #include "states_screens/addons_screen.hpp"
@@ -262,7 +267,8 @@ void AddonsPack::install(const std::string& name)
     Addon* addon = addons_manager->getAddon(Addon::createAddonId(name));
     if (addon)
     {
-        if (addon->isInstalled())
+        if (addon->isInstalled() &&
+            addon->getRevision() == addon->getInstalledRevision())
         {
             if (nl)
                 nl->addMoreServerInfo(L"Addon already installed");

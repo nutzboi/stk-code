@@ -7,7 +7,7 @@
 # You can also use -DCMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM=xxxxxxxxxx to specify team
 
 # Increase every upload to App store
-SET(IOS_BUILD_VERSION 24)
+SET(IOS_BUILD_VERSION 26)
 
 # Get SDK path
 execute_process(COMMAND xcodebuild -version -sdk iphoneos Path
@@ -59,6 +59,10 @@ set(LIBSAMPLERATE_LIBRARY ${PROJECT_SOURCE_DIR}/dependencies\${EFFECTIVE_PLATFOR
 set(LIBSAMPLERATE_INCLUDEDIR ${PROJECT_SOURCE_DIR}/dependencies-iphoneos/include CACHE STRING "")
 set(MOLTENVK_LIBRARY ${PROJECT_SOURCE_DIR}/dependencies\${EFFECTIVE_PLATFORM_NAME}/lib/libMoltenVK.a CACHE STRING "")
 set(VULKAN_INCLUDEDIR ${PROJECT_SOURCE_DIR}/dependencies-iphoneos/include CACHE STRING "")
+set(LIBASTCENC_LIBRARY ${PROJECT_SOURCE_DIR}/dependencies\${EFFECTIVE_PLATFORM_NAME}/lib/libastcenc.a CACHE STRING "")
+set(LIBASTCENC_INCLUDEDIR ${PROJECT_SOURCE_DIR}/dependencies-iphoneos/include CACHE STRING "")
+set(SHADERC_LIBRARY ${PROJECT_SOURCE_DIR}/dependencies\${EFFECTIVE_PLATFORM_NAME}/lib/libshaderc_combined.a CACHE STRING "")
+set(SHADERC_INCLUDEDIR ${PROJECT_SOURCE_DIR}/dependencies-iphoneos/include CACHE STRING "")
 
 # For universal iOS and simulator
 set(LIBRESOLV_LIBRARY -lresolv CACHE STRING "")
@@ -99,12 +103,7 @@ set(CMAKE_C_OSX_CURRENT_VERSION_FLAG "-current_version ")
 set(CMAKE_CXX_OSX_COMPATIBILITY_VERSION_FLAG "${CMAKE_C_OSX_COMPATIBILITY_VERSION_FLAG}")
 set(CMAKE_CXX_OSX_CURRENT_VERSION_FLAG "${CMAKE_C_OSX_CURRENT_VERSION_FLAG}")
 
-# For archive
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fembed-bitcode")
-
 # Fixed variables in iOS STK
-set(CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE YES CACHE INTERNAL "")
 set(CMAKE_XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC NO CACHE INTERNAL "")
 set(CMAKE_XCODE_ATTRIBUTE_GCC_SYMBOLS_PRIVATE_EXTERN YES CACHE INTERNAL "")
 set(USE_WIIUSE FALSE CACHE BOOL "")
@@ -120,6 +119,8 @@ set(CMAKE_XCODE_ATTRIBUTE_VALID_ARCHS[sdk=iphoneos*] "arm64")
 
 set(CMAKE_XCODE_ATTRIBUTE_ARCHS[sdk=iphonesimulator*] "x86_64")
 set(CMAKE_XCODE_ATTRIBUTE_VALID_ARCHS[sdk=iphonesimulator*] "x86_64")
+
+set(CMAKE_XCODE_ATTRIBUTE_DEBUG_INFORMATION_FORMAT "dwarf-with-dsym" CACHE INTERNAL "")
 
 # Replace the above two with these if you use an apple silicon
 #set(CMAKE_XCODE_ATTRIBUTE_ARCHS[sdk=iphonesimulator*] "arm64")

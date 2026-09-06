@@ -62,6 +62,7 @@ public:
         std::string                m_minor_mode;
         core::stringw              m_stk_version;
         core::stringw              m_user_name;
+        core::stringw              m_info;
         std::vector<std::string>   m_kart_list;
         std::vector<core::stringw> m_name_list;
         std::vector<float>         m_kart_color; //no sorting for this
@@ -217,6 +218,13 @@ public:
             return m_replay_file_list.at(m_current_replay_file).m_filename;
     }
     // ------------------------------------------------------------------------
+    unsigned int getCurrentReplayFileIndex() const
+                                              { return m_current_replay_file; }
+    // ------------------------------------------------------------------------
+    unsigned int getSecondReplayFileIndex() const
+                                               { return m_second_replay_file; }
+    // ------------------------------------------------------------------------
+    bool isSecondReplayEnabled() const      { return m_second_replay_enabled; }
 };   // Replay
 
 #endif

@@ -23,8 +23,9 @@
 #include "font/digit_face.hpp"
 #include "font/font_manager.hpp"
 #include "font/regular_face.hpp"
-#include "graphics/camera_debug.hpp"
-#include "graphics/camera_fps.hpp"
+#include "graphics/camera/camera_debug.hpp"
+#include "graphics/camera/camera_fps.hpp"
+#include "graphics/central_settings.hpp"
 #include "graphics/shader_based_renderer.hpp"
 #include "graphics/sp/sp_base.hpp"
 #include "graphics/stk_text_billboard.hpp"
@@ -66,10 +67,15 @@
 #include "utils/profiler.hpp"
 #include "utils/string_utils.hpp"
 
+#include <IrrlichtDevice.h>
 #include <IGUIEnvironment.h>
 #include <IGUIContextMenu.h>
 
 #include <cmath>
+#ifndef SERVER_ONLY
+#include <ge_main.hpp>
+#include <ge_vulkan_driver.hpp>
+#endif
 
 using namespace irr;
 using namespace gui;
@@ -98,6 +104,8 @@ enum DebugMenuCommand
     DEBUG_PROFILER_WRITE_REPORT,
     DEBUG_FONT_DUMP_GLYPH_PAGE,
     DEBUG_FONT_RELOAD,
+    DEBUG_GE_PBR,
+    DEBUG_GE_IBL,
     DEBUG_SP_RESET,
     DEBUG_SP_TOGGLE_CULLING,
     DEBUG_SP_WN_VIZ,
@@ -316,11 +324,20 @@ bool handleContextMenuAction(s32 cmd_id)
     {
     case DEBUG_GRAPHICS_RELOAD_SHADERS:
 #ifndef SERVER_ONLY
+    {
         Log::info("Debug", "Reloading shaders...");
-        SP::SPShaderManager::get()->unloadAll();
-        ShaderBase::killShaders();
-        ShaderFilesManager::getInstance()->removeAllShaderFiles();
-        SP::SPShaderManager::get()->initAll();
+        GE::GEVulkanDriver* vk = GE::getVKDriver();
+        if (vk)
+            vk->reloadShaders();
+        else
+        {
+            SP::SPShaderManager::get()->unloadAll();
+            ShaderBase::killShaders();
+            ShaderFilesManager::getInstance()->removeAllShaderFiles();
+            SP::SPShaderManager::get()->initAll();
+        }
+        break;
+    }
 #endif
         break;
     case DEBUG_GRAPHICS_RELOAD_TEXTURES:
@@ -370,6 +387,33 @@ bool handleContextMenuAction(s32 cmd_id)
         physics->setDebugMode(IrrDebugDrawer::DM_NO_KARTS_GRAPHICS);
         break;
     }
+    case DEBUG_GE_PBR:
+#ifndef SERVER_ONLY
+    {
+        GE::GEVulkanDriver* vk = GE::getVKDriver();
+        if (vk)
+        {
+            UserConfigParams::m_dynamic_lights = !UserConfigParams::m_dynamic_lights;
+            GE::getGEConfig()->m_pbr = UserConfigParams::m_dynamic_lights;
+            vk->updateDriver(false/*scale_changed*/, true/*pbr_changed*/);
+        }
+        break;
+    }
+#endif
+    case DEBUG_GE_IBL:
+#ifndef SERVER_ONLY
+    {
+        GE::GEVulkanDriver* vk = GE::getVKDriver();
+        if (vk)
+        {
+            UserConfigParams::m_degraded_IBL = !UserConfigParams::m_degraded_IBL;
+            GE::getGEConfig()->m_ibl = !UserConfigParams::m_degraded_IBL;
+            vk->updateDriver(false/*scale_changed*/, false/*pbr_changed*/,
+                true/*ibl_changed*/);
+        }
+        break;
+    }
+#endif
     case DEBUG_SP_RESET:
         irr_driver->resetDebugModes();
         if (physics)
@@ -507,7 +551,10 @@ bool handleContextMenuAction(s32 cmd_id)
         break;
     }
     case DEBUG_PROFILER:
-        profiler.toggleStatus();
+        if (UserConfigParams::m_profiler_enabled)
+            profiler.desactivate();
+        else
+            profiler.activate();
         break;
     case DEBUG_PROFILER_WRITE_REPORT:
         profiler.writeToFile();
@@ -1000,7 +1047,14 @@ bool handleContextMenuAction(s32 cmd_id)
                 SP::SPTextureManager* sptm = SP::SPTextureManager::get();
                 if (t == "tus;")
                 {
-                    sptm->dumpAllTextures();
+                    if (CVS->isGLSL())
+                        sptm->dumpAllTextures();
+                    else
+                    {
+                        for (auto& p : STKTexManager::getInstance()->getAllTextures())
+                            Log::info("STKTexManager", "%s", p.first.c_str());
+                        STKTexManager::getInstance()->dumpTextureUsage();
+                    }
                     return false;
                 }
                 if (t.empty())
@@ -1038,8 +1092,8 @@ bool handleContextMenuAction(s32 cmd_id)
     case DEBUG_HELP:
         new TutorialMessageDialog(L"Debug keyboard shortcuts (can conflict with user-defined shortcuts):\n"
                             "* <~> - Show this help dialog | + <Ctrl> - Adjust lights | + <Shift> - Adjust visuals\n"
-                            "* <F1> - Anvil powerup | + <Ctrl> - Normal view | + <Shift> - Bomb attachment\n"
-                            "* <F2> - Basketball powerup | + <Ctrl> - First person view | + <Shift> - Anvil attachment\n"
+                            "* <F1> - Anchor powerup | + <Ctrl> - Normal view | + <Shift> - Bomb attachment\n"
+                            "* <F2> - Basketball powerup | + <Ctrl> - First person view | + <Shift> - Anchor attachment\n"
                             "* <F3> - Bowling ball powerup | + <Ctrl> - Top view | + <Shift> - Parachute attachment\n"
                             "* <F4> - Bubblegum powerup | + <Ctrl> - Behind wheel view | + <Shift> - Flatten kart\n"
                             "* <F5> - Cake powerup | + <Ctrl> - Behind kart view | + <Shift> - Send plunger to kart front\n"
@@ -1056,7 +1110,7 @@ bool handleContextMenuAction(s32 cmd_id)
                             "* <End> - Last kart\n"
                             "* <Page Up> - Previous kart\n"
                             "* <Page Down> - Next kart"
-                            , true);
+                            , World::getWorld() && World::getWorld()->isNetworkWorld() ? false : true);
         break;
     }
     return false;
@@ -1236,9 +1290,9 @@ bool onEvent(const SEvent &event)
 
             mnu->addItem(L"Items >",-1,true,true);
             sub = mnu->getSubMenu(3);
-            sub->addItem(L"Anvil (F1)", DEBUG_POWERUP_ANVIL );
+            sub->addItem(L"Anchor (F1)", DEBUG_POWERUP_ANVIL );
             sub->addItem(L"Basketball (F2)", DEBUG_POWERUP_RUBBERBALL );
-            sub->addItem(L"Bowling (F3)", DEBUG_POWERUP_BOWLING );
+            sub->addItem(L"Bowling ball (F3)", DEBUG_POWERUP_BOWLING );
             sub->addItem(L"Bubblegum (F4)", DEBUG_POWERUP_BUBBLEGUM );
             sub->addItem(L"Cake (F5)", DEBUG_POWERUP_CAKE );
             sub->addItem(L"Parachute (F6)", DEBUG_POWERUP_PARACHUTE );
@@ -1251,7 +1305,7 @@ bool onEvent(const SEvent &event)
             mnu->addItem(L"Attachments >",-1,true, true);
             sub = mnu->getSubMenu(4);
             sub->addItem(L"Bomb (Shift + F1)", DEBUG_ATTACHMENT_BOMB);
-            sub->addItem(L"Anvil (Shift + F2)", DEBUG_ATTACHMENT_ANVIL);
+            sub->addItem(L"Anchor (Shift + F2)", DEBUG_ATTACHMENT_ANVIL);
             sub->addItem(L"Parachute (Shift + F3)", DEBUG_ATTACHMENT_PARACHUTE);
             sub->addItem(L"Flatten (Shift + F4)", DEBUG_ATTACHMENT_SQUASH);
             sub->addItem(L"Plunger (Shift + F5)", DEBUG_ATTACHMENT_PLUNGER);
@@ -1265,8 +1319,10 @@ bool onEvent(const SEvent &event)
             sub->addItem(L"Clear nitro (Delete)", DEBUG_NITRO_CLEAR );
             sub->addItem(L"Clear attachment (Delete)", DEBUG_ATTACHMENT_NOTHING);
 
-            mnu->addItem(L"SP debug >",-1,true, true);
+            mnu->addItem(L"SP / GE debug >",-1,true, true);
             sub = mnu->getSubMenu(6);
+            sub->addItem(L"Toggle GE PBR", DEBUG_GE_PBR);
+            sub->addItem(L"Toggle GE IBL", DEBUG_GE_IBL);
             sub->addItem(L"Reset SP debug", DEBUG_SP_RESET);
             sub->addItem(L"Toggle culling", DEBUG_SP_TOGGLE_CULLING);
             sub->addItem(L"Draw world normal in texture", DEBUG_SP_WN_VIZ);

@@ -21,13 +21,14 @@
 #define HEADER_TRACK_INFO_SCREEN_HPP
 
 #include "guiengine/screen.hpp"
-#include "guiengine/widgets.hpp"
 
+namespace irr { namespace gui { class STKModifiedSpriteBank; } }
 namespace GUIEngine
 {
     class CheckBoxWidget;
     class IconButtonWidget;
     class LabelWidget;
+    class ListWidget;
     class SpinnerWidget;
     class Widget;
 }
@@ -48,6 +49,8 @@ class TrackInfoScreen : public GUIEngine::Screen,
     bool m_record_this_race;
 
     bool m_is_soccer;
+
+    bool m_is_lap_trial;
 
     bool m_show_ffa_spinner;
 

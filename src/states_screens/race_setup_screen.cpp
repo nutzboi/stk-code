@@ -42,6 +42,7 @@ const int CONFIG_CODE_3STRIKES  = 3;
 const int CONFIG_CODE_EASTER    = 4;
 const int CONFIG_CODE_SOCCER    = 5;
 const int CONFIG_CODE_GHOST     = 6;
+const int CONFIG_CODE_LAP_TRIAL = 7;
 
 using namespace GUIEngine;
 
@@ -137,6 +138,11 @@ void RaceSetupScreen::init()
     name6 += _("Race against ghost karts and try to beat them!");
     w2->addItem( name6, IDENT_GHOST, "/gui/icons/mode_ghost.png");
 
+    // I18N: Lap Trial: Complete as many laps as possible in a given amount of time.
+    irr::core::stringw name7 = irr::core::stringw(_("Lap Trial")) + L"\n";
+    name7 += _("Complete as many laps as possible in a given amount of time.");
+    w2->addItem(name7, IDENT_LAP_TRIAL, RaceManager::getIconOf(RaceManager::MINOR_MODE_LAP_TRIAL));
+
     w2->updateItemDisplay();
 
     // restore saved game mode
@@ -163,7 +169,12 @@ void RaceSetupScreen::init()
     case CONFIG_CODE_GHOST :
         w2->setSelection(IDENT_GHOST, PLAYER_ID_GAME_MASTER, true);
         break;
+    case CONFIG_CODE_LAP_TRIAL:
+        w2->setSelection(IDENT_LAP_TRIAL, PLAYER_ID_GAME_MASTER, true);
+        break;
     }
+
+    w2->setItemCountHint(8);
 
     {
         RibbonWidget* w = getWidget<RibbonWidget>("difficulty");
@@ -246,6 +257,12 @@ void RaceSetupScreen::eventCallback(Widget* widget, const std::string& name,
             RaceManager::get()->setMinorMode(RaceManager::MINOR_MODE_TIME_TRIAL);
             UserConfigParams::m_game_mode = CONFIG_CODE_GHOST;
             GhostReplaySelection::getInstance()->push();
+        }
+        else if (selectedMode == IDENT_LAP_TRIAL)
+        {
+            RaceManager::get()->setMinorMode(RaceManager::MINOR_MODE_LAP_TRIAL);
+            UserConfigParams::m_game_mode = CONFIG_CODE_LAP_TRIAL;
+            TracksAndGPScreen::getInstance()->push();
         }
         else if (selectedMode == "locked")
         {

@@ -701,8 +701,11 @@ namespace GUIEngine
 #include <algorithm>
 #include <iostream>
 #include <assert.h>
-#include <irrlicht.h>
 #include <mutex>
+
+#include <IrrlichtDevice.h>
+#include <IGUIEnvironment.h>
+#include <IVideoDriver.h>
 
 using namespace irr::gui;
 using namespace irr::video;
@@ -948,6 +951,8 @@ namespace GUIEngine
         }
 
         Debug::closeDebugMenu();
+        if (!g_current_screen->isLoaded())
+            g_current_screen->loadFromFile();
         g_current_screen->beforeAddingWidget();
 
         // show screen
@@ -1090,6 +1095,9 @@ namespace GUIEngine
         g_is_no_graphics[PT_CHILD] = false;
     }   // resetGlobalVariables
 
+
+    int g_expected_icon_count = 0;
+
     // -----------------------------------------------------------------------
     void init(IrrlichtDevice* device_a, IVideoDriver* driver_a,
               AbstractStateManager* state_manager, bool loading)
@@ -1098,6 +1106,7 @@ namespace GUIEngine
         g_device = device_a;
         g_driver = driver_a;
         g_state_manager = state_manager;
+        g_expected_icon_count = 0;
 
         for (unsigned int n=0; n<MAX_PLAYER_COUNT; n++)
         {
@@ -1136,6 +1145,8 @@ namespace GUIEngine
                 Log::fatal("Engine::init", "Canot load default GUI skin");
             }
         }
+
+        font_manager->loadFonts();
 
         RegularFace* regular = font_manager->getFont<RegularFace>();
         BoldFace* bold = font_manager->getFont<BoldFace>();
@@ -1233,7 +1244,10 @@ namespace GUIEngine
             g_small_title_font->getDimension( L"X" ).Height;
         Private::tiny_title_font_height =
             g_tiny_title_font->getDimension( L"X" ).Height;
-        StateManager::get()->onResize();
+        if (ScreenKeyboard::isActive())
+            ScreenKeyboard::getCurrent()->onResize();
+        if (ModalDialog::isADialogActive())
+            ModalDialog::getCurrent()->onResize();
     }   // reloadForNewSize
 
     // -----------------------------------------------------------------------
@@ -1275,6 +1289,16 @@ namespace GUIEngine
 #endif
 
         GameState gamestate = g_state_manager->getGameState();
+
+        core::dimension2d<u32> screen_size = irr_driver->getFrameSize();
+        core::dimension2d<u32> cur_screen_size;
+        if (getCurrentScreen())
+        {
+            cur_screen_size.Width = getCurrentScreen()->getWidth();
+            cur_screen_size.Height = getCurrentScreen()->getHeight();
+            if (screen_size != cur_screen_size)
+                getCurrentScreen()->onResize();
+        }
 
         // ---- some menus may need updating
         bool dialog_opened = false;
@@ -1365,7 +1389,6 @@ namespace GUIEngine
 
         if (gamestate != GAME && !gui_messages.empty())
         {
-            core::dimension2d<u32> screen_size = irr_driver->getFrameSize();
             const int text_height = getFontHeight() + 20;
             const int y_from = screen_size.Height - text_height;
 
@@ -1509,8 +1532,37 @@ namespace GUIEngine
         }
 
         const int icon_count = (int)g_loading_icons.size();
-        const int icon_size = (int)(std::min(screen_w, screen_h) / 12.0f);
+        const int expected_count = g_expected_icon_count;
+        int icon_size = (int)(std::min(screen_w, screen_h) / 12.0f);
         const int ICON_MARGIN = 6;
+
+        auto f = [&](int icon_size, int icon_margin) -> int {
+            int size_with_margin = (icon_size + icon_margin);
+            int rows = (y_from - text_height * 1.2f) / size_with_margin - 1;
+            int cols = (screen_w - icon_margin) / size_with_margin;
+            int max_good_rows = (rows * 4 + 9) / 10;
+            return max_good_rows * cols;
+        };
+
+        int can_have_now = f(icon_size, ICON_MARGIN);
+
+        if (can_have_now < expected_count)
+        {
+            int left = ICON_MARGIN;
+            int right = icon_size;
+            int mid;
+            while (right - left > 1)
+            {
+                mid = (right + left) / 2;
+                can_have_now = f(mid, ICON_MARGIN);
+                if (can_have_now >= expected_count)
+                    left = mid;
+                else
+                    right = mid;
+            }
+            icon_size = left;
+        }
+
         int x = ICON_MARGIN;
         int y = y_from - icon_size - ICON_MARGIN - text_height * 1.2f;
         for (int n=0; n<icon_count; n++)
@@ -1529,6 +1581,14 @@ namespace GUIEngine
                 x = ICON_MARGIN;
             }
         }
+#endif
+    } // renderLoading
+
+    // -----------------------------------------------------------------------
+
+    void flushRenderLoading(bool launching)
+    {
+#ifndef SERVER_ONLY
         // This will avoid no response in windows, also allow showing loading
         // icon in apple device, because apple device only update render
         // buffer if you poll the mainloop
@@ -1540,7 +1600,7 @@ namespace GUIEngine
         }
 
         // If launch is finished, pause & display the story mode timers
-        if ( !launching)
+        if (!launching)
         {
             // For speedruns only, display the timer on loading screens
             if (UserConfigParams::m_speedrun_mode)
@@ -1555,8 +1615,14 @@ namespace GUIEngine
             irr_driver->handleWindowResize();
         }
 #endif
-    } // renderLoading
+    } // flushRenderLoading
 
+    // -----------------------------------------------------------------------
+
+    void reserveLoadingIcons(int count)
+    {
+        g_expected_icon_count += count;
+    } // reserveLoadingIcons
     // -----------------------------------------------------------------------
 
     void addLoadingIcon(irr::video::ITexture* icon)
@@ -1569,6 +1635,7 @@ namespace GUIEngine
                     ->beginScene(true, true, video::SColor(255,100,101,140));
             renderLoading(false, true, false);
             g_device->getVideoDriver()->endScene();
+            GUIEngine::flushRenderLoading(true/*launching*/);
         }
         else
         {

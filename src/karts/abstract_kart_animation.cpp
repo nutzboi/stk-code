@@ -29,7 +29,7 @@
 #include "physics/physics.hpp"
 #include "physics/triangle_mesh.hpp"
 #include "tracks/track.hpp"
-#include "utils/mini_glm.hpp"
+#include "mini_glm.hpp"
 
 #include <limits>
 
@@ -153,6 +153,16 @@ float AbstractKartAnimation::getAnimationTimer() const
         return 0.0f;
     return stk_config->ticks2Time(m_end_ticks - w->getTicksSinceStart());
 }   // getAnimationTimer
+
+// ------------------------------------------------------------------------
+/* Get the animation time normalized (i.e. [0.0 - 1.0] where 0.0 is the first tick and 1 is the last) */
+float AbstractKartAnimation::getAlpha() const {
+    World* w = World::getWorld();
+    if (!w)
+        return 0.0f;
+
+    return (w->getTicksSinceStart() - m_created_ticks) / (float)(m_end_ticks - m_created_ticks);
+}   // getAlpha
 
 // ----------------------------------------------------------------------------
 /** Determine maximum rescue height with up-raycast

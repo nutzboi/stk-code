@@ -28,7 +28,7 @@
 #include "graphics/shared_gpu_objects.hpp"
 #include "graphics/shader_based_renderer.hpp"
 #include "graphics/post_processing.hpp"
-#include "graphics/render_info.hpp"
+#include <ge_render_info.hpp>
 #include "graphics/rtts.hpp"
 #include "graphics/shaders.hpp"
 #include "graphics/sp/sp_dynamic_draw_call.hpp"
@@ -52,10 +52,17 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <functional>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+
+#include <ge_main.hpp>
+
+#include <IrrlichtDevice.h>
+
+using namespace GE;
 
 namespace SP
 {
@@ -92,7 +99,7 @@ std::unordered_map<unsigned, std::pair<core::vector3df,
 // ----------------------------------------------------------------------------
 std::unordered_set<SPMeshBuffer*> g_instances;
 // ----------------------------------------------------------------------------
-std::array<GLuint, ST_COUNT> g_samplers;
+std::array<GLuint, ST_COUNT> g_samplers = {{ }};
 // ----------------------------------------------------------------------------
 // Check sp_shader.cpp for the name
 std::array<GLuint, 1> sp_prefilled_tex;
@@ -116,6 +123,8 @@ unsigned sp_cur_buf_id[MAX_PLAYER_COUNT] = {};
 unsigned g_skinning_offset = 0;
 // ----------------------------------------------------------------------------
 std::vector<SPMeshNode*> g_skinning_mesh;
+// ----------------------------------------------------------------------------
+bool g_skinning_use_tbo = false;
 // ----------------------------------------------------------------------------
 int sp_cur_shadow_cascade = 0;
 // ----------------------------------------------------------------------------
@@ -245,9 +254,7 @@ void resizeSkinning(unsigned number)
     const irr::core::matrix4 m;
     g_skinning_size = number;
 
-
-
-    if (!CVS->isARBTextureBufferObjectUsable())
+    if (!skinningUseTBO())
     {
         glBindTexture(GL_TEXTURE_2D, g_skinning_tex);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 4, number, 0, GL_RGBA,
@@ -296,7 +303,7 @@ void initSkinning()
 
     int max_size = 0;
 
-    if (!CVS->isARBTextureBufferObjectUsable())
+    if (!skinningUseTBO())
     {
         glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_size);
     
@@ -313,12 +320,13 @@ void initSkinning()
     else
     {
 #ifndef USE_GLES2
-        glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, &max_size);
-        if (stk_config->m_max_skinning_bones << 6 > (unsigned)max_size)
+        int skinning_tbo_limit;
+        glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, &skinning_tbo_limit);
+        if (stk_config->m_max_skinning_bones << 6 > (unsigned)skinning_tbo_limit)
         {
             Log::warn("SharedGPUObjects", "Too many bones for skinning, max: %d",
-                      max_size >> 6);
-            stk_config->m_max_skinning_bones = max_size >> 6;
+                      skinning_tbo_limit >> 6);
+            stk_config->m_max_skinning_bones = skinning_tbo_limit >> 6;
         }
         Log::info("SharedGPUObjects", "Hardware Skinning enabled, method: TBO, "
                   "max bones: %u", stk_config->m_max_skinning_bones);
@@ -331,7 +339,7 @@ void initSkinning()
     const irr::core::matrix4 m;
     glGenTextures(1, &g_skinning_tex);
 #ifndef USE_GLES2
-    if (CVS->isARBTextureBufferObjectUsable())
+    if (skinningUseTBO())
     {
         glGenBuffers(1, &g_skinning_buf);
     }
@@ -436,6 +444,18 @@ void init()
         return;
     }
 
+    if (CVS->isARBTextureBufferObjectUsable())
+    {
+        int skinning_tbo_limit;
+        glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE_ARB, &skinning_tbo_limit);
+        
+        g_skinning_use_tbo = skinning_tbo_limit >= stk_config->m_max_skinning_bones << 6;
+    }
+    else
+    {
+        g_skinning_use_tbo = false;
+    }
+
     initSkinning();
     for (unsigned i = 0; i < MAX_PLAYER_COUNT; i++)
     {
@@ -453,6 +473,18 @@ void init()
     glBindBufferBase(GL_UNIFORM_BUFFER, 2, sp_fog_ubo);
 
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    initSamplers();
+}   // init
+
+// ----------------------------------------------------------------------------
+void initSamplers()
+{
+    if (std::all_of(g_samplers.begin(), g_samplers.end() - 1,
+        [](int value) { return value != 0; }))
+    {
+        glDeleteSamplers((unsigned)g_samplers.size() - 1, g_samplers.data());
+        g_samplers.fill(0);
+    }
 
     for (unsigned st = ST_NEAREST; st < ST_COUNT; st++)
     {
@@ -586,7 +618,7 @@ void init()
                 break;
         }
     }
-}   // init
+}   // initSamplers
 
 // ----------------------------------------------------------------------------
 void destroy()
@@ -599,7 +631,7 @@ void destroy()
     SPTextureManager::destroy();
 
 #ifndef USE_GLES2
-    if (CVS->isARBTextureBufferObjectUsable() && 
+    if (skinningUseTBO() && 
         CVS->isARBBufferStorageUsable())
     {
         glBindBuffer(GL_TEXTURE_BUFFER, g_skinning_buf);
@@ -619,7 +651,7 @@ void destroy()
     }
     glDeleteBuffers(1, &sp_fog_ubo);
     glDeleteSamplers((unsigned)g_samplers.size() - 1, g_samplers.data());
-
+    g_samplers.fill(0);
 }   // destroy
 
 // ----------------------------------------------------------------------------
@@ -642,63 +674,11 @@ SPShader* getNormalVisualizer()
 }   // getNormalVisualizer
 
 // ----------------------------------------------------------------------------
-inline void mathPlaneNormf(float *p)
+bool skinningUseTBO()
 {
-    float f = 1.0f / sqrtf(p[0] * p[0] + p[1] * p[1] + p[2] * p[2]);
-    p[0] *= f;
-    p[1] *= f;
-    p[2] *= f;
-    p[3] *= f;
-}   // mathPlaneNormf
+    return g_skinning_use_tbo;
+}
 
-// ----------------------------------------------------------------------------
-inline void mathPlaneFrustumf(float* out, const core::matrix4& pvm)
-{
-    // return 6 planes, 24 floats
-    const float* m = pvm.pointer();
-
-    // near
-    out[0] = m[3] + m[2];
-    out[1] = m[7] + m[6];
-    out[2] = m[11] + m[10];
-    out[3] = m[15] + m[14];
-    mathPlaneNormf(&out[0]);
-
-    // right
-    out[4] = m[3] - m[0];
-    out[4 + 1] = m[7] - m[4];
-    out[4 + 2] = m[11] - m[8];
-    out[4 + 3] = m[15] - m[12];
-    mathPlaneNormf(&out[4]);
-
-    // left
-    out[2 * 4] = m[3] + m[0];
-    out[2 * 4 + 1] = m[7] + m[4];
-    out[2 * 4 + 2] = m[11] + m[8];
-    out[2 * 4 + 3] = m[15] + m[12];
-    mathPlaneNormf(&out[2 * 4]);
-
-    // bottom
-    out[3 * 4] = m[3] + m[1];
-    out[3 * 4 + 1] = m[7] + m[5];
-    out[3 * 4 + 2] = m[11] + m[9];
-    out[3 * 4 + 3] = m[15] + m[13];
-    mathPlaneNormf(&out[3 * 4]);
-
-    // top
-    out[4 * 4] = m[3] - m[1];
-    out[4 * 4 + 1] = m[7] - m[5];
-    out[4 * 4 + 2] = m[11] - m[9];
-    out[4 * 4 + 3] = m[15] - m[13];
-    mathPlaneNormf(&out[4 * 4]);
-
-    // far
-    out[5 * 4] = m[3] - m[2];
-    out[5 * 4 + 1] = m[7] - m[6];
-    out[5 * 4 + 2] = m[11] - m[10];
-    out[5 * 4 + 3] = m[15] - m[14];
-    mathPlaneNormf(&out[5 * 4]);
-}   // mathPlaneFrustumf
 
 // ----------------------------------------------------------------------------
 inline core::vector3df getCorner(const core::aabbox3df& bbox, unsigned n)
@@ -1179,7 +1159,7 @@ void uploadSkinningMatrices()
 
     unsigned buffer_offset = 0;
 #ifndef USE_GLES2
-    if (CVS->isARBTextureBufferObjectUsable() && 
+    if (skinningUseTBO() && 
         !CVS->isARBBufferStorageUsable())
     {
         glBindBuffer(GL_TEXTURE_BUFFER, g_skinning_buf);
@@ -1198,7 +1178,7 @@ void uploadSkinningMatrices()
         buffer_offset += g_skinning_mesh[i]->getTotalJoints();
     }
 
-    if (!CVS->isARBTextureBufferObjectUsable())
+    if (!skinningUseTBO())
     {
         glBindTexture(GL_TEXTURE_2D, g_skinning_tex);
         glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 1, 4, buffer_offset, GL_RGBA,
@@ -1207,7 +1187,7 @@ void uploadSkinningMatrices()
     }
     
 #ifndef USE_GLES2
-    if (CVS->isARBTextureBufferObjectUsable() && 
+    if (skinningUseTBO() && 
         !CVS->isARBBufferStorageUsable())
     {
         glUnmapBuffer(GL_TEXTURE_BUFFER);

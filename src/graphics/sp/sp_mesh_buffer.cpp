@@ -24,10 +24,13 @@
 #include "graphics/sp/sp_shader_manager.hpp"
 #include "graphics/sp/sp_texture_manager.hpp"
 #include "race/race_manager.hpp"
-#include "utils/mini_glm.hpp"
+#include "mini_glm.hpp"
 #include "utils/string_utils.hpp"
 
 #include <set>
+#ifndef SERVER_ONLY
+#include <ge_main.hpp>
+#endif
 
 namespace SP
 {
@@ -171,9 +174,9 @@ void SPMeshBuffer::uploadGLMesh()
         video::SColor vc = m_vertices[i].m_color;
         if (CVS->isDeferredEnabled())
         {
-            vc.setRed(srgb255ToLinear(vc.getRed()));
-            vc.setGreen(srgb255ToLinear(vc.getGreen()));
-            vc.setBlue(srgb255ToLinear(vc.getBlue()));
+            vc.setRed(GE::srgb255ToLinear(vc.getRed()));
+            vc.setGreen(GE::srgb255ToLinear(vc.getGreen()));
+            vc.setBlue(GE::srgb255ToLinear(vc.getBlue()));
         }
         memcpy(ptr + v_size + offset, &vc, 4);
         offset += 4;
@@ -471,6 +474,11 @@ void SPMeshBuffer::reloadTextureCompare()
 void SPMeshBuffer::setSTKMaterial(Material* m)
 {
     m_stk_material[0] = std::make_tuple(0u, getIndexCount(), m);
+#ifndef SERVER_ONLY
+    // Used by b3d mesh loader, clean up later after SP is removed
+    if (GE::getVKDriver() != NULL)
+        return;
+#endif
     const std::string shader_name =
         std::get<2>(m_stk_material[0])->getShaderName();
     const std::string skinned_shader_name =

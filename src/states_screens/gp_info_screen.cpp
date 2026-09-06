@@ -78,14 +78,14 @@ void GPInfoScreen::loadedFromFile()
     m_reverse_spinner->addLabel(_("None"));
     m_reverse_spinner->addLabel(_("All"));
     m_reverse_spinner->addLabel(_("Random"));
-    m_reverse_spinner->setValue(0);
 
     m_num_tracks_spinner = getWidget<SpinnerWidget>("track-spinner");
     // Only init the number of tracks here, this way the previously selected
     // number of tracks will be the default.
-    m_num_tracks_spinner->setValue(1);
 
     m_ai_kart_spinner = getWidget<SpinnerWidget>("ai-spinner");
+
+    m_time_target_spinner = getWidget<SpinnerWidget>("time-target-spinner");
     
     GUIEngine::IconButtonWidget* screenshot = getWidget<IconButtonWidget>("screenshot");
     screenshot->setFocusable(false);
@@ -101,6 +101,7 @@ void GPInfoScreen::loadedFromFile()
     }
     video::ITexture* kart_not_found = irr_driver->getTexture(file_manager->getAsset(FileManager::GUI_ICON, "random_kart.png"));
     m_unknown_kart_icon = m_icon_bank->addTextureAsSprite(kart_not_found);
+
     
 }   // loadedFromFile
 
@@ -190,6 +191,11 @@ void GPInfoScreen::init()
     getWidget<LabelWidget  >("group-text"   )->setVisible(random);
     m_group_spinner->setVisible(random);
 
+    m_time_target_spinner->setVisible(RaceManager::get()->isLapTrialMode());
+    getWidget<LabelWidget>("time-target-text")->setVisible(RaceManager::get()->isLapTrialMode());
+    if (RaceManager::get()->isLapTrialMode())
+        m_time_target_spinner->setValue(UserConfigParams::m_lap_trial_time_limit);
+
     // Number of AIs
     // -------------
     const bool has_AI = RaceManager::get()->hasAI();
@@ -216,7 +222,9 @@ void GPInfoScreen::init()
         m_ai_kart_spinner->setMin(min_ai);
     }   // has_AI
 
-    if(random)
+    m_reverse_spinner->setValue( UserConfigParams::m_gp_reverse );
+
+    if (random)
     {
         RibbonWidget *rb = getWidget<RibbonWidget>("buttons");
         rb->setLabel(1,_(L"Reload") );
@@ -226,19 +234,35 @@ void GPInfoScreen::init()
         // been added or deleted since the last time this screen was shown.
         const std::vector<std::string>& groups = track_manager->getAllTrackGroups();
         m_group_names.clear();
-        m_group_names.push_back("all");
-        for (unsigned int i = 0; i < groups.size(); i++)
+        m_group_names.push_back("all"); // Add "all" group as first group
+        for (unsigned int i = 0; i < groups.size(); i++)  // Add rest of groups
             m_group_names.push_back(groups[i]);
+
         m_group_spinner->clearLabels();
-        int index_standard=0;
+        int index_standard = 0; // Index value of "standard" category
+
         for (unsigned int i = 0; i < m_group_names.size(); i++)
         {
-            m_group_spinner->addLabel(_(m_group_names[i].c_str()));
-            if (m_group_names[i] == "standard")
+            if (m_group_names[i] == "all")
+            {
+                // Fix capitalization (#4622)
+                m_group_spinner->addLabel( _("All") );
+            }
+            else if (m_group_names[i] == "standard")
+            {
+                // Set index value of "Standard" category
                 index_standard = i + 1;
+                // Fix capitalization (#4622)
+                m_group_spinner->addLabel( _("Standard") );
+            }
+            else
+            {
+                m_group_spinner->addLabel(_(m_group_names[i].c_str()));
+            }
         }
+
         // Try to keep a previously selected group value
-        if(m_group_spinner->getValue() >= (int)groups.size())
+        if (m_group_spinner->getValue() >= (int)groups.size())
         {
             m_group_spinner->setValue(index_standard);
             m_group_name = "standard";
@@ -246,10 +270,11 @@ void GPInfoScreen::init()
         else
             m_group_name = stringc(m_group_names[m_group_spinner->getValue()].c_str()).c_str();
 
+        m_num_tracks_spinner->setValue( UserConfigParams::m_rand_gp_num_tracks );
         m_max_num_tracks = getMaxNumTracks(m_group_name);
 
         m_num_tracks_spinner->setMax(m_max_num_tracks);
-        if(m_num_tracks_spinner->getValue() > m_max_num_tracks ||
+        if (m_num_tracks_spinner->getValue() > m_max_num_tracks ||
             m_num_tracks_spinner->getValue() < 1)
         {
             m_num_tracks_spinner->setValue(m_max_num_tracks);
@@ -266,11 +291,9 @@ void GPInfoScreen::init()
         getWidget<LabelWidget>("name")->setText(m_gp.getName(), false);
         m_gp.checkConsistency();
 
-        int icon_height = GUIEngine::getFontHeight();
-        int row_height = GUIEngine::getFontHeight() * 1.2f;
-        m_icon_bank->setScale(icon_height/128.0f);
-        m_icon_bank->setTargetIconSize(128,128);
-        m_highscore_list->setIcons(m_icon_bank,row_height);
+        m_icon_bank->setScale(1.0f / 128.0f);
+        m_icon_bank->setTargetIconSize(128, 128);
+        m_highscore_list->setIcons(m_icon_bank, 1.2f);
         RaceManager::get()->setNumKarts(RaceManager::get()->getNumLocalPlayers() + m_ai_kart_spinner->getValue());
         // We don't save highscores for random gps so load highscores here
         updateHighscores();
@@ -349,6 +372,11 @@ void GPInfoScreen::eventCallback(Widget *, const std::string &name,
             RaceManager::get()->setNumKarts(local_players + num_ai);
             UserConfigParams::m_num_karts_per_gamemode[RaceManager::MAJOR_MODE_GRAND_PRIX] = local_players + num_ai;
             
+            if (RaceManager::get()->isLapTrialMode())
+            {
+                RaceManager::get()->setGPTimeTarget(static_cast<int>(m_time_target_spinner->getValue()) * 60);
+            }
+
             m_gp.changeReverse(getReverse());
             RaceManager::get()->startGP(m_gp, false, false);
         }
@@ -377,7 +405,9 @@ void GPInfoScreen::eventCallback(Widget *, const std::string &name,
     }
     else if (name=="track-spinner")
     {
-        m_gp.changeTrackNumber(m_num_tracks_spinner->getValue(), m_group_name);
+        const int num_tranks = m_num_tracks_spinner->getValue();
+        m_gp.changeTrackNumber(num_tranks, m_group_name);
+        UserConfigParams::m_rand_gp_num_tracks = num_tranks;
         addTracks();
     }
     else if (name=="ai-spinner")
@@ -393,6 +423,13 @@ void GPInfoScreen::eventCallback(Widget *, const std::string &name,
     }
     else if(name=="reverse-spinner")
     {
+        const int reverse = m_reverse_spinner->getValue();
+        UserConfigParams::m_gp_reverse = reverse;
+        updateHighscores();
+    }
+    else if(name == "time-target-spinner")
+    {
+        UserConfigParams::m_lap_trial_time_limit = m_time_target_spinner->getValue();
         updateHighscores();
     }
 
@@ -472,7 +509,9 @@ void GPInfoScreen::updateHighscores()
                                                                 RaceManager::get()->getNumberOfKarts(),
                                                                 RaceManager::get()->getDifficulty(),
                                                                 m_gp.getId(),
-                                                                getReverse());
+                                                                RaceManager::get()->isLapTrialMode() ? m_time_target_spinner->getValue() * 60 : 0,
+                                                                getReverse(),
+                                                                RaceManager::get()->getMinorMode());
     m_highscore_list->clear();
     int count = highscores->getNumberEntries();
     std::string kart;
@@ -485,7 +524,13 @@ void GPInfoScreen::updateHighscores()
         if(i < count)
         {
             highscores->getEntry(i, kart, name, &time);
-            std::string time_string = StringUtils::timeToString(time);
+
+            std::string highscore_string;
+            if (RaceManager::get()->isLapTrialMode())
+                highscore_string = std::to_string(static_cast<int>(time));
+            else
+                highscore_string = StringUtils::timeToString(time);
+
             for(unsigned int n=0; n<kart_properties_manager->getNumberOfKarts(); n++)
             {
                 const KartProperties* prop = kart_properties_manager->getKartById(n);
@@ -495,7 +540,7 @@ void GPInfoScreen::updateHighscores()
                     break;
                 }
             }
-            line = name + "    " + irr::core::stringw(time_string.c_str());
+            line = name + "    " + irr::core::stringw(highscore_string.c_str());
         }
         else
         {

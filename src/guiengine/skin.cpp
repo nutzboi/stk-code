@@ -25,16 +25,28 @@
 #include "config/user_config.hpp"
 #include "graphics/2dutils.hpp"
 #include "graphics/central_settings.hpp"
+#include "graphics/irr_driver.hpp"
 #include "guiengine/engine.hpp"
 #include "guiengine/modaldialog.hpp"
 #include "guiengine/scalable_font.hpp"
 #include "guiengine/screen.hpp"
 #include "guiengine/screen_keyboard.hpp"
-#include "guiengine/widgets.hpp"
+#include "guiengine/widgets/bubble_widget.hpp"
+#include "guiengine/widgets/check_box_widget.hpp"
+#include "guiengine/widgets/list_widget.hpp"
+#include "guiengine/widgets/model_view_widget.hpp"
+#include "guiengine/widgets/progress_bar_widget.hpp"
+#include "guiengine/widgets/rating_bar_widget.hpp"
+#include "guiengine/widgets/ribbon_widget.hpp"
+#include "guiengine/widgets/spinner_widget.hpp"
 #include "io/file_manager.hpp"
 #include "states_screens/state_manager.hpp"
 #include "utils/log.hpp"
 #include "utils/string_utils.hpp"
+
+#include <IrrlichtDevice.h>
+#include <IFileSystem.h>
+#include <IVideoDriver.h>
 
 using namespace GUIEngine;
 using namespace irr;
@@ -57,15 +69,15 @@ namespace SkinConfig
     static std::vector<std::string> m_normal_ttf;
     static std::vector<std::string> m_digit_ttf;
     static std::string m_color_emoji_ttf;
-    static bool m_icon_theme;
+    static std::vector<std::string> m_icon_theme_paths;
     static bool m_font;
 
-    static void parseElement(const XMLNode* node)
+    static void parseElement(const XMLNode* node, std::vector<std::string>& skin_paths)
     {
         std::string type;
         std::string state = "neutral";
         std::string image;
-        bool common_img = false;
+        bool common_img = false, parent_img = false;
         int leftborder = 0, rightborder=0, topborder=0, bottomborder=0;
         float hborder_out_portion = 0.5f, vborder_out_portion = 1.0f;
         float horizontal_inner_padding = 0.0f, vertical_inner_padding = 0.0f;
@@ -104,6 +116,7 @@ namespace SkinConfig
 
         node->get("areas", &areas);
         node->get("common", &common_img);
+        node->get("parent", &parent_img);
 
         BoxRenderParams new_param;
         new_param.m_left_border = leftborder;
@@ -118,12 +131,23 @@ namespace SkinConfig
         new_param.m_vertical_margin = vertical_margin;
         new_param.m_preserve_h_aspect_ratios = preserve_h_aspect_ratios;
 
-        // call last since it calculates coords considering all other
-        // parameters
+        // The call to an image in the parent folder only allows to go one level higher.
+        // Having a child skin rely on how many levels deeper it is in a chain of base themes
+        // to fetch a texture would bring its own issues, although this code could be
+        // easily adapted to allow it if truly needed.
+        if (parent_img && skin_paths.size() == 1)
+        {
+            parent_img = false;
+            Log::error("skin", "Requesting images from the base theme folder without a base theme\n");
+        }
+
         new_param.setTexture(common_img ?
             irr_driver->getTexture(FileManager::SKIN, std::string("common/") + image) :
+            parent_img ? irr_driver->getTexture(skin_paths[skin_paths.size() - 2] + "/" + image) :
             irr_driver->getTexture(m_data_path + image));
 
+        // call last since it calculates coords considering all other
+        // parameters
         if (areas.size() > 0)
         {
             new_param.areas = 0;
@@ -172,26 +196,29 @@ namespace SkinConfig
       * \brief loads skin information from a STK skin file
       * \throw std::runtime_error if file cannot be read
       */
-    static void loadFromFile(std::string file, bool load_advanced_only)
+    static void loadFromFile(std::string file, bool clear_prev_params, std::vector<std::string>& skin_paths)
     {
-        // Clear global variables for android
-        m_render_params.clear();
-        m_colors.clear();
         m_data_path.clear();
-        m_normal_ttf.clear();
-        for (auto& p : stk_config->m_normal_ttf)
-            m_normal_ttf.push_back(file_manager->getAssetChecked(FileManager::TTF, p, true));
-        m_digit_ttf.clear();
-        for (auto& p : stk_config->m_digit_ttf)
-            m_digit_ttf.push_back(file_manager->getAssetChecked(FileManager::TTF, p, true));
-        m_color_emoji_ttf.clear();
-        if (!stk_config->m_color_emoji_ttf.empty())
+        if (clear_prev_params)
         {
-            m_color_emoji_ttf = file_manager->getAssetChecked(FileManager::TTF,
-                stk_config->m_color_emoji_ttf, true);
+            // Clear global variables
+            m_render_params.clear();
+            m_colors.clear();
+            m_normal_ttf.clear();
+            for (auto& p : stk_config->m_normal_ttf)
+                m_normal_ttf.push_back(file_manager->getAssetChecked(FileManager::TTF, p, true));
+            m_digit_ttf.clear();
+            for (auto& p : stk_config->m_digit_ttf)
+                m_digit_ttf.push_back(file_manager->getAssetChecked(FileManager::TTF, p, true));
+            m_color_emoji_ttf.clear();
+            if (!stk_config->m_color_emoji_ttf.empty())
+            {
+                m_color_emoji_ttf = file_manager->getAssetChecked(FileManager::TTF,
+                    stk_config->m_color_emoji_ttf, true);
+            }
+            m_icon_theme_paths.clear();
+            m_font = false;
         }
-        m_icon_theme = false;
-        m_font = false;
 
         XMLNode* root = file_manager->createXMLTree(file);
         if(!root)
@@ -203,27 +230,27 @@ namespace SkinConfig
 
         m_data_path = StringUtils::getPath(file_manager
             ->getFileSystem()->getAbsolutePath(file.c_str()).c_str()) + "/";
+
+        // Check for icon folder in theme, and add to search paths if present
+        if (file_manager->fileExists(m_data_path + "data/gui/icons/"))
+            m_icon_theme_paths.insert(m_icon_theme_paths.begin(),
+                m_data_path);
+
         const int amount = root->getNumNodes();
         for (int i=0; i<amount; i++)
         {
             const XMLNode* node = root->getNode(i);
 
-            if (node->getName() == "element" && !load_advanced_only)
+            if (node->getName() == "element")
             {
-                parseElement(node);
+                parseElement(node, skin_paths);
             }
-            else if (node->getName() == "color" && !load_advanced_only)
+            else if (node->getName() == "color")
             {
                 parseColor(node);
             }
             else if (node->getName() == "advanced")
             {
-                bool ret = false;
-                if (node->get("icon_theme", &ret))
-                {
-                    if (file_manager->fileExists(m_data_path + "data/gui/icons/"))
-                        m_icon_theme = true;
-                }
                 std::string color_ttf;
                 if (node->get("color_emoji_ttf", &color_ttf))
                 {
@@ -257,7 +284,6 @@ namespace SkinConfig
                 list_ttf_path.clear();
                 if (node->get("digit_ttf", &list_ttf))
                 {
-                    m_digit_ttf.clear();
                     for (auto& t : list_ttf)
                     {
                         std::string test_path = m_data_path + "data/ttf/" + t;
@@ -271,7 +297,7 @@ namespace SkinConfig
                         list_ttf_path.begin(), list_ttf_path.end());
                 }
             }
-            else if (!load_advanced_only)
+            else
             {
                 Log::error("skin", "Unknown node in XML file '%s'.",
                            node->getName().c_str());
@@ -280,6 +306,40 @@ namespace SkinConfig
 
         delete root;
     }   // loadFromFile
+
+    std::vector<std::string> getDependencyChain(std::string initial_skin_id)
+    {
+        std::vector<std::string> chain;
+        chain.insert(chain.begin(), initial_skin_id);
+        
+        for(size_t i=0, n=chain.size(); i<n; i++)
+        {
+            std::string skin_file = chain[0].find("addon_") != std::string::npos ?
+                file_manager->getAddonsFile(
+                    std::string("skins/") + chain[0].substr(6) + "/stkskin.xml") :
+                file_manager->getAsset(FileManager::SKIN, chain[0] + "/stkskin.xml");
+
+            XMLNode* root = file_manager->createXMLTree(skin_file);
+            if (!root)
+            {
+                Log::error("skin", "Could not read XML file '%s'.",
+                           skin_file.c_str());
+                throw std::runtime_error("Invalid skin file");
+            }
+
+            std::string base_theme;
+            if (root->get("base_theme", &base_theme) != 0)
+            {
+                Log::info("GUI", "Inserting base theme %s into dependency chain", base_theme.c_str());
+                chain.insert(chain.begin(), base_theme);
+                ++n;
+            }
+
+            delete root;
+        }
+
+        return chain;
+    }   // getDependencyChain
 
     // ------------------------------------------------------------------------
     float getVerticalInnerPadding(int wtype, Widget* widget)
@@ -507,37 +567,29 @@ X##_yflip.LowerRightCorner.Y =  y1;}
 
 Skin::Skin(IGUISkin* fallback_skin)
 {
-    // fallback_skin will be null if load only basic theming data
     std::string skin_id = UserConfigParams::m_skin_file;
-    std::string skin_name = skin_id.find("addon_") != std::string::npos ?
-        file_manager->getAddonsFile(
-            std::string("skins/") + skin_id.substr(6) + "/stkskin.xml") :
-        file_manager->getAsset(FileManager::SKIN, skin_id + "/stkskin.xml");
 
     try
     {
-        SkinConfig::loadFromFile(skin_name, /*load_advanced_only*/fallback_skin == NULL);
+        chainLoad(skin_id);
     }
     catch (const std::exception& e)
     {
         (void)e;   // avoid compiler warning
         // couldn't load skin. Try to revert to default
+
+        Log::error("GUI", "Could not load skin, reverting to default.");
         UserConfigParams::m_skin_file.revertToDefaults();
-        std::string default_skin_id = UserConfigParams::m_skin_file;
-        skin_name = file_manager->getAsset(FileManager::SKIN,
-                                           default_skin_id + "/stkskin.xml");
-        SkinConfig::loadFromFile(skin_name, /*load_advanced_only*/fallback_skin == NULL);
+        skin_id = UserConfigParams::m_skin_file;
+
+        chainLoad(skin_id);
     }
 
     m_bg_image = NULL;
 
-    m_fallback_skin = NULL;
-    if (fallback_skin)
-    {
-        m_fallback_skin = fallback_skin;
-        m_fallback_skin->grab();
-        assert(fallback_skin != NULL);
-    }
+    assert(fallback_skin != NULL);
+    m_fallback_skin = fallback_skin;
+    m_fallback_skin->grab();
 
     m_dialog = false;
     m_dialog_size = 0.0f;
@@ -549,6 +601,27 @@ Skin::~Skin()
     if (m_fallback_skin)
         m_fallback_skin->drop();
 }   // ~Skin
+
+void Skin::chainLoad(std::string skin_id)
+{
+    m_skin_paths.clear();
+    std::vector<std::string> load_chain = SkinConfig::getDependencyChain(skin_id);
+
+    bool reset = true;
+    for (auto skin_id : load_chain)
+    {
+        std::string skin_path = skin_id.find("addon_") != std::string::npos ?
+            file_manager->getAddonsFile(std::string("skins/") + skin_id.substr(6)) :
+            file_manager->getAsset(FileManager::SKIN, skin_id);
+        m_skin_paths.push_back(skin_path);
+
+        skin_path += "/stkskin.xml";
+
+        Log::info("GUI", "Loading skin data from file: %s", skin_path.c_str());
+        SkinConfig::loadFromFile(skin_path, reset, m_skin_paths);
+        reset = false;
+    }
+} // chainLoad
 
 // ----------------------------------------------------------------------------
 void Skin::drawBgImage()
@@ -1063,7 +1136,7 @@ void Skin::drawProgressBarInScreen(SkinWidgetContainer* swc,
     core::recti rect2 = rect;
     rect2.LowerRightCorner.X -= (rect.getWidth())
                               - int(progress * rect.getWidth());
-    drawBoxFromStretchableTexture(swc, rect2,
+    drawBoxFromStretchableTexture(swc->m_next, rect2,
         SkinConfig::m_render_params["progress::fill"], deactivated);
 }   // drawProgress
 
@@ -1079,6 +1152,7 @@ void Skin::drawRatingBar(Widget *w, const core::recti &rect,
     RatingBarWidget *ratingBar = (RatingBarWidget*)w;
 
     const ITexture *texture = SkinConfig::m_render_params["rating::neutral"].getImage();
+    int all_steps = ratingBar->getSteps();
     const int texture_w = texture->getSize().Width / 4;
     const int texture_h = texture->getSize().Height;
     const float aspect_ratio = 1.0f;
@@ -1101,6 +1175,39 @@ void Skin::drawRatingBar(Widget *w, const core::recti &rect,
 
     core::recti stars_rect(x_from, y_from, x_from + (star_number * star_w), y_from + star_h);
 
+    if (focused)
+    {
+        static float glow_effect = 0;
+
+        const float dt = GUIEngine::getLatestDt();
+        glow_effect += dt*3;
+        if (glow_effect > 6.2832f /* 2*PI */) glow_effect -= 6.2832f;
+        float grow = 10*sinf(glow_effect);
+
+        const int glow_center_x = stars_rect.UpperLeftCorner.X + stars_rect.getWidth() / 2;
+        const int glow_center_y = stars_rect.LowerRightCorner.Y + stars_rect.getHeight() / 2;
+
+        ITexture* tex_ficonhighlight =
+            SkinConfig::m_render_params["focusHalo::neutral"].getImage();
+        const int texture_w = tex_ficonhighlight->getSize().Width;
+        const int texture_h = tex_ficonhighlight->getSize().Height;
+
+        core::recti source_area = core::recti(0, 0, texture_w, texture_h);
+
+        float scale = (float)std::min(irr_driver->getActualScreenSize().Height / 1080.0f, 
+                                    irr_driver->getActualScreenSize().Width / 1350.0f);
+        int size = (int)((90.0f + grow) * scale);
+        const core::recti rect2(glow_center_x - size,
+                                glow_center_y - size / 2,
+                                glow_center_x + size,
+                                glow_center_y + size / 2);
+
+        draw2DImage(tex_ficonhighlight, rect2,
+                    source_area,
+                    0 /* no clipping */, 0,
+                    true /* alpha */);
+    }
+
     if(!w->m_deactivated)
         ratingBar->setStepValuesByMouse(irr_driver->getDevice()->getCursorControl()->getPosition(), stars_rect);
 
@@ -1119,15 +1226,16 @@ void Skin::drawRatingBar(Widget *w, const core::recti &rect,
         star_rect.LowerRightCorner.Y = y_from + star_h;
 
         int step = ratingBar->getStepsOfStar(i);
+        int begin = roundf(2.0f * step / (all_steps - 1)) * texture_w; // Round to the closest actual image
 
-        const core::recti source_area(texture_w * step, 0,
-                                      texture_w * (step + 1), texture_h);
+        const core::recti source_area(begin, 0,
+                                      begin + texture_w, texture_h);
 
         draw2DImage(texture,
-                                            star_rect, source_area,
-                                            0 /* no clipping */,
-                                           (w->m_deactivated || ID_DEBUG) ? colors : 0,
-                                            true /* alpha */);
+                    star_rect, source_area,
+                    0 /* no clipping */,
+                    (w->m_deactivated || ID_DEBUG) ? colors : 0,
+                    true /* alpha */);
     }
 #endif
 }   // drawRatingBar
@@ -1325,10 +1433,11 @@ void Skin::drawRibbonChild(const core::recti &rect, Widget* widget,
         }
 
         const bool mark_focused =
-            focused || (parent_focused && parentRibbonWidget != NULL &&
+            (focused || (parent_focused && parentRibbonWidget != NULL &&
                           parentRibbonWidget->m_mouse_focus == widget) ||
                        (mark_selected && !always_show_selection &&
-                          parent_focused);
+                          parent_focused)) &&
+                        widget->m_properties[PROP_FOCUS_ICON].size() == 0;
 
         /* draw "selection bubble" if relevant */
         if (always_show_selection && mark_selected)
@@ -1376,68 +1485,23 @@ void Skin::drawRibbonChild(const core::recti &rect, Widget* widget,
             }
         }
 
+        // Handle focus from players
 
-        //Handle drawing for the first player
         int nPlayersOnThisItem = 0;
 
         if (mark_focused)
         {
-            if (use_glow)
-            {
-                // don't mark filler items as focused
-                if (widget->m_properties[PROP_ID] == RibbonWidget::NO_ITEM_ID)
-                    return;
+            // Don't mark filler items as focused
+            if (widget->m_properties[PROP_ID] == RibbonWidget::NO_ITEM_ID)
+                return;
+            
+            // Hide focus when not forced
+            if (!always_show_selection && !focused && !parent_focused)
+                return;
+                
+            nPlayersOnThisItem = 1;
+        }
 
-                static float glow_effect = 0;
-
-                const float dt = GUIEngine::getLatestDt();
-                glow_effect += dt * 3;
-                if (glow_effect > 6.2832f /* 2*PI */) glow_effect -= 6.2832f;
-                float grow = 10.0f * sinf(glow_effect);
-
-                const int glow_center_x = rect.UpperLeftCorner.X
-                    + rect.getWidth() / 2;
-                const int glow_center_y = rect.LowerRightCorner.Y;
-
-                ITexture* tex_ficonhighlight =
-                    SkinConfig::m_render_params["focusHalo::neutral"]
-                    .getImage();
-                const int texture_w = tex_ficonhighlight->getSize().Width;
-                const int texture_h = tex_ficonhighlight->getSize().Height;
-
-                core::recti source_area(0, 0, texture_w, texture_h);
-
-                float scale = (float)irr_driver->getActualScreenSize().Height / 1080.0f;
-                int size = (int)((90.0f + grow) * scale);
-                const core::recti rect2(glow_center_x - size,
-                                        glow_center_y - size / 2,
-                                        glow_center_x + size,
-                                        glow_center_y + size / 2);
-
-                draw2DImage(tex_ficonhighlight, rect2,
-                    source_area,
-                    /*clipping*/ 0,
-                    /*color*/ 0,
-                    /*alpha*/true);
-            }
-            // if we're not using glow, draw square focus instead
-            else
-            {
-                const bool show_focus = (focused || parent_focused);
-
-                if (!always_show_selection && !show_focus) return;
-
-                // don't mark filler items as focused
-                if (widget->m_properties[PROP_ID] == RibbonWidget::NO_ITEM_ID)
-                    return;
-
-                drawBoxFromStretchableTexture(parentRibbonWidget, rect,
-                    SkinConfig::m_render_params["squareFocusHalo1::neutral"]);
-                nPlayersOnThisItem++;
-            }
-        } // end if mark_focused
-
-        //Handle drawing for everyone else
         for (unsigned i = 1; i < MAX_PLAYER_COUNT; i++)
         {
             // ---- Draw selection for other players than player 1
@@ -1445,6 +1509,20 @@ void Skin::drawRibbonChild(const core::recti &rect, Widget* widget,
                 parentRibbon->getSelectionIDString(i) ==
                 widget->m_properties[PROP_ID])
             {
+                nPlayersOnThisItem++;
+            }
+        }
+
+        // Handle drawing for everyone else
+        for (unsigned i = MAX_PLAYER_COUNT - 1; i >= 1; i--)
+        {
+            // ---- Draw selection for other players than player 1
+            if (parentRibbon->isFocusedForPlayer(i) &&
+                parentRibbon->getSelectionIDString(i) ==
+                widget->m_properties[PROP_ID])
+            {
+                nPlayersOnThisItem--;
+                
                 short red_previous = parentRibbonWidget->m_skin_r;
                 short green_previous = parentRibbonWidget->m_skin_g;
                 short blue_previous = parentRibbonWidget->m_skin_b;
@@ -1491,9 +1569,54 @@ void Skin::drawRibbonChild(const core::recti &rect, Widget* widget,
                     parentRibbonWidget->m_skin_g = green_previous;
                     parentRibbonWidget->m_skin_b = blue_previous;
                 }
-                nPlayersOnThisItem++;
             }
         }
+
+        // Handle drawing for the first player
+        if (mark_focused)
+        {
+            if (use_glow)
+            {
+                static float glow_effect = 0;
+
+                const float dt = GUIEngine::getLatestDt();
+                glow_effect += dt * 3;
+                if (glow_effect > 6.2832f /* 2*PI */) glow_effect -= 6.2832f;
+                float grow = 10.0f * sinf(glow_effect);
+
+                const int glow_center_x = rect.UpperLeftCorner.X
+                    + rect.getWidth() / 2;
+                const int glow_center_y = rect.LowerRightCorner.Y;
+
+                ITexture* tex_ficonhighlight =
+                    SkinConfig::m_render_params["focusHalo::neutral"]
+                    .getImage();
+                const int texture_w = tex_ficonhighlight->getSize().Width;
+                const int texture_h = tex_ficonhighlight->getSize().Height;
+
+                core::recti source_area(0, 0, texture_w, texture_h);
+
+                float scale = (float)std::min(irr_driver->getActualScreenSize().Height / 1080.0f, 
+                                            irr_driver->getActualScreenSize().Width / 1350.0f);
+                int size = (int)((90.0f + grow) * scale);
+                const core::recti rect2(glow_center_x - size,
+                                        glow_center_y - size / 2,
+                                        glow_center_x + size,
+                                        glow_center_y + size / 2);
+
+                draw2DImage(tex_ficonhighlight, rect2,
+                    source_area,
+                    /*clipping*/ 0,
+                    /*color*/ 0,
+                    /*alpha*/true);
+            }
+            // if we're not using glow, draw square focus instead
+            else
+            {
+                drawBoxFromStretchableTexture(parentRibbonWidget, rect,
+                    SkinConfig::m_render_params["squareFocusHalo1::neutral"]);
+            }
+        } // end if mark_focused
 
         drawIconButton(rect, widget, pressed, focused);
 
@@ -1726,7 +1849,16 @@ void Skin::drawSpinnerChild(const core::recti &rect, Widget* widget,
         return;
 
     SpinnerWidget* spinner = dynamic_cast<SpinnerWidget*>(widget->m_event_handler);
-    bool spinner_focused = spinner->isFocusedForPlayer(PLAYER_ID_GAME_MASTER);
+    
+    bool spinner_focused = false;
+    for (unsigned i = 1; i < MAX_PLAYER_COUNT + 1; i++)
+    {
+        if (spinner->isFocusedForPlayer(i - 1))
+        {
+            spinner_focused = true;
+            break;
+        }
+    }
 
     if (pressed || (spinner->isButtonSelected(right) && spinner_focused))
     {
@@ -1783,7 +1915,8 @@ void Skin::drawIconButton(const core::recti &rect, Widget* widget,
 
         core::recti source_area = core::recti(0, 0, texture_w, texture_h);
 
-        float scale = (float)irr_driver->getActualScreenSize().Height / 1080.0f;
+        float scale = (float)std::min(irr_driver->getActualScreenSize().Height / 1080.0f, 
+                                    irr_driver->getActualScreenSize().Width / 1350.0f);
         int size = (int)((90.0f + grow) * scale);
         const core::recti rect2(glow_center_x - size,
                                 glow_center_y - size / 2,
@@ -2463,6 +2596,20 @@ void Skin::drawBadgeOn(const Widget* widget, const core::recti& rect)
                                                           "down.png");
         doDrawBadge(texture, rect, max_icon_size, false);
     }
+    if (widget->m_badges & HEART_BADGE)
+    {
+        float max_icon_size = 0.43f;
+        video::ITexture* texture = irr_driver->getTexture(FileManager::GUI_ICON,
+                                                          "heart.png");
+        doDrawBadge(texture, rect, max_icon_size, false);
+    }
+    if (widget->m_badges & REDDOT_BADGE)
+    {
+        float max_icon_size = 0.43f;
+        video::ITexture* texture = irr_driver->getTexture(FileManager::GUI_ICON,
+                                                          "red_dot.png");
+        doDrawBadge(texture, rect, max_icon_size, false);
+    }
 }   // drawBadgeOn
 
 // -----------------------------------------------------------------------------
@@ -2830,7 +2977,15 @@ u32 Skin::getIcon (EGUI_DEFAULT_ICON icon) const
 
 s32 Skin::getSize (EGUI_DEFAULT_SIZE texture_size) const
 {
-    return m_fallback_skin->getSize(texture_size);
+    switch(texture_size)
+    {
+        // TODO : make this depend on the text-size parameter and/or skin
+        // and perhaps rename it
+        case EGDS_TEXT_DISTANCE_X:
+            return 10;
+        default:
+            return m_fallback_skin->getSize(texture_size);
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -2883,12 +3038,6 @@ void Skin::setSpriteBank (IGUISpriteBank *bank)
 }   // setSpriteBank
 
 // -----------------------------------------------------------------------------
-const std::string& Skin::getDataPath() const
-{
-    return SkinConfig::m_data_path;
-}   // getDataPath
-
-// -----------------------------------------------------------------------------
 /* All TTF list here are in absolute path. */
 const std::vector<std::string>& Skin::getNormalTTF() const
 {
@@ -2910,7 +3059,7 @@ const std::string& Skin::getColorEmojiTTF() const
 // -----------------------------------------------------------------------------
 bool Skin::hasIconTheme() const
 {
-    return SkinConfig::m_icon_theme;
+    return SkinConfig::m_icon_theme_paths.size() > 0;
 }   // hasIconTheme
 
 // -----------------------------------------------------------------------------
@@ -2924,38 +3073,36 @@ bool Skin::hasFont() const
  * icon. */
 std::string Skin::getThemedIcon(const std::string& relative_path) const
 {
-    // First check if an svg icon is available
+    // File extensions to check
     const std::vector<std::string> ext {".svg", ".png"};
-    // get the path without extension
+    // Get the requested path without extension
     const std::string path_no_extension = StringUtils::removeExtension(relative_path);
-    // loop the file extensions: svg first
-    for(auto s : ext)
+
+    // Look for the requested icon in each theme in the dependency chain
+    for (auto p : SkinConfig::m_icon_theme_paths)
     {
-        std::string relative_path2 = path_no_extension + s;
-        if (!SkinConfig::m_icon_theme ||
-            (relative_path2.find("karts/") == std::string::npos &&
-             relative_path2.find("gui/icons/") == std::string::npos))
+        // Loop through possible file extensions (svg first)
+        for (auto s : ext)
         {
-            std::string tmp_path = file_manager->getAsset(relative_path2);
-            if (file_manager->fileExists(tmp_path))
+            std::string relative_path2 = path_no_extension + s;
+            if (!hasIconTheme() ||
+                (relative_path2.find("karts/") == std::string::npos &&
+                 relative_path2.find("gui/icons/") == std::string::npos))
             {
-                return tmp_path;
+                std::string tmp_path = file_manager->getAsset(relative_path2);
+                if (file_manager->fileExists(tmp_path))
+                {
+                    return tmp_path;
+                }
+            }
+
+            std::string test_path = p + "data/" + relative_path2;
+            if (file_manager->fileExists(test_path))
+            {
+                return test_path;
             }
         }
-
-        if (relative_path2.find(SkinConfig::m_data_path) != std::string::npos &&
-            file_manager->fileExists(relative_path2))
-        {
-            // Absolute path given
-            return relative_path2;
-        }
-
-        std::string test_path = SkinConfig::m_data_path + "data/" + relative_path2;
-        if (file_manager->fileExists(test_path))
-        {
-            return test_path;
-        }
     }
-    // if nothing found, return the bundled one
+    // If nothing found, return the bundled icon
     return file_manager->getAsset(relative_path);
 }   // getThemedIcon

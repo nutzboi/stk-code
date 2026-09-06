@@ -124,8 +124,11 @@ public:
         }
         else
         {
+            unsigned idx_count = std::get<1>(m_stk_material[material_id]);
+            if (idx_count == 0)
+                return;
             glDrawElementsInstanced(GL_TRIANGLES,
-                std::get<1>(m_stk_material[material_id]),
+                idx_count,
                 GL_UNSIGNED_SHORT,
                 (void*)(std::get<0>(m_stk_material[material_id]) << 1),
                 (unsigned)m_ins_dat[dct].size());
@@ -308,6 +311,11 @@ public:
         return m_vertices.data();
     }
     // ------------------------------------------------------------------------
+    std::vector<video::S3DVertexSkinnedMesh>& getVerticesRef()
+    {
+        return m_vertices;
+    }
+    // ------------------------------------------------------------------------
     virtual u32 getVertexCount() const
     {
         return (unsigned)m_vertices.size();
@@ -316,6 +324,11 @@ public:
     virtual video::E_INDEX_TYPE getIndexType() const
     {
         return video::EIT_16BIT;
+    }
+    // ------------------------------------------------------------------------
+    std::vector<u16>& getIndicesRef()
+    {
+        return m_indices;
     }
     // ------------------------------------------------------------------------
     virtual const u16* getIndices() const
@@ -426,6 +439,8 @@ public:
     virtual u32 getChangedID_Vertex() const { return 0; }
     // ------------------------------------------------------------------------
     virtual u32 getChangedID_Index() const { return 0; }
+    // ------------------------------------------------------------------------
+    void disableForMaterial(u32 idx)  { std::get<1>(m_stk_material[idx]) = 0; }
 
 };
 

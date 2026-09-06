@@ -2,6 +2,9 @@ if(NOT MSVC)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
 endif()
 
+# Modified for STK to avoid compiler warnings with MinGW
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+
 set(SOURCES
 	classic.c
 	dynamics.c
@@ -28,7 +31,7 @@ set(SOURCES
 	wiiuse_internal.h
 	wiiboard.h)
 set(API
-	wiiuse.h)
+	include/wiiuse.h)
 
 if(WIN32)
 	list(APPEND SOURCES os_win.c)
@@ -43,15 +46,13 @@ elseif(APPLE)
 		os_mac/os_mac.c
 		${MAC_OBJC_SOURCES})
 	list(APPEND SOURCES ${MAC_SOURCES})
-	# make sure we use the gcc for Objective-C files as well so that the
-	# sysroot and deployment target arguments are correctly passed to the compiler
-	set_source_files_properties(${MAC_OBJC_SOURCES} PROPERTIES LANGUAGE C)
+	set_source_files_properties(${MAC_OBJC_SOURCES} PROPERTIES COMPILE_FLAGS "-x objective-c")
 else()
 	list(APPEND SOURCES os_nix.c)
 endif()
 
 if(MSVC)
-	list(APPEND API wiiuse_msvcstdint.h)
+	list(APPEND API include/wiiuse_msvcstdint.h)
 endif()
 
 add_definitions(-DWIIUSE_COMPILE_LIB)

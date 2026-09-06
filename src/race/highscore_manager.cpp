@@ -26,6 +26,7 @@
 #include "io/utf_writer.hpp"
 #include "race/race_manager.hpp"
 #include "utils/constants.hpp"
+#include "utils/file_utils.hpp"
 #include "utils/log.hpp"
 #include "utils/string_utils.hpp"
 #include "utils/translation.hpp"
@@ -150,7 +151,8 @@ void HighscoreManager::saveHighscores()
 
     try
     {
-        UTFWriter highscore_file(m_filename.c_str(), false);
+        // Save to a new file and rename later to avoid disk space problem, see #4709
+        UTFWriter highscore_file((m_filename + "new").c_str(), false);
         highscore_file << "<?xml version=\"1.0\"?>\n";
         highscore_file << "<highscores version=\"" << CURRENT_HSCORE_FILE_VERSION << "\">\n";
 
@@ -160,11 +162,13 @@ void HighscoreManager::saveHighscores()
         }
         highscore_file << "</highscores>\n";
         highscore_file.close();
+        file_manager->removeFile(m_filename);
+        FileUtils::renameU8Path(m_filename + "new", m_filename);
     }
     catch(std::exception &e)
     {
-        Log::error("Highscore Manager","Problems saving highscores in '%s'\n", m_filename.c_str());
-        puts(e.what());
+        Log::error("Highscore Manager","Problems saving highscores in '%s' because %s",
+            m_filename.c_str(), e.what());
         m_can_write=false;
     }
 
@@ -205,14 +209,16 @@ Highscores* HighscoreManager::getHighscores(const Highscores::HighscoreType &hig
 Highscores* HighscoreManager::getGPHighscores(int num_karts,
                                               const RaceManager::Difficulty difficulty,
                                               const std::string &trackName,
-                                              GrandPrixData::GPReverseType reverse_type)
+                                              const int target,
+                                              GrandPrixData::GPReverseType reverse_type,
+                                              RaceManager::MinorRaceModeType minor_mode)
 {
     Highscores *highscores = 0;
 
     // See if we already have a record for this type
     for (auto& hs : m_all_scores)
     {
-        if (hs->matches(num_karts, difficulty, trackName, reverse_type))
+        if (hs->matches(num_karts, difficulty, trackName, target, reverse_type, minor_mode))
         {
             // we found one entry for this kind of race, return it
             return hs.get();
@@ -221,7 +227,7 @@ Highscores* HighscoreManager::getGPHighscores(int num_karts,
 
     // we don't have an entry for such a race currently. Create one.
     highscores = new Highscores(num_karts, difficulty,
-                                trackName, reverse_type);
+                                trackName, target, reverse_type, minor_mode);
     m_all_scores.push_back(std::unique_ptr<Highscores>(highscores));
     return highscores;
-}   // get
+} // getGPHighscores

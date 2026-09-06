@@ -23,13 +23,14 @@
 #include "audio/sfx_manager.hpp"
 #include "config/user_config.hpp"
 #include "config/player_manager.hpp"
-#include "graphics/camera.hpp"
+#include "graphics/camera/camera.hpp"
 #include "guiengine/engine.hpp"
 #include "guiengine/modaldialog.hpp"
 #include "guiengine/message_queue.hpp"
 #include "guiengine/screen_keyboard.hpp"
 #include "input/device_manager.hpp"
 #include "input/input_device.hpp"
+#include "io/file_manager.hpp"
 #include "items/network_item_manager.hpp"
 #include "items/powerup_manager.hpp"
 #include "karts/abstract_kart.hpp"
@@ -253,6 +254,22 @@ bool ClientLobby::notifyEventAsynchronous(Event* event)
 }   // notifyEventAsynchronous
 
 //-----------------------------------------------------------------------------
+void ClientLobby::getPlayersAddonKartType(const BareNetworkString& data,
+    std::vector<std::shared_ptr<NetworkPlayerProfile> >& players) const
+{
+    if (NetworkConfig::get()->getServerCapabilities().find(
+        "real_addon_karts") ==
+        NetworkConfig::get()->getServerCapabilities().end() ||
+        data.size() == 0)
+        return;
+    for (unsigned i = 0; i < players.size(); i++)
+    {
+        KartData kart_data(data);
+        players[i]->setKartData(kart_data);
+    }
+}   // getPlayersAddonKartType
+
+//-----------------------------------------------------------------------------
 void ClientLobby::addAllPlayers(Event* event)
 {
     if (World::getWorld())
@@ -316,6 +333,7 @@ void ClientLobby::addAllPlayers(Event* event)
         unsigned flag_deactivated_time = data.getUInt16();
         RaceManager::get()->setFlagDeactivatedTicks(flag_deactivated_time);
     }
+    getPlayersAddonKartType(data, players);
     configRemoteKart(players, isSpectator() ? 1 :
         (int)NetworkConfig::get()->getNetworkPlayers().size());
     loadWorld();
@@ -445,10 +463,7 @@ void ClientLobby::update(int ticks)
 #else
                 name = _("Bot");
 #endif
-                if (i > 0)
-                {
-                    name += core::stringw(" ") + StringUtils::toWString(i);
-                }
+                name += core::stringw(" ") + StringUtils::toWString(i + 1);
             }
             rest->encodeString(name).
                 addFloat(player->getDefaultKartColor());
@@ -1075,8 +1090,9 @@ void ClientLobby::startSelection(Event* event)
     }
     // In case of auto-connect or continue a grand prix, use random karts
     // (or previous kart) from server and go to track selection
-    if ((NetworkConfig::get()->isAutoConnect() || skip_kart_screen) &&
-        m_server_enabled_track_voting)
+    if (NetworkConfig::get()->isAutoConnect())
+        skip_kart_screen = true;
+    if (skip_kart_screen)
     {
         input_manager->setMasterPlayerOnly(true);
         for (auto& p : NetworkConfig::get()->getNetworkPlayers())
@@ -1085,23 +1101,24 @@ void ClientLobby::startSelection(Event* event)
                 ->createActivePlayer(std::get<1>(p), std::get<0>(p));
         }
         input_manager->getDeviceManager()->setAssignMode(ASSIGN);
-        if (!GUIEngine::isNoGraphics())
+        NetworkingLobby::getInstance()->setAssignedPlayers(true);
+    }
+    if (!GUIEngine::isNoGraphics())
+    {
+        if (skip_kart_screen && m_server_enabled_track_voting)
         {
             TracksScreen::getInstance()->setQuitServer();
             TracksScreen::getInstance()->setNetworkTracks();
             TracksScreen::getInstance()->push();
         }
-    }
-    else if (!GUIEngine::isNoGraphics())
-    {
-        NetworkKartSelectionScreen::getInstance()->push();
-    }
-
-    if (!GUIEngine::isNoGraphics())
-    {
+        else if (!skip_kart_screen)
+        {
+            NetworkKartSelectionScreen::getInstance()->push();
+        }
         TracksScreen *ts = TracksScreen::getInstance();
         ts->resetVote();
     }
+
     m_state.store(SELECTING_ASSETS);
     Log::info("ClientLobby", "Selection starts now");
 }   // startSelection
@@ -1307,6 +1324,7 @@ void ClientLobby::liveJoinAcknowledged(Event* event)
         // player connection or disconnection
         std::vector<std::shared_ptr<NetworkPlayerProfile> > players =
             decodePlayers(data);
+        getPlayersAddonKartType(data, players);
         w->resetElimination();
         for (unsigned i = 0; i < players.size(); i++)
         {
@@ -1389,6 +1407,12 @@ void ClientLobby::handleKartInfo(Event* event)
     data.decodeString(&kart_name);
     std::string country_code;
     data.decodeString(&country_code);
+    KartData kart_data;
+    if (NetworkConfig::get()->getServerCapabilities().find(
+        "real_addon_karts") !=
+        NetworkConfig::get()->getServerCapabilities().end() &&
+        data.size() > 0)
+        kart_data = KartData(data);
 
     RemoteKartInfo& rki = RaceManager::get()->getKartInfo(kart_id);
     rki.setPlayerName(player_name);
@@ -1399,6 +1423,7 @@ void ClientLobby::handleKartInfo(Event* event)
     rki.setLocalPlayerId(local_id);
     rki.setKartName(kart_name);
     rki.setCountryCode(country_code);
+    rki.setKartData(kart_data);
     addLiveJoiningKart(kart_id, rki, live_join_util_ticks);
 
     core::stringw msg;
@@ -1462,6 +1487,7 @@ void ClientLobby::sendChat(irr::core::stringw text, KartTeam team)
         // Make message look better by aligning to left or right side depends
         // on name and text
         // (LTR: RTL text always right; RTL : LTR text always left)
+        core::stringw name_suffix (": ");
 #ifndef SERVER_ONLY
         if (!name.empty() && !text.empty())
         {
@@ -1490,12 +1516,12 @@ void ClientLobby::sendChat(irr::core::stringw text, KartTeam team)
             SBParagraphRelease(first_paragraph);
             SBAlgorithmRelease(bidi_algorithm);
             if (name_level % 2 == 0 && text_level % 2 != 0)
-                name = core::stringw(L"\u200F") + name;
+                name_suffix += core::stringw(L"\u200F");
             else if (name_level % 2 != 0 && text_level % 2 == 0)
-                name = core::stringw(L"\u200E") + name;
+                name_suffix += core::stringw(L"\u200E");
         }
 #endif
-        chat->encodeString16(name + L": " + text, 1000/*max_len*/);
+        chat->encodeString16(name + name_suffix + text, 1000/*max_len*/);
 
         if (team != KART_TEAM_NONE)
             chat->addUInt8(team);
@@ -1661,6 +1687,7 @@ void ClientLobby::handleClientCommand(const std::string& cmd)
         AddonsPack::install(argv[1]);
     else if (argv[0] == "uninstalladdon" && argv.size() == 2)
         AddonsPack::uninstall(argv[1]);
+    // FIXME - this code duplicates functions that should be handled elsewhere.
     else if (argv[0] == "music" && argv.size() == 2)
     {
         int vol = atoi(argv[1].c_str());
@@ -1681,6 +1708,17 @@ void ClientLobby::handleClientCommand(const std::string& cmd)
         }
         else
             music_manager->setMasterMusicVolume((float)vol / 10);
+    }
+    else if (argv[0] == "addonrevision" && argv.size() == 2)
+    {
+        Addon* addon = addons_manager->getAddon(Addon::createAddonId(argv[1]));
+        if (!addon)
+            return;
+        core::stringw ret = addon->getName();
+        ret += core::stringw(L": revision ") +
+            core::stringw(addon->getInstalledRevision()) +
+            L"/" + core::stringw(addon->getRevision());
+        NetworkingLobby::getInstance()->addMoreServerInfo(ret);
     }
     else if (argv[0] == "liststkaddon")
     {
@@ -1816,6 +1854,16 @@ void ClientLobby::handleClientCommand(const std::string& cmd)
                     std::string("Local addon: ") + msg));
             }
         }
+    }
+    else if (argv[0] == "opengl")
+    {
+        UserConfigParams::m_render_driver = "gl";
+        user_config->saveConfig();
+    }
+    else if (argv[0] == "vulkan")
+    {
+        UserConfigParams::m_render_driver = "vulkan";
+        user_config->saveConfig();
     }
     else
     {

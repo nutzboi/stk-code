@@ -19,7 +19,7 @@
 #include "input/input_manager.hpp"
 
 #include "config/user_config.hpp"
-#include "graphics/camera_fps.hpp"
+#include "graphics/camera/camera_fps.hpp"
 #include "graphics/irr_driver.hpp"
 #include "graphics/shader_based_renderer.hpp"
 #include "graphics/sp/sp_base.hpp"
@@ -35,8 +35,8 @@
 #include "input/multitouch_device.hpp"
 #include "input/sdl_controller.hpp"
 #include "input/wiimote_manager.hpp"
-#include "karts/controller/controller.hpp"
 #include "karts/abstract_kart.hpp"
+#include "karts/controller/controller.hpp"
 #include "modes/demo_world.hpp"
 #include "modes/world.hpp"
 #include "network/network_config.hpp"
@@ -49,21 +49,26 @@
 #include "states_screens/main_menu_screen.hpp"
 #include "states_screens/online/networking_lobby.hpp"
 #include "states_screens/options/options_screen_device.hpp"
+#ifdef MOBILE_STK
+#include "states_screens/race_gui_multitouch.hpp"
+#endif
 #include "states_screens/state_manager.hpp"
 #include "utils/debug.hpp"
 #include "utils/string_utils.hpp"
 #include "utils/translation.hpp"
 
+#include <IrrlichtDevice.h>
 #include <ISceneManager.h>
 #include <ICameraSceneNode.h>
 #include <ISceneNode.h>
+#include <ITexture.h>
 
-#include <map>
-#include <vector>
-#include <string>
-#include <iostream>
-#include <sstream>
 #include <algorithm>
+#include <iostream>
+#include <map>
+#include <sstream>
+#include <string>
+#include <vector>
 
 #ifndef SERVER_ONLY
 #include <SDL.h>
@@ -119,13 +124,11 @@ InputManager::InputManager() : m_mode(BOOTSTRAP),
             SDL_GetError());
     }
 
-#if SDL_VERSION_ATLEAST(1,3,0)
     if (SDL_InitSubSystem(SDL_INIT_HAPTIC) != 0)
     {
         Log::error("InputManager", "Failed to init SDL haptics: %s",
             SDL_GetError());
     }
-#endif
 #endif // SERVER_ONLY
 }
 
@@ -812,6 +815,22 @@ void InputManager::dispatchInput(Input::InputType type, int deviceID,
 
             Controller* controller = pk->getController();
             if (controller != NULL) controller->action(action, abs(value));
+#ifdef MOBILE_STK
+            if (type == Input::IT_STICKBUTTON || type == Input::IT_STICKMOTION)
+            {
+                if (UserConfigParams::m_multitouch_draw_gui &&
+                    irr_driver->getDevice()->isAccelerometerAvailable() &&
+                    World::getWorld() && World::getWorld()->getRaceGUI() &&
+                    World::getWorld()->getRaceGUI()->getMultitouchGUI() &&
+                    !World::getWorld()->getRaceGUI()->getMultitouchGUI()->isSpectatorMode() &&
+                    UserConfigParams::m_multitouch_controls != MULTITOUCH_CONTROLS_STEERING_WHEEL)
+                {
+                    // Disable accelerometer or gyroscope control if gamepad events trigger, see #4705
+                    UserConfigParams::m_multitouch_controls = MULTITOUCH_CONTROLS_STEERING_WHEEL;
+                    World::getWorld()->getRaceGUI()->recreateGUI();
+                }
+            }
+#endif
         }
         else if (RaceManager::get() &&
             RaceManager::get()->isWatchingReplay() && !GUIEngine::ModalDialog::isADialogActive() &&

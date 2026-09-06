@@ -22,7 +22,7 @@
 #include "audio/sfx_buffer.hpp"
 #include "challenges/unlock_manager.hpp"
 #include "config/user_config.hpp"
-#include "graphics/camera.hpp"
+#include "graphics/camera/camera.hpp"
 #include "graphics/central_settings.hpp"
 #include "graphics/irr_driver.hpp"
 #include "graphics/light.hpp"
@@ -58,6 +58,7 @@
 #include <IMeshSceneNode.h>
 #include <IParticleSystemSceneNode.h>
 #include <ISceneManager.h>
+#include <IVideoDriver.h>
 
 // ----------------------------------------------------------------------------
 TrackObjectPresentation::TrackObjectPresentation(const XMLNode& xml_node)
@@ -135,7 +136,9 @@ void TrackObjectPresentationSceneNode::move(const core::vector3df& xyz,
     }
     m_node->setRotation(hpr);
     m_node->setScale(scale);
+    bool prev_needs_update = m_node->getNeedsUpdateAbsTrans();
     m_node->updateAbsolutePosition();
+    m_node->setNeedsUpdateAbsTrans(prev_needs_update);
 }   // move
 
 // ----------------------------------------------------------------------------
@@ -283,6 +286,7 @@ TrackObjectPresentationLibraryNode::TrackObjectPresentationLibraryNode(
     m_node->setRotation(m_init_hpr);
     m_node->setScale(m_init_scale);
     m_node->updateAbsolutePosition();
+    m_node->setNeedsUpdateAbsTrans(true);
 
     assert(libroot != NULL);
     Track::getCurrentTrack()->loadObjects(libroot, lib_path, model_def_loader,
@@ -474,7 +478,7 @@ void TrackObjectPresentationLibraryNode::move(const core::vector3df& xyz, const 
 TrackObjectPresentationLOD::TrackObjectPresentationLOD(const XMLNode& xml_node,
                                        scene::ISceneNode* parent,
                                        ModelDefinitionLoader& model_def_loader,
-                                       std::shared_ptr<RenderInfo> ri)
+                                       std::shared_ptr<GE::GERenderInfo> ri)
                           : TrackObjectPresentationSceneNode(xml_node)
 {
     m_node = model_def_loader.instanciateAsLOD(&xml_node, parent, ri);
@@ -520,7 +524,7 @@ TrackObjectPresentationMesh::TrackObjectPresentationMesh(
                                                      const XMLNode& xml_node,
                                                      bool enabled,
                                                      scene::ISceneNode* parent,
-                                                     std::shared_ptr<RenderInfo> render_info)
+                                                     std::shared_ptr<GE::GERenderInfo> render_info)
                            : TrackObjectPresentationSceneNode(xml_node)
 {
     m_is_looped  = false;
@@ -595,12 +599,12 @@ TrackObjectPresentationMesh::TrackObjectPresentationMesh(
     m_node         = NULL;
     m_is_in_skybox = false;
     m_render_info  = NULL;
-    bool animated  = (UserConfigParams::m_particles_effects > 1 ||
-                      World::getWorld()->getIdent() == IDENT_CUTSCENE);
 
     m_model_file = model_file;
     file_manager->pushTextureSearchPath(StringUtils::getPath(model_file), "");
 #ifndef SERVER_ONLY
+    bool animated  = (UserConfigParams::m_particles_effects > 1 ||
+                      World::getWorld()->getIdent() == IDENT_CUTSCENE);
     if (file_manager->fileExists(model_file))
     {
         if (animated)
@@ -997,7 +1001,17 @@ TrackObjectPresentationParticles::TrackObjectPresentationParticles(
                                                      scene::ISceneNode* parent)
                                 : TrackObjectPresentationSceneNode(xml_node)
 {
+    float heading = 0;
+    if (xml_node.get("h", &heading))
+    {
+        m_init_hpr.X = 0;
+        m_init_hpr.Y = heading;
+        m_init_hpr.Z = 0;
+    }
+
+#ifndef SERVER_ONLY
     m_emitter = NULL;
+#endif
     m_lod_emitter_node = NULL;
     std::string path;
     xml_node.get("kind", &path);
@@ -1055,6 +1069,7 @@ TrackObjectPresentationParticles::TrackObjectPresentationParticles(
 // ----------------------------------------------------------------------------
 TrackObjectPresentationParticles::~TrackObjectPresentationParticles()
 {
+#ifndef SERVER_ONLY
     if (m_emitter)
     {
         if (m_lod_emitter_node != NULL)
@@ -1064,15 +1079,18 @@ TrackObjectPresentationParticles::~TrackObjectPresentationParticles()
         }
         delete m_emitter; // this will also delete m_node
     }
+#endif
 }   // ~TrackObjectPresentationParticles
 
 // ----------------------------------------------------------------------------
 void TrackObjectPresentationParticles::updateGraphics(float dt)
 {
+#ifndef SERVER_ONLY
     if (m_emitter != NULL)
     {
         m_emitter->update(dt);
     }
+#endif
 
     if (m_delayed_stop)
     {
@@ -1140,7 +1158,8 @@ TrackObjectPresentationLight::TrackObjectPresentationLight(
     m_distance = 20.f * m_energy;
     xml_node.get("distance", &m_distance);
 #ifndef SERVER_ONLY
-    if (CVS->isGLSL())
+    if (CVS->isGLSL() ||
+        irr_driver->getVideoDriver()->getDriverType() == video::EDT_VULKAN)
     {
         m_node = irr_driver->addLight(m_init_xyz, m_energy, m_distance,
                                       colorf.r, colorf.g, colorf.b, false,
@@ -1150,6 +1169,33 @@ TrackObjectPresentationLight::TrackObjectPresentationLight(
 #endif
     {
         m_node = NULL; // lights require shaders to work
+    }
+
+    std::string type = "point";
+    xml_node.get("type", &type);
+    float inner_cone = 0.0f;
+    float outer_cone = 0.0f;
+    xml_node.get("inner-cone", &inner_cone);
+    xml_node.get("outer-cone", &outer_cone);
+    if (type != "spot" || (inner_cone == 0.0f && outer_cone == 0.0f))
+        return;
+
+    LightNode* lnode = dynamic_cast<LightNode*>(m_node);
+    if (lnode != NULL)
+    {
+        Spotlight& sl = lnode->getSpotlightData();
+        sl.m_inner_cone = inner_cone;
+        sl.m_outer_cone = outer_cone;
+        return;
+    }
+    scene::ILightSceneNode* irr_node = dynamic_cast<scene::ILightSceneNode*>(
+        m_node);
+    if (irr_node != NULL)
+    {
+        irr_node->setLightType(video::ELT_SPOT);
+        video::SLight& data = irr_node->getLightData();
+        data.InnerCone = inner_cone;
+        data.OuterCone = outer_cone;
     }
 }   // TrackObjectPresentationLight
 
@@ -1170,6 +1216,14 @@ void TrackObjectPresentationLight::setEnergy(float energy)
     if (lnode != NULL)
     {
         lnode->setEnergy(energy);
+        return;
+    }
+    scene::ILightSceneNode* irr_node = dynamic_cast<scene::ILightSceneNode*>(
+        m_node);
+    if (irr_node != NULL)
+    {
+        video::SLight& data = irr_node->getLightData();
+        data.Attenuation.X = energy;
     }
 }
 // ----------------------------------------------------------------------------
@@ -1316,7 +1370,7 @@ void TrackObjectPresentationActionTrigger::onTriggerItemApproached(int kart_id)
     {
         Scripting::ScriptEngine::getInstance()->runFunction(true, "void "
             + m_library_name + "::" + m_action +
-            "(int, const string, const string)", [=](asIScriptContext* ctx)
+            "(int, const string, const string)", [this, kart_id](asIScriptContext* ctx)
             {
                 ctx->SetArgDWord(0, kart_id);
                 ctx->SetArgObject(1, &m_library_id);

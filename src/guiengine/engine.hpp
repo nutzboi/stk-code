@@ -248,6 +248,12 @@ namespace GUIEngine
     /** \brief renders a "loading" screen */
     void renderLoading(bool clearIcons = true, bool launching = false, bool update_tips = true);
 
+    /** \brief poll events during rendering to prevent unresponsive window */
+    void flushRenderLoading(bool launching);
+
+    /** \brief The engine is being told there will be more icons. */
+    void reserveLoadingIcons(int count);
+
     /** \brief to spice up a bit the loading icon : add icons to the loading screen */
     void addLoadingIcon(irr::video::ITexture* icon);
 

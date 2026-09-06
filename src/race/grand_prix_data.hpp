@@ -23,6 +23,7 @@
 #include <irrString.h>
 #include <string>
 #include <vector>
+#include "utils/types.hpp"
 
 using irr::core::stringw;
 
@@ -65,7 +66,8 @@ private:
     std::vector<int> m_laps;
 
     /** Whether the track in question should be done in reverse mode */
-    std::vector<bool> m_reversed;
+   // This is uint8_t instead of bool because of GitHub issue #5053
+   std::vector<uint8_t> m_reversed;
 
     /** Wether the user can edit this grand prix or not */
     bool m_editable;
@@ -104,7 +106,12 @@ public:
     GrandPrixData(const std::string& filename, enum GPGroupType group);
 
     /** Needed for simple creation of an instance of GrandPrixData */
-    GrandPrixData() {}
+    GrandPrixData()
+    {
+        m_editable = false;
+        m_group = GP_NONE;
+        m_reverse_type = GP_NO_REVERSE;
+    }
 
     virtual ~GrandPrixData() {}
     virtual std::vector<std::string> getTrackNames(const bool includeLocked=false) const;
@@ -132,7 +139,7 @@ public:
 
     bool                     checkConsistency(bool log_error=true) const;
     std::vector<int>         getLaps(const bool includeLocked=false) const;
-    std::vector<bool>        getReverse(const bool includeLocked=false) const;
+    std::vector<uint8_t>        getReverse(const bool includeLocked=false) const;
     bool                     isEditable() const;
     const std::string&       getTrackId(const unsigned int track) const;
     irr::core::stringw       getTrackName(const unsigned int track) const;
